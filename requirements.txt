@@ -1,3 +1,7 @@
 streamlit
 streamlit-lottie
 requests
+scikit-learn
+pdfkit
+python-docx
+PyMuPDF
