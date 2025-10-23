@@ -1,0 +1,16 @@
+[server]
+headless = true
+enableCORS = false
+port = 8501
+
+[theme]
+base = "light"
+primaryColor = "#6A1B9A"         # Soulful purple
+backgroundColor = "#FFF8F0"      # Gentle cream
+secondaryBackgroundColor = "#F0F0F0"
+textColor = "#333333"
+font = "sans serif"
+
+[browser]
+gatherUsageStats = false
+serverAddress = "https://soulvest-soulskill-rwwrmxhx5mmuak37j9ap6z.streamlit.app"  # Replace with your actual custom domain
