@@ -2,29 +2,24 @@ import streamlit as st
 from streamlit_lottie import st_lottie
 import requests
 import re
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+import json
+import os
 import pdfkit
 import tempfile
-import fitz
-from docx import Document
 import base64
+import shutil
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
+# Config files
 from stream_config import STREAM_OPTIONS
 from education_config import DEGREE_OPTIONS, SCHOOL_PROGRAMS
-
-def load_lottie(url):
-    try:
-        r = requests.get(url)
-        if r.status_code != 200:
-            return None
-        return r.json()
-    except:
-        return None
-
-career_lottie = load_lottie("https://lottie.host/1c3a3b7e-2c9f-4e4a-9c3e-8c7d1f7b9e3f/animation.json")
+from template_config import TEMPLATES
 
 st.set_page_config(page_title="SoulSkill", page_icon="✨", layout="centered")
+
+def sanitize_text(text):
+    return text.encode("utf-8", errors="ignore").decode("utf-8").replace("â", "-").replace("ðŸ", "").replace("ï", "").replace("ÕŸ", "").replace("ðÝŽ“", "")
 
 if "step" not in st.session_state:
     st.session_state.step = 1
@@ -39,365 +34,316 @@ def prev_step():
 
 st.title("✨ SoulSkill: Resume Builder")
 st.subheader("Empower your career with clarity and soul")
-
-if career_lottie:
-    st_lottie(career_lottie, height=200)
-
-st.markdown("---")
-st.header("🪷 SoulSkill Ritual Mode")
-
-if st.checkbox("Light your intention before you begin"):
-    st.success("🕯️ Your intention is lit. Breathe in clarity, breathe out doubt.")
-    st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", format="audio/mp3")
-    st.markdown("Affirmation: *I am worthy of every opportunity that aligns with my soul.*")
-
-st.markdown("---")
-st.header("📂 Upload Existing Resume")
-
-uploaded_file = st.file_uploader("Upload your resume (PDF or DOCX)", type=["pdf", "docx"])
-
-if uploaded_file:
-    text = ""
-    try:
-        if uploaded_file.name.endswith(".pdf"):
-            doc = fitz.open(stream=uploaded_file.read(), filetype="pdf")
-            for page in doc:
-                text += page.get_text()
-        elif uploaded_file.name.endswith(".docx"):
-            doc = Document(uploaded_file)
-            for para in doc.paragraphs:
-                text += para.text + "\n"
-    except Exception as e:
-        st.error(f"Error reading file: {e}")
-
-    st.text_area("Extracted Resume Text", value=text, height=300)
-
-    if st.button("✨ Auto-Fill Resume Fields"):
-        if not text.strip():
-            st.warning("No text extracted from the uploaded file.")
-        else:
-            lines = [line.strip() for line in text.strip().split("\n") if line.strip()]
-            full_text = " ".join(lines)
-
-            summary_lines = [line for line in lines if re.search(r"(engineer|developer|lead|manager)", line.lower())]
-            st.session_state.summary = " ".join(summary_lines[:2]) if summary_lines else "Experienced professional with a passion for growth and innovation."
-
-            skill_keywords = [
-                "python", "streamlit", "html", "css", "leadership", "communication", "project management", "sql", "data",
-                "ai", "machine learning", "pyqt5", "gcc", "jira", "linux", "debugging", "ci/cd", "docker", "git"
-            ]
-            found_skills = sorted(set(word for word in skill_keywords if word.lower() in full_text.lower()))
-            st.session_state.skills = ", ".join(found_skills).title() if found_skills else "Skills not detected"
-
-            experience_lines = re.split(r'[•·]', full_text)
-            experience_lines = [line.strip() for line in experience_lines if len(line.strip()) > 30]
-            st.session_state.experience = "\n".join(experience_lines[:5]) if experience_lines else "Experience not detected"
-
-            work_entries = []
-            current_entry = {"title": "", "company": "", "duration": "", "responsibilities": ""}
-
-            for line in lines:
-                line_lower = line.lower()
-                if any(role in line_lower for role in ["engineer", "developer", "manager", "consultant"]):
-                    if current_entry["title"]:
-                        work_entries.append(current_entry)
-                        current_entry = {"title": "", "company": "", "duration": "", "responsibilities": ""}
-                    current_entry["title"] = line.strip()
-                elif re.search(r"\b(samsung|igate|solutions|labs|technologies|research)\b", line_lower):
-                    current_entry["company"] = line.strip()
-                elif re.search(r"\b\d{4}\b", line) and ("–" in line or "-" in line):
-                    current_entry["duration"] = line.strip()
-                elif line.startswith("·") or any(verb in line_lower for verb in ["developed", "built", "led", "created", "designed"]):
-                    current_entry["responsibilities"] += line.strip() + " "
-
-            if current_entry["title"]:
-                work_entries.append(current_entry)
-
-            st.session_state.work_entries = work_entries if work_entries else []
-
-            st.success("All fields auto-filled! You can edit them in the next steps.")
-
-if "template" not in st.session_state:
-    st.session_state.template = "Soulful"
-
 if st.session_state.step == 1:
     st.header("🎨 Choose Your Resume Style")
-    st.session_state.template = st.selectbox("Select a template", ["Classic", "Modern", "Soulful"])
+
+    template_names = list(TEMPLATES.keys())
+    selected_template = st.selectbox("Select a template", template_names)
+    st.session_state.template = selected_template
+
+    font = TEMPLATES[selected_template]['font']
+    color = TEMPLATES[selected_template]['color']
+
+    st.markdown(f"**Font:** `{font}`")
+    st.markdown(f"<div style='width:100px;height:20px;background-color:{color};border-radius:4px;border:1px solid #ccc;'></div>", unsafe_allow_html=True)
+
+    layout_choice = st.radio("Choose resume layout", ["Single Column", "Two Column"])
+    st.session_state.layout = layout_choice
+
+    st.markdown("---")
+    st.markdown("### 🖼️ Live Resume Preview")
+
+    sample_photo_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Sample_User_Icon.png/240px-Sample_User_Icon.png"
+    photo_html = f"<img src='{sample_photo_url}' style='width:100px;border-radius:8px;margin-bottom:10px;'/>"
+
+    if layout_choice == "Single Column":
+        preview_html = f"""
+        <html><body style="font-family:{font};color:{color};padding:20px;">
+        {photo_html}
+        <h2>John Doe</h2>
+        <p><strong>Software Engineer</strong></p>
+        <h3>Summary</h3><p>Creative and detail-oriented engineer...</p>
+        <h3>Skills</h3><p>Python, Streamlit, GitHub...</p>
+        <h3>Education</h3><p>B.Tech in CSE, VTU</p>
+        <h3>Portfolio</h3><p><a href='https://soulvest.ai'>Soulvest.ai</a></p>
+        <img src='https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://soulvest.ai'/>
+        </body></html>
+        """
+    else:
+        preview_html = f"""
+        <html><body style="font-family:{font};color:{color};padding:20px;">
+        <div style="display:flex;gap:30px;">
+        <div style="width:35%;">{photo_html}<h3>Contact</h3><p>hello@soulskill.ai</p></div>
+        <div style="width:65%;"><h2>John Doe</h2><p><strong>Software Engineer</strong></p>
+        <h3>Summary</h3><p>Creative and detail-oriented engineer...</p></div>
+        </div>
+        </body></html>
+        """
+
+    st.markdown(preview_html, unsafe_allow_html=True)
     st.button("Next", on_click=next_step)
-# Step 2: Soulful Summary
 elif st.session_state.step == 2:
     st.header("🌟 Soulful Summary")
-    st.session_state.summary = st.text_area("Write your soulful summary", value=st.session_state.get("summary", ""))
+    summary_input = st.text_area("Write your summary", value=st.session_state.get("summary", ""))
+    if st.button("💾 Save Summary"):
+        st.session_state.summary = sanitize_text(summary_input)
+        st.success("Saved!")
     st.button("Back", on_click=prev_step)
     st.button("Next", on_click=next_step)
 
-# Step 3: Skills & Strengths
 elif st.session_state.step == 3:
-    st.header("🧠 Skills & Strengths")
-    st.session_state.skills = st.text_area("List your skills and strengths", value=st.session_state.get("skills", ""))
+    st.header("🧠 Skills")
+    skills_input = st.text_area("List your skills", value=st.session_state.get("skills", ""))
+    if st.button("💾 Save Skills"):
+        st.session_state.skills = sanitize_text(skills_input)
+        st.success("Saved!")
     st.button("Back", on_click=prev_step)
     st.button("Next", on_click=next_step)
 
-# Step 4: Experience Highlights
 elif st.session_state.step == 4:
     st.header("💼 Experience Highlights")
-    st.session_state.experience = st.text_area("Share your key experiences", value=st.session_state.get("experience", ""))
+    exp_input = st.text_area("Describe your experience", value=st.session_state.get("experience", ""))
+    if st.button("💾 Save Experience"):
+        st.session_state.experience = sanitize_text(exp_input)
+        st.success("Saved!")
     st.button("Back", on_click=prev_step)
     st.button("Next", on_click=next_step)
-
-# Step 5: Work History (Multiple Entries)
 elif st.session_state.step == 5:
     st.header("📜 Work History")
+    job_title = st.text_input("Job Title", value=st.session_state.get("job_title", ""))
+    company_name = st.text_input("Company Name", value=st.session_state.get("company_name", ""))
+    duration = st.text_input("Duration", value=st.session_state.get("duration", ""))
+    responsibilities = st.text_area("Responsibilities", value=st.session_state.get("responsibilities", ""))
 
-    if "job_title" not in st.session_state:
-        st.session_state.job_title = ""
-        st.session_state.company_name = ""
-        st.session_state.duration = ""
-        st.session_state.responsibilities = ""
-
-    st.session_state.job_title = st.text_input("Job Title", value=st.session_state.job_title)
-    st.session_state.company_name = st.text_input("Company Name", value=st.session_state.company_name)
-    st.session_state.duration = st.text_input("Duration (e.g., Jan 2020 – Dec 2023)", value=st.session_state.duration)
-    st.session_state.responsibilities = st.text_area("Roles & Responsibilities", value=st.session_state.responsibilities)
+    if st.button("💾 Save Work Entry"):
+        st.session_state.job_title = job_title
+        st.session_state.company_name = company_name
+        st.session_state.duration = duration
+        st.session_state.responsibilities = responsibilities
+        st.success("Saved!")
 
     if st.button("➕ Add Entry"):
         st.session_state.work_entries.append({
-            "title": st.session_state.job_title,
-            "company": st.session_state.company_name,
-            "duration": st.session_state.duration,
-            "responsibilities": st.session_state.responsibilities
+            "title": sanitize_text(job_title),
+            "company": sanitize_text(company_name),
+            "duration": sanitize_text(duration),
+            "responsibilities": sanitize_text(responsibilities)
         })
-        st.session_state.job_title = ""
-        st.session_state.company_name = ""
-        st.session_state.duration = ""
-        st.session_state.responsibilities = ""
         st.success("Entry added!")
 
-    if st.session_state.work_entries:
-        st.markdown("### 🗂️ Your Work History")
-        for i, entry in enumerate(st.session_state.work_entries):
-            st.markdown(f"""
-            **{entry['title']}**  
-            {entry['company']} ({entry['duration']})  
-            {entry['responsibilities']}
-            """)
-
     st.button("Back", on_click=prev_step)
     st.button("Next", on_click=next_step)
 
-# Step 6: Certifications & Courses
 elif st.session_state.step == 6:
-    st.header("🏅 Certifications & Courses")
-    st.session_state.certifications = st.text_area("List your certifications and courses", value=st.session_state.get("certifications", ""))
-    if not st.session_state.certifications:
-        st.info("🧠 Tip: Add certifications like AWS, Scrum, or Python to boost your profile.")
+    st.header("🧪 Project Highlights")
+    proj_input = st.text_area("Describe key projects", value=st.session_state.get("projects", ""))
+    if st.button("💾 Save Projects"):
+        st.session_state.projects = sanitize_text(proj_input)
+        st.success("Saved!")
     st.button("Back", on_click=prev_step)
     st.button("Next", on_click=next_step)
 
-# Step 7: Achievements
 elif st.session_state.step == 7:
-    st.header("🥇 Achievements")
-    st.session_state.achievements = st.text_area("List your achievements and recognitions", value=st.session_state.get("achievements", ""))
-    if not st.session_state.achievements:
-        st.info("🏅 Tip: Mention awards, recognitions, or key milestones.")
+    st.header("🎓 Education")
+    st.session_state.degree = st.selectbox("Degree", DEGREE_OPTIONS)
+    st.session_state.stream = st.selectbox("Stream", STREAM_OPTIONS)
+    st.session_state.university = st.text_input("University")
+    st.session_state.institution = st.text_input("Institution")
+    st.session_state.grad_year = st.text_input("Graduation Year")
+    st.session_state.grade = st.text_input("Grade")
     st.button("Back", on_click=prev_step)
     st.button("Next", on_click=next_step)
 
-# Step 8: Education
 elif st.session_state.step == 8:
-    st.header("🎓 Higher Education")
-
-    st.session_state.degree = st.selectbox("Degree", DEGREE_OPTIONS, index=0)
-    st.session_state.stream = st.selectbox("Stream / Specialization", STREAM_OPTIONS, index=0)
-    st.session_state.university = st.text_input("University", value=st.session_state.get("university", ""))
-    st.session_state.institution = st.text_input("Institution / College", value=st.session_state.get("institution", ""))
-    st.session_state.grad_year = st.text_input("Graduation Year", value=st.session_state.get("grad_year", ""))
-    st.session_state.grade = st.text_input("Percentage / Grade", value=st.session_state.get("grade", ""))
-
-    st.markdown("### 🏫 School-Level Education (Optional)")
-    st.session_state.school_program = st.selectbox("School Program", SCHOOL_PROGRAMS, index=0)
-    st.session_state.school_name = st.text_input("School Name", value=st.session_state.get("school_name", ""))
-    st.session_state.school_year = st.text_input("Year of Completion", value=st.session_state.get("school_year", ""))
-
-    st.button("Back", on_click=prev_step)
-    st.button("Next", on_click=next_step)
-
-# Step 9: Social Links
-elif st.session_state.step == 9:
     st.header("🔗 Social Links")
-    st.session_state.github = st.text_input("GitHub URL", value=st.session_state.get("github", ""))
-    st.session_state.linkedin = st.text_input("LinkedIn URL", value=st.session_state.get("linkedin", ""))
+    st.session_state.github = st.text_input("GitHub URL")
+    st.session_state.linkedin = st.text_input("LinkedIn URL")
     st.button("Back", on_click=prev_step)
     st.button("Next", on_click=next_step)
-elif st.session_state.step == 10:
+elif st.session_state.step == 9:
     st.header("📄 Resume Preview")
 
-    style = st.session_state.template
-    font = "Georgia" if style == "Classic" else "Verdana" if style == "Modern" else "Helvetica"
+    template = st.session_state.template
+    font = TEMPLATES[template]["font"]
+    color = TEMPLATES[template]["color"]
+    layout = st.session_state.layout
 
     # Profile Photo Upload
     st.markdown("### 🖼️ Upload Your Profile Photo (Optional)")
     photo = st.file_uploader("Upload a professional photo", type=["jpg", "jpeg", "png"])
-    country = st.selectbox("Country you're applying in", ["India", "United States", "Europe", "Other"])
-
-    photo_style = ""
+    photo_html = ""
     if photo:
-        photo_bytes = photo.getvalue()
-        encoded_photo = base64.b64encode(photo_bytes).decode()
-        if country == "India":
-            photo_style = "width:100px;border-radius:4px;border:1px solid #333;"
-        elif country == "United States":
-            photo_style = "width:120px;border-radius:50%;box-shadow:0 0 5px rgba(0,0,0,0.2);"
-        elif country == "Europe":
-            photo_style = "display:none;"
-        else:
-            photo_style = "width:100px;border-radius:8px;"
-        photo_html = f"<img src='data:image/png;base64,{encoded_photo}' style='{photo_style}'/>"
-    else:
-        photo_html = ""
+        encoded = base64.b64encode(photo.read()).decode()
+        photo_html = f"<img src='data:image/png;base64,{encoded}' style='width:100px;border-radius:8px;margin-bottom:10px;'/>"
 
-    # Clean & Optimize
-    if st.button("🎯 Clean & Optimize Resume"):
-        st.session_state.summary = re.sub(r"(Experienced professional.*?){2,}", r"\1", st.session_state.summary)
-        st.session_state.experience = re.sub(r"(Experienced professional.*?){2,}", r"\1", st.session_state.experience)
-        st.success("Resume content cleaned and optimized!")
-
-    work_history_html = ""
+    # Work History HTML
+    work_html = ""
     for entry in st.session_state.work_entries:
-        work_history_html += f"<p><strong>{entry['title']}</strong><br>{entry['company']} ({entry['duration']})<br>{entry['responsibilities']}</p>"
+        work_html += f"<p><strong>{entry['title']}</strong><br>{entry['company']} ({entry['duration']})<br>{entry['responsibilities']}</p>"
 
-    social_links_html = ""
+    # Social Links
+    social_html = ""
     if st.session_state.get("github"):
-        social_links_html += f"<a href='{st.session_state.github}' target='_blank'>🌐 GitHub</a> &nbsp;&nbsp;"
+        social_html += f"<a href='{st.session_state.github}' target='_blank'>GitHub</a><br>"
     if st.session_state.get("linkedin"):
-        social_links_html += f"<a href='{st.session_state.linkedin}' target='_blank'>🔗 LinkedIn</a>"
+        social_html += f"<a href='{st.session_state.linkedin}' target='_blank'>LinkedIn</a>"
 
-    html_resume = f"""
-    <html>
-    <head>
-    <style>
-    body {{
-        font-family: '{font}', sans-serif;
-        background-color: #ffffff;
-        padding: 40px;
-        line-height: 1.6;
-        color: #333333;
-    }}
-    h3 {{
-        color: #222;
-        border-bottom: 1px solid #ccc;
-        padding-bottom: 5px;
-    }}
-    p {{
-        margin: 10px 0;
-    }}
-    </style>
-    </head>
-    <body>
-    {photo_html}
-    <h3>🌟 Summary</h3>
-    <p>{st.session_state.get("summary", "")}</p>
-    <h3>🧠 Skills</h3>
-    <p>{st.session_state.get("skills", "")}</p>
-    <h3>💼 Experience Highlights</h3>
-    <p>{st.session_state.get("experience", "")}</p>
-    <h3>📜 Work History</h3>
-    {work_history_html}
-    <h3>🎓 Higher Education</h3>
-    <p>
-    {st.session_state.get("degree", "")}<br>
-    Stream: {st.session_state.get("stream", "")}<br>
-    {st.session_state.get("university", "")}<br>
-    {st.session_state.get("institution", "")}<br>
-    Graduation Year: {st.session_state.get("grad_year", "")}<br>
-    Grade: {st.session_state.get("grade", "")}
-    </p>
-    <h3>🏫 School Education</h3>
-    <p>
-    Program: {st.session_state.get("school_program", "")}<br>
-    School: {st.session_state.get("school_name", "")}<br>
-    Year of Completion: {st.session_state.get("school_year", "")}
-    </p>
-    <h3>🏅 Certifications & Courses</h3>
-    <p>{st.session_state.get("certifications", "")}</p>
-    <h3>🥇 Achievements</h3>
-    <p>{st.session_state.get("achievements", "")}</p>
-    <h3>🔗 Social Links</h3>
-    <p>{social_links_html}</p>
-    </body>
-    </html>
-    """
+    # Resume HTML
+    if layout == "Single Column":
+        html_resume = f"""
+        <html><head><style>
+        body {{
+            font-family: '{font}', sans-serif;
+            color: {color};
+            padding: 40px;
+            line-height: 1.6;
+        }}
+        h3 {{
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }}
+        </style></head><body>
+        {photo_html}
+        <h2>{sanitize_text('Renganathan')}</h2>
+        <p><strong>Founder, Soulvest.ai</strong></p>
+        <h3>🌟 Summary</h3><p>{sanitize_text(st.session_state.get("summary", ""))}</p>
+        <h3>🧠 Skills</h3><p>{sanitize_text(st.session_state.get("skills", ""))}</p>
+        <h3>💼 Experience Highlights</h3><p>{sanitize_text(st.session_state.get("experience", ""))}</p>
+        <h3>📜 Work History</h3>{work_html}
+        <h3>🧪 Project Highlights</h3><p>{sanitize_text(st.session_state.get("projects", ""))}</p>
+        <h3>🎓 Higher Education</h3>
+        <p>{sanitize_text(st.session_state.get("degree", ""))} in {sanitize_text(st.session_state.get("stream", ""))}<br>
+        {sanitize_text(st.session_state.get("institution", ""))}, {sanitize_text(st.session_state.get("university", ""))}<br>
+        Graduation Year: {sanitize_text(st.session_state.get("grad_year", ""))} | Grade: {sanitize_text(st.session_state.get("grade", ""))}</p>
+        <h3>🏫 School Education</h3>
+        <p>{sanitize_text(st.session_state.get("school_program", ""))}<br>
+        {sanitize_text(st.session_state.get("school_name", ""))} | Year: {sanitize_text(st.session_state.get("school_year", ""))}</p>
+        <h3>🔗 Social Links</h3><p>{social_html}</p>
+        <h3>🌐 Portfolio</h3>
+        <p><a href='https://soulvest.ai'>https://soulvest.ai</a></p>
+        <img src='https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://soulvest.ai'/>
+        <br><br><p style='text-align:center;'>✨ Crafted with clarity. Powered by SoulSkill.</p>
+        </body></html>
+        """
+    else:
+        html_resume = f"""
+        <html><head><style>
+        body {{
+            font-family: '{font}', sans-serif;
+            color: {color};
+            padding: 30px;
+            line-height: 1.6;
+        }}
+        .container {{
+            display: flex;
+            gap: 30px;
+        }}
+        .left {{
+            width: 35%;
+        }}
+        .right {{
+            width: 65%;
+        }}
+        h3 {{
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }}
+        </style></head><body>
+        <div class="container">
+        <div class="left">
+            {photo_html}
+            <h3>📍 Contact</h3>
+            <p>📧 hello@soulskill.ai<br>🌐 https://soulvest.ai</p>
+            <h3>🎓 Education</h3>
+            <p>{sanitize_text(st.session_state.get("degree", ""))}<br>{sanitize_text(st.session_state.get("institution", ""))}</p>
+            <h3>🛠️ Skills</h3>
+            <p>{sanitize_text(st.session_state.get("skills", ""))}</p>
+            <h3>🔗 Links</h3>
+            <p>{social_html}</p>
+        </div>
+        <div class="right">
+            <h2>{sanitize_text('Renganathan')}</h2>
+            <p><strong>Founder, Soulvest.ai</strong></p>
+            <h3>🌟 Summary</h3><p>{sanitize_text(st.session_state.get("summary", ""))}</p>
+            <h3>💼 Experience</h3><p>{sanitize_text(st.session_state.get("experience", ""))}</p>
+            <h3>📜 Work History</h3>{work_html}
+            <h3>🧪 Projects</h3><p>{sanitize_text(st.session_state.get("projects", ""))}</p>
+            <h3>🌐 Portfolio</h3>
+            <p><a href='https://soulvest.ai'>https://soulvest.ai</a></p>
+            <img src='https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://soulvest.ai'/>
+        </div>
+        </div>
+        <br><p style='text-align:center;'>✨ Crafted with clarity. Powered by SoulSkill.</p>
+        </body></html>
+        """
 
     st.markdown(html_resume, unsafe_allow_html=True)
 
     try:
-        config = pdfkit.configuration(wkhtmltopdf='C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe')
-        options = {
-            'page-size': 'A4',
-            'margin-top': '0.75in',
-            'margin-right': '0.75in',
-            'margin-bottom': '0.75in',
-            'margin-left': '0.75in',
-            'encoding': "UTF-8",
-            'no-outline': None
-        }
+        wkhtml_path = shutil.which("wkhtmltopdf") or r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
+        config = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-            pdfkit.from_string(html_resume, tmp.name, options=options, configuration=config)
-            st.download_button("📥 Resume Ready: Click to Save", data=open(tmp.name, "rb").read(), file_name="SoulSkill_Resume.pdf")
+            pdfkit.from_string(html_resume, tmp.name, configuration=config)
+            st.download_button("📥 Download Resume PDF", data=open(tmp.name, "rb").read(), file_name="SoulSkill_Resume.pdf")
     except Exception as e:
         st.error(f"PDF generation failed: {e}")
 
     st.button("Back", on_click=prev_step)
+    st.button("Next", on_click=next_step)
+elif st.session_state.step == 10:
+    st.header("💌 Cover Letter Generator")
 
-    # Resume Health Score
-    st.markdown("---")
-    st.header("📊 Resume Health Score")
+    tone = st.selectbox("Choose your tone", ["Confident", "Humble", "Visionary"])
+    cover_letter = ""
 
-    score = 0
-    feedback = []
+    if st.button("Generate Cover Letter"):
+        work_lines = "\n".join([
+            f"{e['title']} at {e['company']} ({e['duration']})"
+            for e in st.session_state.work_entries
+        ])
 
-    if len(st.session_state.get("summary", "")) >= 50:
-        score += 20
-    else:
-        feedback.append("📝 Add a stronger summary (2–3 lines).")
+        cover_letter = f"""
+Dear Hiring Manager,
 
-    if len(st.session_state.get("skills", "").split(",")) >= 5:
-        score += 20
-    else:
-        feedback.append("🧠 Add more technical and soft skills.")
+I am writing to express my interest in the role at your esteemed organization. With a background in {sanitize_text(st.session_state.get("experience", ""))}, and a passion for {sanitize_text(st.session_state.get("skills", ""))}, I believe I bring both skill and soul to the opportunity.
 
-    if len(st.session_state.get("experience", "").split("\n")) >= 3:
-        score += 20
-    else:
-        feedback.append("💼 Add more experience highlights.")
+My journey has been shaped by roles such as:
+{sanitize_text(work_lines)}
 
-    if st.session_state.work_entries:
-        score += 20
-    else:
-        feedback.append("📜 Add at least one work history entry.")
+I am excited to contribute with {tone.lower()} energy and a commitment to growth. I would welcome the opportunity to discuss how my experience and values align with your team’s mission.
 
-    if st.session_state.get("certifications") or st.session_state.get("achievements"):
-        score += 20
-    else:
-        feedback.append("🏅 Add certifications or achievements.")
+With gratitude,  
+Renganathan
+        """.strip()
 
-    st.metric("Resume Health Score", f"{score} / 100")
-
-    if feedback:
-        st.warning("Suggestions to improve your resume:")
-        for tip in feedback:
-            st.markdown(f"- {tip}")
-    else:
-        st.success("✅ Your resume looks strong and ready to apply!")
+    if cover_letter:
+        st.text_area("Your Cover Letter", value=cover_letter, height=300)
+        if st.button("💾 Save Cover Letter as PDF"):
+            try:
+                wkhtml_path = shutil.which("wkhtmltopdf") or r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
+                config = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                    pdfkit.from_string(f"<html><body><pre>{cover_letter}</pre></body></html>", tmp.name, configuration=config)
+                    st.download_button("📥 Download Cover Letter PDF", data=open(tmp.name, "rb").read(), file_name="SoulSkill_CoverLetter.pdf")
+            except Exception as e:
+                st.error(f"Cover letter PDF failed: {e}")
 
     # ATS Optimizer
     st.markdown("---")
     st.header("🧠 ATS Optimizer")
 
-    job_desc = st.text_area("📄 Paste Job Description")
-    resume_text = f"{st.session_state.get('summary', '')} {st.session_state.get('skills', '')} {st.session_state.get('experience', '')} {st.session_state.get('certifications', '')} {st.session_state.get('achievements', '')} " + " ".join([f"{e['title']} {e['company']} {e['responsibilities']}" for e in st.session_state.work_entries])
+    job_desc = st.text_area("Paste Job Description")
+    resume_text = " ".join([
+        sanitize_text(st.session_state.get("summary", "")),
+        sanitize_text(st.session_state.get("skills", "")),
+        sanitize_text(st.session_state.get("experience", "")),
+        sanitize_text(st.session_state.get("certifications", "")),
+        sanitize_text(st.session_state.get("achievements", "")),
+        sanitize_text(st.session_state.get("projects", "")),
+        " ".join([f"{e['title']} {e['company']} {e['responsibilities']}" for e in st.session_state.work_entries])
+    ])
 
-    if st.button("🔍 Analyze ATS Match"):
+    if st.button("Analyze ATS Match"):
         if job_desc and resume_text:
             try:
                 vectorizer = CountVectorizer().fit_transform([job_desc, resume_text])
@@ -408,51 +354,111 @@ elif st.session_state.step == 10:
                 resume_words = set(re.findall(r'\b\w+\b', resume_text.lower()))
                 missing_keywords = job_keywords - resume_words
 
-                st.warning("🧠 Missing Keywords:")
-                st.write(", ".join(sorted(missing_keywords)))
+                if missing_keywords:
+                    st.warning("🧠 Missing Keywords:")
+                    st.write(", ".join(sorted(missing_keywords)))
+                else:
+                    st.success("✅ Your resume covers all major keywords!")
             except Exception as e:
                 st.error(f"ATS analysis failed: {e}")
         else:
             st.error("Please paste both job description and resume.")
+elif st.session_state.step == 11:
+    st.header("🎯 Career Suggestions Based on Your Role")
 
-    # Cover Letter Generator
+    user_role = st.text_input("Enter your current role (e.g., Software Engineer, Marketing Manager)")
+
+    if user_role:
+        st.markdown(f"**Current Role:** {user_role}")
+        st.markdown("### 🔍 Suggested Job Roles")
+        role_jobs = [
+            f"{user_role} II",
+            f"Senior {user_role}",
+            f"{user_role} Lead",
+            f"{user_role} Manager",
+            f"{user_role} Consultant",
+            f"{user_role} Architect",
+            f"{user_role} Coach",
+            f"{user_role} Trainer",
+            f"{user_role} Strategist",
+            f"{user_role} Evangelist"
+        ]
+        for job in role_jobs:
+            st.markdown(f"- {job}")
+
+        st.markdown("### 📚 Recommended Certifications")
+        role_certs = [
+            f"{user_role} Fundamentals",
+            f"Advanced {user_role} Techniques",
+            f"{user_role} Leadership Program",
+            f"{user_role} Bootcamp",
+            f"{user_role} Certification by Coursera",
+            f"{user_role} Masterclass by Udemy",
+            f"{user_role} Specialization by edX",
+            f"{user_role} Professional Certificate",
+            f"{user_role} AI Integration",
+            f"{user_role} Agile & DevOps"
+        ]
+        for cert in role_certs:
+            st.markdown(f"- {cert}")
+
+    # Resume Health Score
     st.markdown("---")
-    st.header("💌 Cover Letter Generator")
+    st.header("📊 Resume Health Score")
 
-    tone = st.selectbox("Choose your tone", ["Confident", "Humble", "Visionary"])
+    criteria = {
+        "Summary": bool(st.session_state.get("summary")),
+        "Skills": bool(st.session_state.get("skills")),
+        "Experience": bool(st.session_state.get("experience")),
+        "Work History": len(st.session_state.work_entries) > 0,
+        "Projects": bool(st.session_state.get("projects")),
+        "Education": bool(st.session_state.get("degree")) and bool(st.session_state.get("stream")),
+        "Social Links": bool(st.session_state.get("github")) or bool(st.session_state.get("linkedin"))
+    }
 
-    if st.button("Generate Cover Letter"):
-        work_lines = "\n".join([
-            f"{e['title']} at {e['company']} ({e['duration']})"
-            for e in st.session_state.work_entries
-        ])
+    score = sum(criteria.values()) * 100 // len(criteria)
+    st.metric("Resume Health Score", f"{score} / 100")
 
-        cover_letter = f"""
-    Dear Hiring Manager,
+    missing = [key for key, filled in criteria.items() if not filled]
+    if missing:
+        st.warning("🚧 Sections to Improve:")
+        st.write(", ".join(missing))
+    else:
+        st.success("✅ Your resume is complete and radiant!")
 
-    I am writing to express my interest in the role at your esteemed organization. With a background in {st.session_state.get("experience", "")}, and a passion for {st.session_state.get("skills", "")}, I believe I bring both skill and soul to the opportunity.
-
-    My journey has been shaped by roles such as:
-    {work_lines}
-
-    I am excited to contribute with {tone.lower()} energy and a commitment to growth. I would welcome the opportunity to discuss how my experience and values align with your team’s mission.
-
-    With gratitude,  
-    Renganathan
-        """.strip()
-
-    st.text_area("Your Cover Letter", value=cover_letter, height=300)
-
-
-    # Final Dynamic Job Matching Dashboard
+    # Save for Later
     st.markdown("---")
-    st.header("🔍 Job Matching Dashboard")
+    st.header("💾 Save for Later")
 
-    st.markdown("### ✨ Explore Real-Time Listings")
-    st.markdown("- [LinkedIn Jobs](https://www.linkedin.com/jobs/)")
-    st.markdown("- [Naukri Jobs](https://www.naukri.com/)")
-    st.markdown("- [Indeed Jobs](https://www.indeed.com/q-python-developer-jobs.html)")
-    st.markdown("- [Glassdoor Jobs](https://www.glassdoor.co.in/Job/index.htm)")
-    st.markdown("- [Monster India](https://www.monsterindia.com/)")
+    if st.button("Save My Resume Progress"):
+        try:
+            data = {key: st.session_state.get(key) for key in st.session_state.keys()}
+            with open("soulskill_progress.json", "w") as f:
+                json.dump(data, f)
+            st.success("✅ Your progress has been saved! You can resume later by uploading this file.")
+        except Exception as e:
+            st.error(f"Failed to save progress: {e}")
 
-    st.info("These portals update in real-time. Use your SoulSkill resume to apply confidently.")
+    # Feedback
+    st.markdown("---")
+    st.header("💬 Feedback & Testimonials")
+
+    feedback = st.text_area("Share your experience or suggestions")
+    name = st.text_input("Your name (optional)")
+    email = st.text_input("Your email (optional)")
+
+    if st.button("Submit Feedback"):
+        if feedback.strip():
+            try:
+                entry = {
+                    "name": name,
+                    "email": email,
+                    "feedback": feedback
+                }
+                with open("soulskill_feedback.json", "a") as f:
+                    f.write(json.dumps(entry) + "\n")
+                st.success("🙏 Thank you for your feedback! Your voice helps SoulSkill grow.")
+            except Exception as e:
+                st.error(f"Failed to save feedback: {e}")
+        else:
+            st.warning("Please enter feedback before submitting.")
