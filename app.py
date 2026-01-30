@@ -6,6 +6,7 @@ import tempfile
 import json
 import os
 from datetime import datetime
+import time
 
 # Import configurations
 from template_config import TEMPLATES, INDIAN_TEMPLATES
@@ -24,6 +25,10 @@ from advanced_features import (
     ResumeImporter, QRCodeGenerator, SpellChecker, 
     ResumeVersionControl, EmailTemplates, KeywordHighlighter, 
     ResumeLengthOptimizer
+)
+from job_examples import (
+    PROFESSIONAL_SUMMARIES, WORK_EXPERIENCE_EXAMPLES, SKILLS_EXAMPLES,
+    PROJECT_EXAMPLES, get_examples_for_role, get_all_job_roles
 )
 
 # Try to import PDF generation
@@ -211,7 +216,10 @@ def init_session_state():
         'language_entries': [],
         'ats_score': None,
         'job_description': '',
-        'ai_enabled': ai_assistant.enabled
+        'ai_enabled': ai_assistant.enabled,
+        'progress_checked': False,
+        'show_restore': False,
+        'last_saved_time': ''
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -219,15 +227,82 @@ def init_session_state():
 
 init_session_state()
 
+# Auto-save functionality
+def auto_save_progress():
+    """Auto-save resume progress to local storage"""
+    try:
+        # Create a serializable copy of session state
+        save_data = {
+            'last_saved': datetime.now().isoformat(),
+            'step': st.session_state.get('step', 0),
+            'full_name': st.session_state.get('full_name', ''),
+            'email': st.session_state.get('email', ''),
+            'phone': st.session_state.get('phone', ''),
+            'city': st.session_state.get('city', ''),
+            'state': st.session_state.get('state', ''),
+            'linkedin': st.session_state.get('linkedin', ''),
+            'github': st.session_state.get('github', ''),
+            'portfolio': st.session_state.get('portfolio', ''),
+            'profile_type': st.session_state.get('profile_type', ''),
+            'industry': st.session_state.get('industry', ''),
+            'job_title_target': st.session_state.get('job_title_target', ''),
+            'template': st.session_state.get('template', ''),
+            'summary': st.session_state.get('summary', ''),
+            'tech_skills': st.session_state.get('tech_skills', ''),
+            'soft_skills': st.session_state.get('soft_skills', ''),
+            'work_entries': st.session_state.get('work_entries', []),
+            'education_entries': st.session_state.get('education_entries', []),
+            'certification_entries': st.session_state.get('certification_entries', []),
+            'project_entries': st.session_state.get('project_entries', []),
+            'language_entries': st.session_state.get('language_entries', []),
+        }
+        
+        # Save to file
+        with open("soulskill_autosave.json", "w", encoding='utf-8') as f:
+            json.dump(save_data, f, indent=2)
+        return True
+    except Exception as e:
+        print(f"Auto-save error: {e}")
+        return False
+
+def load_saved_progress():
+    """Load saved progress if available"""
+    try:
+        if os.path.exists("soulskill_autosave.json"):
+            with open("soulskill_autosave.json", "r", encoding='utf-8') as f:
+                saved_data = json.load(f)
+            
+            # Restore session state
+            for key, value in saved_data.items():
+                if key != 'last_saved' and key in st.session_state:
+                    st.session_state[key] = value
+            
+            return saved_data.get('last_saved', '')
+    except Exception as e:
+        print(f"Load error: {e}")
+    return None
+
+# Check for saved progress on startup
+if st.session_state.step == 0 and not st.session_state.get('progress_checked'):
+    st.session_state.progress_checked = True
+    last_saved = load_saved_progress()
+    if last_saved:
+        # Show restore option in sidebar
+        st.session_state.show_restore = True
+        st.session_state.last_saved_time = last_saved
+
 # Navigation functions
 def next_step():
     st.session_state.step += 1
+    auto_save_progress()  # Auto-save on navigation
 
 def prev_step():
     st.session_state.step -= 1
+    auto_save_progress()  # Auto-save on navigation
 
 def goto_step(step_num):
     st.session_state.step = step_num
+    auto_save_progress()  # Auto-save on navigation
 
 # Sidebar Navigation
 with st.sidebar:
@@ -245,6 +320,32 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     
     st.markdown("<p style='text-align: center; font-size: 0.85rem; color: #666;'>🚀 Your Career, Supercharged</p>", unsafe_allow_html=True)
+    
+    # Show restore progress option
+    if st.session_state.get('show_restore', False):
+        with st.expander("💾 Resume Saved Progress", expanded=True):
+            last_saved = st.session_state.get('last_saved_time', '')
+            try:
+                saved_time = datetime.fromisoformat(last_saved)
+                time_str = saved_time.strftime("%b %d, %Y %I:%M %p")
+            except:
+                time_str = "Earlier"
+            
+            st.info(f"Last saved: {time_str}")
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("📂 Resume", use_container_width=True):
+                    load_saved_progress()
+                    st.session_state.show_restore = False
+                    st.rerun()
+            with col2:
+                if st.button("🔄 Start Fresh", use_container_width=True):
+                    # Clear saved progress
+                    if os.path.exists("soulskill_autosave.json"):
+                        os.remove("soulskill_autosave.json")
+                    st.session_state.show_restore = False
+                    st.rerun()
+        st.markdown("---")
     
     if st.session_state.ai_enabled:
         st.success("✨ AI Features: ACTIVE")
@@ -272,8 +373,27 @@ with st.sidebar:
         st.progress(progress / 100)
         st.caption(f"Progress: {int(progress)}%")
         
+        # Show auto-save status
+        if os.path.exists("soulskill_autosave.json"):
+            try:
+                with open("soulskill_autosave.json", "r", encoding='utf-8') as f:
+                    saved_data = json.load(f)
+                    last_saved = saved_data.get('last_saved', '')
+                    if last_saved:
+                        saved_time = datetime.fromisoformat(last_saved)
+                        time_diff = datetime.now() - saved_time
+                        if time_diff.seconds < 60:
+                            st.caption("💾 Auto-saved just now")
+                        elif time_diff.seconds < 3600:
+                            mins = time_diff.seconds // 60
+                            st.caption(f"💾 Auto-saved {mins} min ago")
+                        else:
+                            st.caption(f"💾 Auto-saved {saved_time.strftime('%I:%M %p')}")
+            except:
+                pass
+        
         st.markdown("### 📍 Quick Navigation")
-        steps = ["Profile Type", "Personal Info", "Template", "AI Summary", "Skills", 
+        steps = ["Template", "Profile Type", "Personal Info", "AI Summary", "Skills", 
                  "Experience", "Work History", "Projects", "Education", "Preview", "ATS Check"]
         for i, step_name in enumerate(steps, 1):
             if i < st.session_state.step:
@@ -839,7 +959,94 @@ if st.session_state.step == 0:
     st.success("🎯 **Start Your Success Story**: Join thousands who transformed their careers with Soulvest. Our AI-powered platform creates resumes that pass ATS systems and impress recruiters!")
 
 elif st.session_state.step == 1:
-    # Profile Type
+    # Template Selection - FIRST STEP like ResumeGemini
+    st.title("🎨 Choose Your Resume Template")
+    
+    st.markdown("""
+    <div class='motivational-quote'>
+        "Start with a stunning template. Choose one now and customize it later! 🎨"
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.info("💡 **Don't worry!** You can change your template anytime with one click.")
+    
+    all_templates = {**TEMPLATES, **INDIAN_TEMPLATES}
+    
+    # Template Gallery
+    st.markdown("### 📱 Professional Templates")
+    
+    # Create tabs for different categories
+    tab1, tab2 = st.tabs(["🌟 Modern Templates", "🇮🇳 India-Focused Templates"])
+    
+    with tab1:
+        cols = st.columns(3)
+        for idx, (template_name, template_config) in enumerate(TEMPLATES.items()):
+            with cols[idx % 3]:
+                st.markdown(f"""
+                <div style="border:2px solid {'#667eea' if st.session_state.get('template') == template_name else '#ddd'};
+                            border-radius:12px;padding:15px;background:white;height:300px;
+                            cursor:pointer;transition:all 0.3s;">
+                    <h4 style="color:{template_config['color']};margin:0;">{template_name}</h4>
+                    <p style="font-size:0.85rem;color:#666;margin:5px 0;">{template_config.get('description', 'Professional template')}</p>
+                    <div style="background:#f8f9fa;padding:15px;border-radius:8px;margin:10px 0;font-size:0.75rem;">
+                        <div style="color:{template_config['color']};font-weight:bold;margin-bottom:5px;">JOHN DOE</div>
+                        <div style="color:#666;">Software Engineer</div>
+                        <div style="border-top:2px solid {template_config['color']};margin:8px 0;"></div>
+                        <div style="font-size:0.7rem;color:#999;">📧 email@example.com</div>
+                    </div>
+                    <small><strong>Font:</strong> {template_config['font']}<br>
+                    <strong>Color:</strong> {template_config['color']}</small>
+                </div>
+                """, unsafe_allow_html=True)
+                if st.button(f"Select {template_name}", key=f"sel_{template_name}", use_container_width=True):
+                    st.session_state.template = template_name
+                    st.session_state.template_config = template_config
+                    st.success(f"✅ {template_name} selected!")
+                    st.rerun()
+    
+    with tab2:
+        cols = st.columns(3)
+        for idx, (template_name, template_config) in enumerate(INDIAN_TEMPLATES.items()):
+            with cols[idx % 3]:
+                st.markdown(f"""
+                <div style="border:2px solid {'#667eea' if st.session_state.get('template') == template_name else '#ddd'};
+                            border-radius:12px;padding:15px;background:white;height:300px;">
+                    <h4 style="color:{template_config['color']};margin:0;">{template_name}</h4>
+                    <p style="font-size:0.85rem;color:#666;margin:5px 0;">{template_config.get('description', 'India-optimized template')}</p>
+                    <div style="background:#f8f9fa;padding:15px;border-radius:8px;margin:10px 0;font-size:0.75rem;">
+                        <div style="color:{template_config['color']};font-weight:bold;margin-bottom:5px;">PRIYA SHARMA</div>
+                        <div style="color:#666;">Data Scientist</div>
+                        <div style="border-top:2px solid {template_config['color']};margin:8px 0;"></div>
+                        <div style="font-size:0.7rem;color:#999;">📧 email@example.com</div>
+                    </div>
+                    <small><strong>Font:</strong> {template_config['font']}<br>
+                    <strong>Color:</strong> {template_config['color']}</small>
+                </div>
+                """, unsafe_allow_html=True)
+                if st.button(f"Select {template_name}", key=f"sel_{template_name}", use_container_width=True):
+                    st.session_state.template = template_name
+                    st.session_state.template_config = template_config
+                    st.success(f"✅ {template_name} selected!")
+                    st.rerun()
+    
+    st.markdown("---")
+    
+    if st.session_state.get('template'):
+        st.success(f"✅ Selected Template: **{st.session_state.template}**")
+        col1, col2 = st.columns([1, 4])
+        with col1:
+            if st.button("⬅️ Back"):
+                prev_step()
+        with col2:
+            if st.button("Next: Choose Your Profile ➡️", use_container_width=True):
+                next_step()
+    else:
+        st.warning("👆 Please select a template to continue")
+        if st.button("⬅️ Back to Home"):
+            prev_step()
+
+elif st.session_state.step == 2:
+    # Profile Type - moved from step 1
     st.title("👤 Choose Your Profile Type")
     
     st.markdown("""
@@ -858,9 +1065,14 @@ elif st.session_state.step == 1:
         if st.button("💼 EXPERIENCED\n\nWorking Professional\nHave Work Experience\nCareer Growth", use_container_width=True, help="For professionals with work experience"):
             st.session_state.profile_type = "experienced"
             next_step()
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("⬅️ Back"):
+            prev_step()
 
-elif st.session_state.step == 2:
-    # Personal Information
+elif st.session_state.step == 3:
+    # Personal Information - moved from step 2
     st.title("📝 Personal Information")
     
     # Profile Photo Upload Section
@@ -950,51 +1162,26 @@ elif st.session_state.step == 2:
             else:
                 st.error("Please fill all required fields (*)")
 
-elif st.session_state.step == 3:
-    # Template Selection
-    st.title("🎨 Choose Resume Template")
-    
-    all_templates = {**TEMPLATES, **INDIAN_TEMPLATES}
-    
-    col1, col2 = st.columns([1, 2])
-    with col1:
-        st.session_state.template = st.selectbox("Select Template", list(all_templates.keys()))
-        st.session_state.layout = st.radio("Layout", ["Single Column", "Two Column"])
-        
-        template_info = all_templates[st.session_state.template]
-        st.markdown(f"**Font:** {template_info['font']}")
-        st.markdown(f"**Color:** {template_info['color']}")
-        if 'description' in template_info:
-            st.info(template_info['description'])
-    
-    with col2:
-        st.markdown("### 📱 Preview")
-        preview_html = f"""
-        <div style="border:2px solid #ddd;border-radius:10px;padding:20px;background:white;font-family:{template_info['font']};">
-            <h2 style="color:{template_info['color']};margin:0;">{st.session_state.get('full_name', 'Your Name')}</h2>
-            <p style="color:#666;font-size:1.1rem;">{st.session_state.get('job_title_target', 'Job Title')}</p>
-            <p>📧 email@example.com | 📱 +91-XXXXX | 📍 City, State</p>
-            <hr style="border:1px solid {template_info['color']};">
-            <h3 style="color:{template_info['color']};">Professional Summary</h3>
-            <p>Your professional summary will appear here...</p>
-        </div>
-        """
-        st.markdown(preview_html, unsafe_allow_html=True)
-    
-    st.markdown("---")
-    st.info("✅ **ATS-Friendly**: All templates are optimized for Applicant Tracking Systems")
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("⬅️ Back"):
-            prev_step()
-    with col2:
-        if st.button("Next ➡️"):
-            next_step()
-
 elif st.session_state.step == 4:
     # AI-Powered Professional Summary
     st.title("🤖 Professional Summary (AI-Powered)")
+    
+    # Show pre-written examples based on job title
+    job_title = st.session_state.get('job_title_target', '')
+    if job_title:
+        examples = get_examples_for_role(job_title)
+        if examples['summaries']:
+            with st.expander("💡 Click to use pre-written examples", expanded=True):
+                st.markdown("**Choose a professional summary to start with:**")
+                for idx, summary_example in enumerate(examples['summaries']):
+                    col1, col2 = st.columns([4, 1])
+                    with col1:
+                        st.markdown(f"<small>{summary_example}</small>", unsafe_allow_html=True)
+                    with col2:
+                        if st.button("Use This", key=f"summary_{idx}"):
+                            st.session_state.summary = summary_example
+                            st.success("✅ Example added! You can edit it below.")
+                            st.rerun()
     
     col1, col2 = st.columns([2, 1])
     
@@ -1096,6 +1283,28 @@ elif st.session_state.step == 5:
     # Skills with AI Suggestions
     st.title("🧠 Skills & Competencies")
     
+    # Show pre-written skill suggestions
+    job_title = st.session_state.get('job_title_target', '')
+    if job_title:
+        with st.expander("💡 Click to add popular skills", expanded=True):
+            st.markdown("**Click to add skills to your resume:**")
+            
+            # Show skills from SKILLS_EXAMPLES
+            cols = st.columns(3)
+            skill_categories = list(SKILLS_EXAMPLES.keys())[:6]  # Show 6 categories
+            for idx, category in enumerate(skill_categories):
+                with cols[idx % 3]:
+                    st.markdown(f"**{category}:**")
+                    for skill in SKILLS_EXAMPLES[category][:5]:  # Top 5 from each
+                        if st.button(f"+ {skill}", key=f"skill_{skill}_{idx}"):
+                            current_skills = st.session_state.get('tech_skills', '')
+                            if current_skills:
+                                st.session_state.tech_skills = current_skills + ", " + skill
+                            else:
+                                st.session_state.tech_skills = skill
+                            st.success(f"✅ Added {skill}!")
+                            st.rerun()
+    
     col1, col2 = st.columns(2)
     
     with col1:
@@ -1174,11 +1383,30 @@ elif st.session_state.step == 7:
     # Work History with AI Enhancement
     st.title("📜 Work History / Experience Details")
     
+    # Show pre-written examples
+    job_title = st.session_state.get('job_title_target', '')
+    if job_title:
+        examples = get_examples_for_role(job_title)
+        if examples['bullets']:
+            with st.expander("💡 Click to use pre-written bullet points"):
+                st.markdown("**Choose responsibilities to add to your job description:**")
+                for idx, bullet_example in enumerate(examples['bullets'][:5]):  # Show top 5
+                    col1, col2 = st.columns([4, 1])
+                    with col1:
+                        st.markdown(f"<small>• {bullet_example}</small>", unsafe_allow_html=True)
+                    with col2:
+                        if st.button("Add", key=f"bullet_{idx}"):
+                            current_resp = st.session_state.get('resp_input_text', '')
+                            new_resp = current_resp + "\n• " + bullet_example if current_resp else "• " + bullet_example
+                            st.session_state.resp_input_text = new_resp
+                            st.success("✅ Added!")
+                            st.rerun()
+    
     st.markdown("### Add Work Experience")
     
     col1, col2 = st.columns(2)
     with col1:
-        job_title = st.text_input("Job Title / Role *", key="job_title_input")
+        job_title_input = st.text_input("Job Title / Role *", key="job_title_input")
         company_name = st.text_input("Company Name *", key="company_input")
     with col2:
         duration = st.text_input("Duration *", key="duration_input", placeholder="Jan 2022 - Present")
@@ -1186,29 +1414,33 @@ elif st.session_state.step == 7:
     
     responsibilities = st.text_area(
         "Responsibilities & Achievements *",
+        value=st.session_state.get('resp_input_text', ''),
         key="resp_input",
         height=150,
         help="Describe your key responsibilities and achievements"
     )
+    # Store the text area value
+    st.session_state.resp_input_text = responsibilities
     
     col1, col2 = st.columns(2)
     with col1:
         if st.button("➕ Add Work Entry"):
-            if job_title and company_name and duration and responsibilities:
+            if job_title_input and company_name and duration and responsibilities:
                 st.session_state.work_entries.append({
-                    'title': job_title,
+                    'title': job_title_input,
                     'company': company_name,
                     'duration': duration,
                     'location': location,
                     'responsibilities': responsibilities
                 })
+                st.session_state.resp_input_text = ''  # Clear after adding
                 st.success("✅ Work entry added!")
                 st.rerun()
             else:
                 st.error("Please fill all required fields")
     
     with col2:
-        if st.session_state.ai_enabled and job_title and company_name and responsibilities:
+        if st.session_state.ai_enabled and job_title_input and company_name and responsibilities:
             if st.button("🤖 Enhance with AI"):
                 with st.spinner("AI is enhancing your description..."):
                     enhanced = ai_assistant.enhance_work_description(job_title, company_name, responsibilities)
@@ -1366,14 +1598,61 @@ elif st.session_state.step == 9:
 
 elif st.session_state.step == 10:
     # Preview and Download
-    st.title("📄 Resume Preview & Download")
+    st.title("📄 Resume Preview & Customization")
+    
+    # Template customization section
+    st.markdown("### 🎨 Customize Your Resume")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        all_templates = {**TEMPLATES, **INDIAN_TEMPLATES}
+        current_template = st.session_state.get('template', list(all_templates.keys())[0])
+        new_template = st.selectbox(
+            "Change Template",
+            list(all_templates.keys()),
+            index=list(all_templates.keys()).index(current_template) if current_template in all_templates else 0
+        )
+        if new_template != current_template:
+            st.session_state.template = new_template
+            st.success(f"✅ Switched to {new_template}!")
+            st.rerun()
+    
+    with col2:
+        template_config = all_templates[st.session_state.template]
+        # Color customization
+        colors = {
+            "Professional Blue": "#2c3e50",
+            "Success Green": "#27ae60",
+            "Corporate Purple": "#8e44ad",
+            "Modern Teal": "#16a085",
+            "Classic Navy": "#34495e",
+            "Elegant Maroon": "#c0392b"
+        }
+        selected_color = st.selectbox("Accent Color", list(colors.keys()))
+        if st.button("Apply Color"):
+            template_config['color'] = colors[selected_color]
+            st.session_state.template_config = template_config
+            st.success("✅ Color updated!")
+            st.rerun()
+    
+    with col3:
+        # Font customization
+        fonts = ["Arial", "Georgia", "Times New Roman", "Calibri", "Helvetica", "Verdana"]
+        selected_font = st.selectbox("Font Style", fonts)
+        if st.button("Apply Font"):
+            template_config['font'] = selected_font
+            st.session_state.template_config = template_config
+            st.success("✅ Font updated!")
+            st.rerun()
+    
+    st.markdown("---")
     
     # Profile photo section - enhanced
     if not st.session_state.get('profile_photo_base64'):
         st.markdown("### 📸 Add Your Photo (Optional)")
         col_photo, col_info = st.columns([2, 1])
         with col_photo:
-            st.info("💡 Professional photo makes your resume stand out! You can add it now or go back to Personal Info step.")
+            st.info("💡 Professional photo makes your resume stand out!")
             photo = st.file_uploader("Upload your professional photo", type=["jpg", "jpeg", "png"], key="photo_preview")
             if photo:
                 encoded = base64.b64encode(photo.read()).decode()
