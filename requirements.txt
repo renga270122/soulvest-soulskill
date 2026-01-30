@@ -4,14 +4,9 @@ streamlit==1.31.0
 # AI Features
 google-generativeai==0.3.2
 
-# PDF Generation
-pdfkit==1.0.0
-
-# Data Processing & ML
+# Data Processing & ML (for ATS scoring)
 scikit-learn==1.4.0
 numpy==1.26.3
-pandas==2.2.0
 
 # Additional Libraries
 requests==2.31.0
-python-dotenv==1.0.0
