@@ -13,4 +13,3 @@ font = "sans serif"
 
 [browser]
 gatherUsageStats = false
-serverAddress = "https://soulvest-soulskill-rwwrmxhx5mmuak37j9ap6z.streamlit.app"  # Replace with your actual custom domain
