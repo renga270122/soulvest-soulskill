@@ -176,7 +176,7 @@ def generate_resume_html(session_data, template_config):
                 </div>
             </div>
             <div style="text-align:center;margin-top:30px;color:#999;font-size:0.9rem;">
-                <p>Created with ResumeIndia \ud83c\uddee\ud83c\uddf3</p>
+                <p>Created with SoulvestAI Resume Builder ✨</p>
             </div>
         </body>
         </html>
@@ -231,7 +231,7 @@ def generate_resume_html(session_data, template_config):
             {lang_html}
             {social_html}
             <div style="text-align:center;margin-top:30px;color:#999;font-size:0.9rem;">
-                <p>Created with ResumeIndia \ud83c\uddee\ud83c\uddf3</p>
+                <p>Created with SoulvestAI Resume Builder ✨</p>
             </div>
         </body>
         </html>
