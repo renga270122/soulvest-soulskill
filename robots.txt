@@ -1,0 +1,14 @@
+# Robots.txt for Soulvest AI Resume Builder
+
+User-agent: *
+Allow: /
+
+# Disallow admin/internal pages (if any in future)
+# Disallow: /admin/
+# Disallow: /_internal/
+
+# Sitemap location
+Sitemap: https://soulvest.ai/sitemap.xml
+
+# Crawl-delay (optional, helps with server load)
+Crawl-delay: 1
