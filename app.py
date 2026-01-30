@@ -41,87 +41,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# PWA and SEO Meta Tags
-st.markdown("""
-<head>
-    <!-- PWA Meta Tags -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#6A1B9A">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Soulvest AI">
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json">
-    
-    <!-- Favicon and App Icons -->
-    <link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/icon-192x192.png">
-    <link rel="apple-touch-icon" sizes="192x192" href="/assets/icons/icon-192x192.png">
-    
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="Soulvest AI - Enterprise-grade AI-powered resume builder with 20+ premium templates, ATS optimization, and complete career toolkit. Create professional resumes in minutes.">
-    <meta name="keywords" content="resume builder, AI resume, ATS optimization, cover letter generator, career tools, job search, professional resume templates">
-    <meta name="author" content="Soulvest.ai">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://soulvest.ai/">
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://soulvest.ai/">
-    <meta property="og:title" content="Soulvest AI Resume Builder - Enterprise-Grade Career Platform">
-    <meta property="og:description" content="Create ATS-optimized resumes with AI-powered tools, premium templates, and comprehensive career guidance.">
-    <meta property="og:image" content="https://soulvest.ai/assets/og-image.png">
-    <meta property="og:site_name" content="Soulvest AI">
-    
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://soulvest.ai/">
-    <meta property="twitter:title" content="Soulvest AI Resume Builder">
-    <meta property="twitter:description" content="Create ATS-optimized resumes with AI-powered tools and premium templates.">
-    <meta property="twitter:image" content="https://soulvest.ai/assets/twitter-card.png">
-    
-    <!-- PWA Install Prompt -->
-    <script>
-        // Register Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(registration => console.log('SW registered:', registration))
-                    .catch(error => console.log('SW registration failed:', error));
-            });
-        }
-        
-        // PWA Install Prompt
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            // Show custom install button
-            const installBtn = document.getElementById('pwa-install-btn');
-            if (installBtn) {
-                installBtn.style.display = 'block';
-                installBtn.addEventListener('click', () => {
-                    deferredPrompt.prompt();
-                    deferredPrompt.userChoice.then((choiceResult) => {
-                        if (choiceResult.outcome === 'accepted') {
-                            console.log('PWA installed');
-                        }
-                        deferredPrompt = null;
-                    });
-                });
-            }
-        });
-        
-        // Detect if app is running as PWA
-        window.addEventListener('load', () => {
-            if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-                console.log('Running as PWA');
-                document.body.classList.add('pwa-mode');
-            }
-        });
-    </script>
-</head>
-""", unsafe_allow_html=True)
+# Note: PWA features (manifest.json, service-worker.js) are configured separately
+# SEO meta tags are handled by Streamlit Cloud deployment settings
 
 # Custom CSS for modern, mobile-responsive design with motivating theme
 st.markdown("""
