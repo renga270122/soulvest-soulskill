@@ -1411,19 +1411,29 @@ elif st.session_state.step == 10:
     all_templates = {**TEMPLATES, **INDIAN_TEMPLATES}
     template_config = all_templates[st.session_state.template]
     
-    resume_html = generate_resume_html(st.session_state, template_config)
+    try:
+        resume_html = generate_resume_html(st.session_state, template_config)
+    except UnicodeEncodeError as e:
+        st.error("❌ Error generating resume. Please check your input for special characters.")
+        st.error(f"Details: {str(e)}")
+        resume_html = "<html><body><h1>Error generating resume</h1></body></html>"
     
     st.markdown("### 👀 Preview")
-    st.components.v1.html(resume_html, height=800, scrolling=True)
+    try:
+        st.components.v1.html(resume_html, height=800, scrolling=True)
+    except Exception as e:
+        st.error("Error displaying preview. The resume can still be downloaded.")
     
     # Download button
     st.markdown("---")
     col1, col2, col3 = st.columns(3)
     
     with col1:
+        # Encode HTML properly to handle Unicode characters
+        resume_html_bytes = resume_html.encode('utf-8', errors='ignore')
         st.download_button(
             "📥 Download HTML",
-            resume_html,
+            resume_html_bytes,
             file_name=f"Resume_{st.session_state.get('full_name', 'Resume').replace(' ', '_')}.html",
             mime="text/html",
             use_container_width=True
