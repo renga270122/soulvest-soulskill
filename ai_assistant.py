@@ -18,11 +18,14 @@ class AIResumeAssistant:
     
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key or os.getenv('GOOGLE_API_KEY')
-        if self.api_key and GEMINI_AVAILABLE:
-            genai.configure(api_key=self.api_key)
-            self.model = genai.GenerativeModel('gemini-pro')
-            self.enabled = True
-        else:
+        self.enabled = False  # Default to False
+        
+        try:
+            if self.api_key and GEMINI_AVAILABLE:
+                genai.configure(api_key=self.api_key)
+                self.model = genai.GenerativeModel('gemini-pro')
+                self.enabled = True
+        except Exception:
             self.enabled = False
     
     def generate_professional_summary(self, profile_data: Dict) -> str:

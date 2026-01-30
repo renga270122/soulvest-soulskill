@@ -163,30 +163,41 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Initialize AI Assistant
-@st.cache_resource
 def get_ai_assistant():
-    api_key = os.getenv('GOOGLE_API_KEY')
+    api_key = None
+    # Try st.secrets first (works in both local and cloud)
+    try:
+        if 'GOOGLE_API_KEY' in st.secrets:
+            api_key = st.secrets['GOOGLE_API_KEY']
+    except Exception:
+        pass
+    # Fallback to environment variable
     if api_key is None:
-        try:
-            if hasattr(st, 'secrets') and 'GOOGLE_API_KEY' in st.secrets:
-                api_key = st.secrets['GOOGLE_API_KEY']
-        except Exception:
-            pass
+        api_key = os.getenv('GOOGLE_API_KEY')
     return AIResumeAssistant(api_key)
 
-@st.cache_resource
 def get_advanced_ai():
-    api_key = os.getenv('GOOGLE_API_KEY')
+    api_key = None
+    # Try st.secrets first (works in both local and cloud)
+    try:
+        if 'GOOGLE_API_KEY' in st.secrets:
+            api_key = st.secrets['GOOGLE_API_KEY']
+    except Exception:
+        pass
+    # Fallback to environment variable
     if api_key is None:
-        try:
-            if hasattr(st, 'secrets') and 'GOOGLE_API_KEY' in st.secrets:
-                api_key = st.secrets['GOOGLE_API_KEY']
-        except Exception:
-            pass
+        api_key = os.getenv('GOOGLE_API_KEY')
     return AdvancedAIAssistant(api_key)
 
-ai_assistant = get_ai_assistant()
-advanced_ai = get_advanced_ai()
+# Check if we need to reinitialize AI (in case API key was added after first load)
+if 'ai_assistant' not in st.session_state or 'force_ai_reload' in st.session_state:
+    if 'force_ai_reload' in st.session_state:
+        del st.session_state.force_ai_reload
+    st.session_state.ai_assistant = get_ai_assistant()
+    st.session_state.advanced_ai = get_advanced_ai()
+
+ai_assistant = st.session_state.ai_assistant
+advanced_ai = st.session_state.advanced_ai
 
 # Initialize Session State
 def init_session_state():
@@ -243,6 +254,16 @@ with st.sidebar:
             st.write("To enable AI features, add your Google Gemini API key:")
             st.code("GOOGLE_API_KEY=your_key_here")
             st.caption("[Get free API key](https://makersuite.google.com/app/apikey)")
+            
+            # Debug info
+            if st.button("🔄 Reload API Key"):
+                st.session_state.force_ai_reload = True
+                st.rerun()
+            
+            # Show debug info
+            has_secret = 'GOOGLE_API_KEY' in st.secrets if hasattr(st, 'secrets') else False
+            has_env = os.getenv('GOOGLE_API_KEY') is not None
+            st.caption(f"Debug: secrets.toml={has_secret}, env={has_env}")
     
     st.markdown("---")
     
