@@ -7,7 +7,7 @@
 
 **SoulSkill AI** is a next-generation resume builder that combines AI intelligence with emotional support. More than just a resume tool—it's your career companion that understands your journey and helps you shine.
 
-🌐 **Live Demo**: [soulskill.streamlit.app](https://soulskill.streamlit.app) (Coming soon!)
+🌐 **Live App**: [soulvest-soulskill.streamlit.app](https://soulvest-soulskill-rwwrmxhx5mmuak37j9ap6z.streamlit.app/)
 
 ---
 
