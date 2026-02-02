@@ -4,9 +4,24 @@ Resume Parser - Extract data from PDF/DOCX resumes
 import re
 import json
 from typing import Dict, List, Optional
-import PyPDF2
-from docx import Document
-import google.generativeai as genai
+
+try:
+    import PyPDF2
+except ImportError:
+    try:
+        import pypdf2 as PyPDF2
+    except ImportError:
+        PyPDF2 = None
+
+try:
+    from docx import Document
+except ImportError:
+    Document = None
+
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
 
 class ResumeParser:
     def __init__(self, api_key: Optional[str] = None):
@@ -16,6 +31,9 @@ class ResumeParser:
     
     def extract_text_from_pdf(self, file) -> str:
         """Extract text from PDF file"""
+        if PyPDF2 is None:
+            raise Exception("PyPDF2 is not installed. Please install it to parse PDF files.")
+        
         try:
             pdf_reader = PyPDF2.PdfReader(file)
             text = ""
@@ -27,6 +45,9 @@ class ResumeParser:
     
     def extract_text_from_docx(self, file) -> str:
         """Extract text from DOCX file"""
+        if Document is None:
+            raise Exception("python-docx is not installed. Please install it to parse DOCX files.")
+        
         try:
             doc = Document(file)
             text = ""
@@ -71,6 +92,13 @@ class ResumeParser:
     
     def _parse_with_ai(self, text: str) -> Dict:
         """Use AI to extract structured data from resume text"""
+        if genai is None:
+            print("Google Generative AI not available, falling back to regex")
+            return self._parse_with_regex(text)
+        
+        if not self.api_key:
+            return self._parse_with_regex(text)
+        
         try:
             model = genai.GenerativeModel('gemini-pro')
             
