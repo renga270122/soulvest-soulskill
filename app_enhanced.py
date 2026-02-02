@@ -1110,6 +1110,24 @@ if st.session_state.mode == 'home':
         </div>
         """, unsafe_allow_html=True)
         
+        # Hero CTA Section (for new users)
+        if not st.session_state.user_authenticated:
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                # Primary CTA: Get Started
+                if st.button("🚀 Start Building For Free", use_container_width=True, type="primary", key="hero_get_started"):
+                    st.session_state.show_auth_modal = True
+                    st.rerun()
+                
+                # Secondary CTA: Already have account
+                col_login_a, col_login_b = st.columns([1.5, 1.5])
+                with col_login_a:
+                    st.markdown("<p style='text-align: center; font-size: 0.9rem; color: #4a5568; margin-top: 0.5rem;'>Already have an account?</p>", unsafe_allow_html=True)
+                with col_login_b:
+                    if st.button("Log in here →", use_container_width=True, type="secondary", key="hero_login"):
+                        st.session_state.show_auth_modal = True
+                        st.rerun()
+        
         st.markdown("<br>", unsafe_allow_html=True)
     
     # Stats Section
@@ -1317,6 +1335,33 @@ if st.session_state.mode == 'home':
             </ul>
         </div>
         """, unsafe_allow_html=True)
+    
+    # Footer with secondary auth links
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown("---")
+    
+    footer_col1, footer_col2, footer_col3, footer_col4 = st.columns([1, 1, 1, 1])
+    
+    with footer_col1:
+        st.markdown("<p style='font-size: 0.85rem; color: #666;'>© 2026 SoulSkill. All rights reserved.</p>", unsafe_allow_html=True)
+    
+    with footer_col2:
+        if st.button("About", use_container_width=True, key="footer_about", type="secondary"):
+            st.session_state.mode = 'about'
+            st.rerun()
+    
+    with footer_col3:
+        if st.button("Contact", use_container_width=True, key="footer_contact", type="secondary"):
+            st.session_state.mode = 'contact'
+            st.rerun()
+    
+    with footer_col4:
+        if not st.session_state.user_authenticated:
+            if st.button("Sign In", use_container_width=True, key="footer_signin", type="secondary"):
+                st.session_state.show_auth_modal = True
+                st.rerun()
+        else:
+            st.markdown("<p style='font-size: 0.85rem; color: #2563eb;'>👤 Welcome!</p>", unsafe_allow_html=True)
 
 elif st.session_state.mode == 'dashboard':
     # Resume Dashboard - Manage Multiple Resumes
