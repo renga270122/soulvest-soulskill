@@ -68,7 +68,7 @@ if 'show_auth_modal' not in st.session_state:
 # Apply custom theme
 apply_custom_theme()
 
-# Top Navigation Bar - RESPONSIVE VERSION
+# Top Navigation Bar - RESPONSIVE VERSION with WORKING BUTTONS
 st.markdown("""
 <style>
 @media (max-width: 768px) {
@@ -77,39 +77,42 @@ st.markdown("""
         padding: 1rem !important;
         gap: 1rem !important;
     }
-    .navbar-buttons {
-        flex-direction: column !important;
-        width: 100% !important;
-        gap: 0.5rem !important;
-    }
-    .navbar-buttons a {
-        width: 100% !important;
-        text-align: center !important;
-        padding: 0.6rem 1rem !important;
-        font-size: 0.95rem !important;
-    }
     .navbar-logo {
         text-align: center !important;
         width: 100% !important;
     }
-}
-@media (max-width: 480px) {
-    .navbar-buttons a {
-        padding: 0.5rem 0.8rem !important;
-        font-size: 0.9rem !important;
+    /* Mobile navbar buttons */
+    .stButton button {
+        width: 100% !important;
     }
 }
 </style>
 <div class='navbar-container' style='display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); border-radius: 0; margin: -1rem -1rem 1rem -1rem; box-shadow: 0 2px 8px rgba(30, 58, 138, 0.15);'>
     <div class='navbar-logo' style='font-size: 1.5rem; font-weight: 900; color: white; margin: 0;'>✨ SoulSkill</div>
-    <div class='navbar-buttons' style='display: flex; gap: 0.75rem; align-items: center;'>
-        <a href='#' style='background: #ffffff; color: #1e3a8a; text-decoration: none; font-weight: 900; font-size: 1.05rem; padding: 0.65rem 1.5rem; border-radius: 8px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); display: inline-block; transition: all 0.2s;'>🚀 Build Resume</a>
-        <a href='#' style='background: transparent; color: #ffffff; text-decoration: none; font-weight: 900; font-size: 1.05rem; padding: 0.65rem 1.5rem; border: 2px solid #ffffff; border-radius: 8px; cursor: pointer; display: inline-block; transition: all 0.2s;'>🔐 Sign In</a>
-        <a href='#' style='background: transparent; color: #ffffff; text-decoration: none; font-weight: 900; font-size: 1.05rem; padding: 0.65rem 1.5rem; border: 2px solid #ffffff; border-radius: 8px; cursor: pointer; display: inline-block; transition: all 0.2s;'>✨ Create Account</a>
-        <a href='#' style='background: transparent; color: #ffffff; text-decoration: none; font-weight: 900; font-size: 1.05rem; padding: 0.65rem 1.5rem; border: 2px solid #ffffff; border-radius: 8px; cursor: pointer; display: inline-block; transition: all 0.2s;'>👤 Guest</a>
-    </div>
 </div>
 """, unsafe_allow_html=True)
+
+# Navbar Buttons - Functional Streamlit buttons in columns
+col_nav1, col_nav2, col_nav3, col_nav4, col_nav5 = st.columns([3, 1.5, 1.2, 1.5, 1])
+with col_nav2:
+    if st.button("🚀 Build Resume", key="nav_build", type="primary", use_container_width=True):
+        st.session_state.mode = 'create'
+        st.rerun()
+with col_nav3:
+    if st.button("🔐 Sign In", key="nav_signin", use_container_width=True):
+        st.session_state.show_auth_modal = True
+        st.session_state.auth_mode = 'signin'
+        st.rerun()
+with col_nav4:
+    if st.button("✨ Create Account", key="nav_signup", use_container_width=True):
+        st.session_state.show_auth_modal = True
+        st.session_state.auth_mode = 'signup'
+        st.rerun()
+with col_nav5:
+    if st.button("👤 Guest", key="nav_guest", use_container_width=True):
+        st.session_state.mode = 'home'
+        st.session_state.user_authenticated = False
+        st.rerun()
 
 st.markdown("<br>", unsafe_allow_html=True)
 
