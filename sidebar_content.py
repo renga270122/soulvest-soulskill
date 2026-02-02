@@ -134,7 +134,6 @@ def show_quick_tips(section: str = "general"):
     """Show quick tips for a specific section"""
     tips = QUICK_TIPS.get(section, QUICK_TIPS["general"])
     
-    st.markdown("### 💡 Quick Tips")
     for tip in tips:
         st.caption(tip)
 
