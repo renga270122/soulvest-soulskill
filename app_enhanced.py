@@ -1133,19 +1133,6 @@ if st.session_state.mode == 'home':
         
         st.markdown("<br>", unsafe_allow_html=True)
     
-    # Stats Section
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.markdown("<div class='stat-item'><div class='stat-number' style='font-weight: 900;'><strong>95%</strong></div><div class='stat-label' style='font-weight: 700;'><strong>ATS Success Rate</strong></div></div>", unsafe_allow_html=True)
-    with col2:
-        st.markdown("<div class='stat-item'><div class='stat-number' style='font-weight: 900;'><strong>35+</strong></div><div class='stat-label' style='font-weight: 700;'><strong>Global Templates</strong></div></div>", unsafe_allow_html=True)
-    with col3:
-        st.markdown("<div class='stat-item'><div class='stat-number' style='font-weight: 900;'><strong>100%</strong></div><div class='stat-label' style='font-weight: 700;'><strong>Free Forever</strong></div></div>", unsafe_allow_html=True)
-    with col4:
-        st.markdown("<div class='stat-item'><div class='stat-number' style='font-weight: 900;'><strong>50K+</strong></div><div class='stat-label' style='font-weight: 700;'><strong>Resumes Created</strong></div></div>", unsafe_allow_html=True)
-    
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    
     # CTA Buttons (Only for signed-in users)
     if st.session_state.user_authenticated:
         col1, col2, col3 = st.columns([1, 2, 1])
