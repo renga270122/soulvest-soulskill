@@ -55,21 +55,120 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Initialize session state early
+if 'user_authenticated' not in st.session_state:
+    st.session_state.user_authenticated = False
+if 'user_name' not in st.session_state:
+    st.session_state.user_name = 'User'
+if 'mode' not in st.session_state:
+    st.session_state.mode = 'home'
+if 'show_auth_modal' not in st.session_state:
+    st.session_state.show_auth_modal = False
+
 # Apply custom theme
 apply_custom_theme()
+
+# Top Navigation Bar (Udemy-style with blue theme)
+st.markdown("""
+<style>
+    .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+        border-radius: 0;
+        margin: -1rem -1rem 1rem -1rem;
+        box-shadow: 0 2px 8px rgba(30, 58, 138, 0.15);
+    }
+    .navbar-logo {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: white;
+        margin: 0;
+    }
+    .navbar-auth {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+    .navbar-button {
+        padding: 0.5rem 1.25rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+    .navbar-signin {
+        background: transparent;
+        color: white;
+        border: 1.5px solid white;
+    }
+    .navbar-signin:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-1px);
+    }
+    .navbar-signup {
+        background: white;
+        color: #2563eb;
+    }
+    .navbar-signup:hover {
+        background: #f0f4f8;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+    }
+    .navbar-user {
+        color: white;
+        font-weight: 600;
+        margin: 0;
+    }
+</style>
+
+<div class='navbar'>
+    <div class='navbar-logo'>✨ SoulSkill</div>
+    <div></div>
+</div>
+""", unsafe_allow_html=True)
+
+col_nav_left, col_nav_mid, col_nav_right = st.columns([1, 3, 1])
+
+with col_nav_left:
+    pass
+
+with col_nav_mid:
+    pass  # Middle space for nav items if needed
+
+with col_nav_right:
+    if not st.session_state.user_authenticated:
+        col_signin, col_signup = st.columns(2, gap="small")
+        with col_signin:
+            if st.button("Sign In", use_container_width=True, key="nav_signin", type="secondary"):
+                st.session_state.show_auth_modal = True
+                st.rerun()
+        with col_signup:
+            if st.button("Sign Up", use_container_width=True, key="nav_signup", type="primary"):
+                st.session_state.show_auth_modal = True
+                st.rerun()
+    else:
+        user_name = st.session_state.get('user_name', 'User')
+        st.markdown(f"<div style='text-align: right;'><p style='margin: 0; font-weight: 600; color: #2563eb;'>👤 {user_name}</p></div>", unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
 
 # Enhanced CSS for ResumeGemini-like experience
 st.markdown("""
 <style>
     .main {
         padding: 1rem;
-        background: linear-gradient(135deg, #667eea10 0%, #764ba210 50%, #f093fb10 100%);
+        background: linear-gradient(135deg, #f5f7fb 0%, #e8eef7 100%);
     }
     
     /* Primary Buttons */
     .stButton>button {
         width: 100%;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
         color: white;
         border-radius: 12px;
         padding: 0.75rem 1.5rem;
@@ -77,13 +176,13 @@ st.markdown("""
         font-weight: 600;
         font-size: 1rem;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
         min-height: 44px; /* Mobile touch target */
         cursor: pointer;
     }
     .stButton>button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+        box-shadow: 0 6px 25px rgba(37, 99, 235, 0.5);
     }
     .stButton>button:active {
         transform: translateY(0);
@@ -1002,35 +1101,7 @@ if st.session_state.mode == 'home':
     if st.session_state.get('show_auth_modal', False):
         show_signin_signup_modal()
     else:
-        # Show auth prompt banner for guest users
-        if not st.session_state.user_authenticated:
-            col1, col2, col3 = st.columns([1, 3, 1])
-            with col2:
-                st.info("""
-                **👋 Welcome!** Sign in to save your resumes and access them from any device.
-                **Or continue as guest to try it out!**
-                """)
-                
-                col_a, col_b, col_c = st.columns(3)
-                with col_a:
-                    if st.button("🔐 Sign In", use_container_width=True, key="hero_signin"):
-                        st.session_state.show_auth_modal = True
-                        st.rerun()
-                with col_b:
-                    if st.button("✨ Sign Up", use_container_width=True, key="hero_signup", type="primary"):
-                        st.session_state.show_auth_modal = True
-                        st.rerun()
-                with col_c:
-                    if st.button("👤 Guest Mode", use_container_width=True, key="hero_guest"):
-                        st.info("✅ Continue as guest - you can sign up later!")
-        else:
-            # Welcome back message for logged-in users
-            col1, col2, col3 = st.columns([1, 3, 1])
-            with col2:
-                user_name = st.session_state.get('user_name', 'User')
-                st.success(f"👋 **Welcome back, {user_name}!** Ready to create amazing resumes?")
-
-        # Landing Page - ResumeGemini Style
+        # Landing Page - Hero Section (Focus on Branding)
         st.markdown("""
         <div class='hero-section'>
             <h1 class='hero-title' style='font-weight: 900;'><strong>✨ Build Your Resume in 5 Minutes</strong></h1>
