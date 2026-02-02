@@ -1010,14 +1010,6 @@ if st.session_state.mode == 'home':
     if st.session_state.get('show_auth_modal', False):
         show_signin_signup_modal()
     else:
-        # Landing Page - ResumeGemini Style
-        st.markdown("""
-        <div class='hero-section'>
-            <h1 class='hero-title' style='font-weight: 900;'><strong>✨ Build Your Resume in 5 Minutes</strong></h1>
-            <p class='hero-subtitle' style='font-weight: 700; font-size: 1.3rem;'><strong>AI-Powered • ATS-Optimized • 20+ Professional Templates</strong></p>
-        </div>
-        """, unsafe_allow_html=True)
-        
         # Show auth prompt banner for guest users
         if not st.session_state.user_authenticated:
             col1, col2, col3 = st.columns([1, 3, 1])
@@ -1045,6 +1037,14 @@ if st.session_state.mode == 'home':
             with col2:
                 user_name = st.session_state.get('user_name', 'User')
                 st.success(f"👋 **Welcome back, {user_name}!** Ready to create amazing resumes?")
+
+        # Landing Page - ResumeGemini Style
+        st.markdown("""
+        <div class='hero-section'>
+            <h1 class='hero-title' style='font-weight: 900;'><strong>✨ Build Your Resume in 5 Minutes</strong></h1>
+            <p class='hero-subtitle' style='font-weight: 700; font-size: 1.3rem;'><strong>AI-Powered • ATS-Optimized • 20+ Professional Templates</strong></p>
+        </div>
+        """, unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
     
