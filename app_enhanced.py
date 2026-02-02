@@ -1107,17 +1107,31 @@ if st.session_state.mode == 'home':
         # Left side - Resume Preview Mockup
         with col_left:
             st.markdown("""
-            <div style='text-align: left; padding: 1.4rem 1.2rem; background: #ffffff; border-radius: 14px; min-height: 300px; border: 1px solid rgba(37, 99, 235, 0.2); box-shadow: 0 10px 25px rgba(37, 99, 235, 0.12);'>
-                <p style='color: #2563eb; font-size: 0.8rem; font-weight: 800; margin: 0 0 0.6rem 0; text-transform: uppercase; letter-spacing: 0.7px;'>Resume Preview</p>
-                <h3 style='color: #1e3a8a; font-size: 1.1rem; font-weight: 800; margin: 0;'>Priya Rao</h3>
-                <p style='color: #4a5568; font-size: 0.85rem; font-weight: 600; margin: 0.2rem 0 0.6rem 0;'>Data Analyst • Bengaluru</p>
-                <div style='height: 1px; background: rgba(37, 99, 235, 0.15); margin: 0.75rem 0;'></div>
-                <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 700; margin: 0 0 0.35rem 0;'>Highlights</p>
+            <div style='text-align: left; padding: 1.4rem 1.2rem; background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%); border-radius: 16px; min-height: 320px; border: 1px solid rgba(37, 99, 235, 0.2); box-shadow: 0 12px 28px rgba(37, 99, 235, 0.14);'>
+                <div style='display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;'>
+                    <span style='background: #e0e7ff; color: #1e3a8a; font-size: 0.72rem; font-weight: 800; padding: 0.25rem 0.55rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.6px;'>ATS Friendly</span>
+                    <span style='color: #2563eb; font-size: 0.75rem; font-weight: 800;'>★ 4.9</span>
+                </div>
+                <div style='display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem;'>
+                    <div style='width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 800;'>PR</div>
+                    <div>
+                        <h3 style='color: #1e3a8a; font-size: 1.1rem; font-weight: 800; margin: 0;'>Priya Rao</h3>
+                        <p style='color: #4a5568; font-size: 0.82rem; font-weight: 600; margin: 0.1rem 0 0 0;'>Data Analyst • Bengaluru</p>
+                    </div>
+                </div>
+                <div style='height: 1px; background: rgba(37, 99, 235, 0.15); margin: 0.7rem 0;'></div>
+                <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 800; margin: 0 0 0.35rem 0;'>Highlights</p>
                 <ul style='color: #4a5568; font-size: 0.78rem; margin: 0; padding-left: 1rem; line-height: 1.6;'>
                     <li>SQL • Python • Power BI</li>
                     <li>Built 12+ dashboards</li>
-                    <li>ATS-optimized keywords</li>
+                    <li>ATS‑optimized keywords</li>
                 </ul>
+                <div style='margin-top: 0.7rem;'>
+                    <div style='height: 6px; background: #e6edff; border-radius: 999px; overflow: hidden; margin-bottom: 0.35rem;'>
+                        <div style='width: 78%; height: 100%; background: linear-gradient(90deg, #2563eb, #1e3a8a);'></div>
+                    </div>
+                    <p style='color: #4a5568; font-size: 0.72rem; font-weight: 700; margin: 0;'>Keyword Match: 78%</p>
+                </div>
             </div>
             """, unsafe_allow_html=True)
         
@@ -1125,27 +1139,67 @@ if st.session_state.mode == 'home':
         with col_center:
             st.markdown("""
             <div style='text-align: center; padding: 1.6rem 1.6rem 2.1rem 1.6rem; background: linear-gradient(135deg, #eaf2ff 0%, #dfe9ff 50%, #f6f9ff 100%); border-radius: 18px; border: 1px solid rgba(37, 99, 235, 0.25); box-shadow: 0 14px 30px rgba(30, 58, 138, 0.18);'>
+                <p style='color: #1e3a8a; font-size: 2.4rem; font-weight: 900; margin: 0 0 0.15rem 0;'>Welcome to SoulSkill! 👋</p>
                 <h1 style='color: #1e3a8a; font-size: 2.35rem; font-weight: 900; margin: 0 0 0.5rem 0; letter-spacing: 0.2px;'>Build Your Resume in as little as 5 minutes</h1>
-                <p style='color: #3b4a6b; font-size: 1rem; font-weight: 600; margin: 0 0 0.75rem 0; line-height: 1.55;'>Recruiter‑approved templates, pre‑written examples, and AI‑guided suggestions.</p>
-                <p style='color: #1e3a8a; font-size: 1.2rem; font-weight: 800; margin: 0 0 0.6rem 0;'>Welcome to SoulSkill! 👋</p>
-                <p style='color: #3b4a6b; font-size: 0.98rem; font-weight: 600; margin: 0; line-height: 1.55;'>Build professional resumes, cover letters, and more with AI-powered assistance.</p>
+                <p style='color: #3b4a6b; font-size: 1.02rem; font-weight: 600; margin: 0; line-height: 1.55;'>Build professional resumes, cover letters, and more with AI-powered assistance.</p>
             </div>
             """, unsafe_allow_html=True)
         
         # Right side - Resume Preview Mockup
         with col_right:
             st.markdown("""
-            <div style='text-align: left; padding: 1.4rem 1.2rem; background: #ffffff; border-radius: 14px; min-height: 300px; border: 1px solid rgba(37, 99, 235, 0.2); box-shadow: 0 10px 25px rgba(37, 99, 235, 0.12);'>
-                <p style='color: #2563eb; font-size: 0.8rem; font-weight: 800; margin: 0 0 0.6rem 0; text-transform: uppercase; letter-spacing: 0.7px;'>Resume Preview</p>
-                <h3 style='color: #1e3a8a; font-size: 1.1rem; font-weight: 800; margin: 0;'>Aiden Brooks</h3>
-                <p style='color: #4a5568; font-size: 0.85rem; font-weight: 600; margin: 0.2rem 0 0.6rem 0;'>Product Manager • Austin</p>
-                <div style='height: 1px; background: rgba(37, 99, 235, 0.15); margin: 0.75rem 0;'></div>
-                <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 700; margin: 0 0 0.35rem 0;'>Highlights</p>
+            <div style='text-align: left; padding: 1.4rem 1.2rem; background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%); border-radius: 16px; min-height: 320px; border: 1px solid rgba(37, 99, 235, 0.2); box-shadow: 0 12px 28px rgba(37, 99, 235, 0.14);'>
+                <div style='display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;'>
+                    <span style='background: #e0e7ff; color: #1e3a8a; font-size: 0.72rem; font-weight: 800; padding: 0.25rem 0.55rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.6px;'>Recruiter Ready</span>
+                    <span style='color: #2563eb; font-size: 0.75rem; font-weight: 800;'>★ 4.8</span>
+                </div>
+                <div style='display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem;'>
+                    <div style='width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 800;'>AB</div>
+                    <div>
+                        <h3 style='color: #1e3a8a; font-size: 1.1rem; font-weight: 800; margin: 0;'>Aiden Brooks</h3>
+                        <p style='color: #4a5568; font-size: 0.82rem; font-weight: 600; margin: 0.1rem 0 0 0;'>Product Manager • Austin</p>
+                    </div>
+                </div>
+                <div style='height: 1px; background: rgba(37, 99, 235, 0.15); margin: 0.7rem 0;'></div>
+                <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 800; margin: 0 0 0.35rem 0;'>Highlights</p>
                 <ul style='color: #4a5568; font-size: 0.78rem; margin: 0; padding-left: 1rem; line-height: 1.6;'>
                     <li>Roadmaps • OKRs • GTM</li>
                     <li>Led 4 product launches</li>
                     <li>ATS‑friendly layout</li>
                 </ul>
+                <div style='margin-top: 0.7rem;'>
+                    <div style='height: 6px; background: #e6edff; border-radius: 999px; overflow: hidden; margin-bottom: 0.35rem;'>
+                        <div style='width: 84%; height: 100%; background: linear-gradient(90deg, #22c55e, #16a34a);'></div>
+                    </div>
+                    <p style='color: #4a5568; font-size: 0.72rem; font-weight: 700; margin: 0;'>Formatting Score: 84%</p>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # Quick steps to build trust
+        step1, step2, step3 = st.columns(3)
+        with step1:
+            st.markdown("""
+            <div style='text-align: center; padding: 1rem; background: #ffffff; border-radius: 14px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);'>
+                <div style='font-size: 1.4rem;'>📝</div>
+                <p style='color:#1e3a8a; font-weight:800; margin:0.35rem 0 0.2rem 0;'>Fill Details</p>
+                <p style='color:#4a5568; font-size:0.8rem; margin:0;'>Guided sections in minutes</p>
+            </div>
+            """, unsafe_allow_html=True)
+        with step2:
+            st.markdown("""
+            <div style='text-align: center; padding: 1rem; background: #ffffff; border-radius: 14px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);'>
+                <div style='font-size: 1.4rem;'>✨</div>
+                <p style='color:#1e3a8a; font-weight:800; margin:0.35rem 0 0.2rem 0;'>AI Suggestions</p>
+                <p style='color:#4a5568; font-size:0.8rem; margin:0;'>Instant wording improvements</p>
+            </div>
+            """, unsafe_allow_html=True)
+        with step3:
+            st.markdown("""
+            <div style='text-align: center; padding: 1rem; background: #ffffff; border-radius: 14px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);'>
+                <div style='font-size: 1.4rem;'>📄</div>
+                <p style='color:#1e3a8a; font-weight:800; margin:0.35rem 0 0.2rem 0;'>Download PDF</p>
+                <p style='color:#4a5568; font-size:0.8rem; margin:0;'>ATS‑ready templates</p>
             </div>
             """, unsafe_allow_html=True)
         
@@ -1178,17 +1232,31 @@ if st.session_state.mode == 'home':
             # Left side - Resume Preview Mockup
             with col_left:
                 st.markdown("""
-                <div style='text-align: left; padding: 1.4rem 1.2rem; background: #ffffff; border-radius: 14px; min-height: 300px; border: 1px solid rgba(37, 99, 235, 0.2); box-shadow: 0 10px 25px rgba(37, 99, 235, 0.12);'>
-                    <p style='color: #2563eb; font-size: 0.8rem; font-weight: 800; margin: 0 0 0.6rem 0; text-transform: uppercase; letter-spacing: 0.7px;'>Resume Preview</p>
-                    <h3 style='color: #1e3a8a; font-size: 1.1rem; font-weight: 800; margin: 0;'>Priya Rao</h3>
-                    <p style='color: #4a5568; font-size: 0.85rem; font-weight: 600; margin: 0.2rem 0 0.6rem 0;'>Data Analyst • Bengaluru</p>
-                    <div style='height: 1px; background: rgba(37, 99, 235, 0.15); margin: 0.75rem 0;'></div>
-                    <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 700; margin: 0 0 0.35rem 0;'>Highlights</p>
+                <div style='text-align: left; padding: 1.4rem 1.2rem; background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%); border-radius: 16px; min-height: 320px; border: 1px solid rgba(37, 99, 235, 0.2); box-shadow: 0 12px 28px rgba(37, 99, 235, 0.14);'>
+                    <div style='display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;'>
+                        <span style='background: #e0e7ff; color: #1e3a8a; font-size: 0.72rem; font-weight: 800; padding: 0.25rem 0.55rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.6px;'>ATS Friendly</span>
+                        <span style='color: #2563eb; font-size: 0.75rem; font-weight: 800;'>★ 4.9</span>
+                    </div>
+                    <div style='display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem;'>
+                        <div style='width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 800;'>PR</div>
+                        <div>
+                            <h3 style='color: #1e3a8a; font-size: 1.1rem; font-weight: 800; margin: 0;'>Priya Rao</h3>
+                            <p style='color: #4a5568; font-size: 0.82rem; font-weight: 600; margin: 0.1rem 0 0 0;'>Data Analyst • Bengaluru</p>
+                        </div>
+                    </div>
+                    <div style='height: 1px; background: rgba(37, 99, 235, 0.15); margin: 0.7rem 0;'></div>
+                    <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 800; margin: 0 0 0.35rem 0;'>Highlights</p>
                     <ul style='color: #4a5568; font-size: 0.78rem; margin: 0; padding-left: 1rem; line-height: 1.6;'>
                         <li>SQL • Python • Power BI</li>
                         <li>Built 12+ dashboards</li>
-                        <li>ATS-optimized keywords</li>
+                        <li>ATS‑optimized keywords</li>
                     </ul>
+                    <div style='margin-top: 0.7rem;'>
+                        <div style='height: 6px; background: #e6edff; border-radius: 999px; overflow: hidden; margin-bottom: 0.35rem;'>
+                            <div style='width: 78%; height: 100%; background: linear-gradient(90deg, #2563eb, #1e3a8a);'></div>
+                        </div>
+                        <p style='color: #4a5568; font-size: 0.72rem; font-weight: 700; margin: 0;'>Keyword Match: 78%</p>
+                    </div>
                 </div>
                 """, unsafe_allow_html=True)
             
@@ -1196,9 +1264,8 @@ if st.session_state.mode == 'home':
             with col_center:
                 st.markdown(f"""
                 <div style='text-align: center; padding: 1.6rem 1.6rem 2.1rem 1.6rem; background: linear-gradient(135deg, #eaf2ff 0%, #dfe9ff 50%, #f6f9ff 100%); border-radius: 18px; border: 1px solid rgba(37, 99, 235, 0.25); box-shadow: 0 14px 30px rgba(30, 58, 138, 0.18);'>
+                    <h2 style='color: #1e3a8a; font-size: 2.2rem; font-weight: 900; margin: 0 0 0.2rem 0;'>👋 Welcome back, {st.session_state.get('user_name', 'User')}!</h2>
                     <h1 style='color: #1e3a8a; font-size: 2.35rem; font-weight: 900; margin: 0 0 0.5rem 0; letter-spacing: 0.2px;'>Build Your Resume in as little as 5 minutes</h1>
-                    <p style='color: #3b4a6b; font-size: 1rem; font-weight: 600; margin: 0 0 0.75rem 0; line-height: 1.55;'>Recruiter‑approved templates, pre‑written examples, and AI‑guided suggestions.</p>
-                    <h2 style='color: #1e3a8a; font-size: 1.35rem; font-weight: 800; margin: 0 0 0.6rem 0;'>👋 Welcome back, {st.session_state.get('user_name', 'User')}!</h2>
                     <p style='color: #3b4a6b; font-size: 1rem; font-weight: 600; margin: 0; line-height: 1.55;'>Ready to create amazing resumes?</p>
                 </div>
                 """, unsafe_allow_html=True)
@@ -1206,17 +1273,58 @@ if st.session_state.mode == 'home':
             # Right side - Resume Preview Mockup
             with col_right:
                 st.markdown("""
-                <div style='text-align: left; padding: 1.4rem 1.2rem; background: #ffffff; border-radius: 14px; min-height: 300px; border: 1px solid rgba(37, 99, 235, 0.2); box-shadow: 0 10px 25px rgba(37, 99, 235, 0.12);'>
-                    <p style='color: #2563eb; font-size: 0.8rem; font-weight: 800; margin: 0 0 0.6rem 0; text-transform: uppercase; letter-spacing: 0.7px;'>Resume Preview</p>
-                    <h3 style='color: #1e3a8a; font-size: 1.1rem; font-weight: 800; margin: 0;'>Aiden Brooks</h3>
-                    <p style='color: #4a5568; font-size: 0.85rem; font-weight: 600; margin: 0.2rem 0 0.6rem 0;'>Product Manager • Austin</p>
-                    <div style='height: 1px; background: rgba(37, 99, 235, 0.15); margin: 0.75rem 0;'></div>
-                    <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 700; margin: 0 0 0.35rem 0;'>Highlights</p>
+                <div style='text-align: left; padding: 1.4rem 1.2rem; background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%); border-radius: 16px; min-height: 320px; border: 1px solid rgba(37, 99, 235, 0.2); box-shadow: 0 12px 28px rgba(37, 99, 235, 0.14);'>
+                    <div style='display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;'>
+                        <span style='background: #e0e7ff; color: #1e3a8a; font-size: 0.72rem; font-weight: 800; padding: 0.25rem 0.55rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.6px;'>Recruiter Ready</span>
+                        <span style='color: #2563eb; font-size: 0.75rem; font-weight: 800;'>★ 4.8</span>
+                    </div>
+                    <div style='display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem;'>
+                        <div style='width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 800;'>AB</div>
+                        <div>
+                            <h3 style='color: #1e3a8a; font-size: 1.1rem; font-weight: 800; margin: 0;'>Aiden Brooks</h3>
+                            <p style='color: #4a5568; font-size: 0.82rem; font-weight: 600; margin: 0.1rem 0 0 0;'>Product Manager • Austin</p>
+                        </div>
+                    </div>
+                    <div style='height: 1px; background: rgba(37, 99, 235, 0.15); margin: 0.7rem 0;'></div>
+                    <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 800; margin: 0 0 0.35rem 0;'>Highlights</p>
                     <ul style='color: #4a5568; font-size: 0.78rem; margin: 0; padding-left: 1rem; line-height: 1.6;'>
                         <li>Roadmaps • OKRs • GTM</li>
                         <li>Led 4 product launches</li>
                         <li>ATS‑friendly layout</li>
                     </ul>
+                    <div style='margin-top: 0.7rem;'>
+                        <div style='height: 6px; background: #e6edff; border-radius: 999px; overflow: hidden; margin-bottom: 0.35rem;'>
+                            <div style='width: 84%; height: 100%; background: linear-gradient(90deg, #22c55e, #16a34a);'></div>
+                        </div>
+                        <p style='color: #4a5568; font-size: 0.72rem; font-weight: 700; margin: 0;'>Formatting Score: 84%</p>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            # Quick steps to build trust
+            step1, step2, step3 = st.columns(3)
+            with step1:
+                st.markdown("""
+                <div style='text-align: center; padding: 1rem; background: #ffffff; border-radius: 14px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);'>
+                    <div style='font-size: 1.4rem;'>📝</div>
+                    <p style='color:#1e3a8a; font-weight:800; margin:0.35rem 0 0.2rem 0;'>Fill Details</p>
+                    <p style='color:#4a5568; font-size:0.8rem; margin:0;'>Guided sections in minutes</p>
+                </div>
+                """, unsafe_allow_html=True)
+            with step2:
+                st.markdown("""
+                <div style='text-align: center; padding: 1rem; background: #ffffff; border-radius: 14px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);'>
+                    <div style='font-size: 1.4rem;'>✨</div>
+                    <p style='color:#1e3a8a; font-weight:800; margin:0.35rem 0 0.2rem 0;'>AI Suggestions</p>
+                    <p style='color:#4a5568; font-size:0.8rem; margin:0;'>Instant wording improvements</p>
+                </div>
+                """, unsafe_allow_html=True)
+            with step3:
+                st.markdown("""
+                <div style='text-align: center; padding: 1rem; background: #ffffff; border-radius: 14px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);'>
+                    <div style='font-size: 1.4rem;'>📄</div>
+                    <p style='color:#1e3a8a; font-weight:800; margin:0.35rem 0 0.2rem 0;'>Download PDF</p>
+                    <p style='color:#4a5568; font-size:0.8rem; margin:0;'>ATS‑ready templates</p>
                 </div>
                 """, unsafe_allow_html=True)
 
