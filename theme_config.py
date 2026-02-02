@@ -18,25 +18,28 @@ ENHANCED_CSS = """
         font-family: 'Poppins', sans-serif;
     }
     
-    /* Main app background with gradient */
+    /* Main app background (clean, professional with subtle pattern) */
     .main {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #f5f7fb 0%, #e8eef7 100%);
+        background-image: 
+            radial-gradient(circle at 20% 30%, rgba(37, 99, 235, 0.03) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(59, 130, 246, 0.03) 0%, transparent 50%),
+            radial-gradient(circle at 40% 80%, rgba(29, 78, 216, 0.02) 0%, transparent 50%);
         background-attachment: fixed;
     }
     
-    /* Content area with glass morphism effect */
+    /* Content area */
     .block-container {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
+        background: #ffffff;
         border-radius: 20px;
         padding: 2rem;
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 8px 24px 0 rgba(15, 23, 42, 0.08);
+        border: 1px solid #e5e7eb;
     }
     
     /* Sidebar styling */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(180deg, #1e3a8a 0%, #2563eb 100%);
         color: white !important;
     }
     
@@ -106,7 +109,7 @@ ENHANCED_CSS = """
     
     /* Headers with gradient text (main content only, not sidebar) */
     .main h1 {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 800;
@@ -161,7 +164,7 @@ ENHANCED_CSS = """
     
     /* Buttons - Main content */
     .stButton>button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
         color: white !important;
         border: none;
         border-radius: 10px;
@@ -169,13 +172,13 @@ ENHANCED_CSS = """
         font-weight: 600;
         font-size: 1rem;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px 0 rgba(102, 126, 234, 0.4);
+        box-shadow: 0 4px 14px 0 rgba(29, 78, 216, 0.35);
         cursor: pointer;
     }
     
     .stButton>button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px 0 rgba(102, 126, 234, 0.6);
+        box-shadow: 0 6px 18px 0 rgba(29, 78, 216, 0.45);
     }
     
     /* Sidebar buttons specifically */

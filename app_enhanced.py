@@ -219,8 +219,8 @@ st.markdown("""
     
     /* Content Suggestion Box */
     .content-suggestion {
-        background: #f8f9fa;
-        border-left: 4px solid #667eea;
+        background: #f3f4f6;
+        border-left: 4px solid #2563eb;
         padding: 1rem;
         margin: 0.5rem 0;
         border-radius: 8px;
@@ -228,7 +228,7 @@ st.markdown("""
         transition: all 0.2s ease;
     }
     .content-suggestion:hover {
-        background: #667eea15;
+        background: #e0e7ff;
         transform: translateX(5px);
     }
     .suggestion-title {
@@ -280,7 +280,7 @@ st.markdown("""
     }
     .card-badge {
         padding: 0.25rem 0.75rem;
-        background: #667eea;
+        background: #2563eb;
         color: white;
         border-radius: 20px;
         font-size: 0.75rem;
@@ -306,8 +306,8 @@ st.markdown("""
     
     /* Info Boxes */
     .info-box {
-        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-        border-left: 4px solid #667eea;
+        background: #eff6ff;
+        border-left: 4px solid #2563eb;
         padding: 1rem;
         border-radius: 8px;
         margin: 1rem 0;
@@ -325,11 +325,11 @@ st.markdown("""
     .hero-section {
         text-align: center;
         padding: 3rem 2rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
         color: white;
         border-radius: 20px;
         margin-bottom: 2rem;
-        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 10px 30px rgba(30, 58, 138, 0.25);
     }
     .hero-title {
         font-size: 2.5rem;
@@ -354,7 +354,7 @@ st.markdown("""
     .stat-number {
         font-size: 2rem;
         font-weight: 700;
-        color: #667eea;
+        color: #2563eb;
     }
     .stat-label {
         font-size: 0.9rem;
@@ -475,18 +475,6 @@ render_enhanced_sidebar()
 # Show user profile or auth options
 show_user_profile()
 
-# Authentication status in sidebar (for non-authenticated users)
-if not st.session_state.user_authenticated:
-    with st.sidebar:
-        st.markdown("---")
-        st.markdown("### 🔐 Account")
-        
-        if st.button("Sign In / Sign Up", use_container_width=True, key="sidebar_auth_btn", type="primary"):
-            st.session_state.show_auth_modal = True
-            st.rerun()
-        
-        st.caption("💡 Sign up to save and manage your resumes!")
-
 # Additional sidebar - Universal Navigation
 with st.sidebar:
     st.markdown("---")
@@ -510,6 +498,10 @@ with st.sidebar:
     
     if st.button("✉️ Cover Letter", use_container_width=True, key="sidebar_cl_btn"):
         st.session_state['mode'] = 'coverletter'
+        st.rerun()
+    
+    if st.button("🎓 Masters SOP", use_container_width=True, key="sidebar_masters_btn"):
+        st.session_state['mode'] = 'masters'
         st.rerun()
     
     if st.button("📂 Dashboard", use_container_width=True, key="sidebar_dash_btn"):
@@ -1061,75 +1053,81 @@ if st.session_state.mode == 'home':
     
     st.markdown("<br><br>", unsafe_allow_html=True)
     
-    # CTA Buttons
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        # Use unique keys and direct state changes
-        if st.button("🚀 Build Resume For Free", use_container_width=True, type="primary", key="home_build_btn"):
-            st.session_state['mode'] = 'builder'
-            st.session_state['step'] = 1
-            st.rerun()
+    # CTA Buttons (Only for signed-in users)
+    if st.session_state.user_authenticated:
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            # Use unique keys and direct state changes
+            if st.button("🚀 Build Resume For Free", use_container_width=True, type="primary", key="home_build_btn"):
+                st.session_state['mode'] = 'builder'
+                st.session_state['step'] = 1
+                st.rerun()
+            
+            if st.button("✉️ Create Cover Letter", use_container_width=True, key="home_coverletter_btn"):
+                st.session_state['mode'] = 'coverletter'
+                st.rerun()
+            
+            if st.button("🎓 Masters Application Letter", use_container_width=True, key="home_masters_btn"):
+                st.session_state['mode'] = 'masters'
+                st.rerun()
+            
+            if st.button("📂 My Resumes Dashboard", use_container_width=True, key="home_dashboard_btn"):
+                st.session_state['mode'] = 'dashboard'
+                st.rerun()
         
-        if st.button("✉️ Create Cover Letter", use_container_width=True, key="home_coverletter_btn"):
-            st.session_state['mode'] = 'coverletter'
-            st.rerun()
-        
-        if st.button("📂 My Resumes Dashboard", use_container_width=True, key="home_dashboard_btn"):
-            st.session_state['mode'] = 'dashboard'
-            st.rerun()
+        st.markdown("<br>", unsafe_allow_html=True)
     
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Resume Upload Feature - Auto-Fill
-    st.markdown("---")
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.markdown("<h3 style='font-weight: 800; color: #2d3748; font-size: 1.75rem;'><strong>📤 Have an Existing Resume?</strong></h3>", unsafe_allow_html=True)
-        st.markdown("<p style='font-weight: 600; color: #4a5568; font-size: 1.05rem;'><strong>Upload your current resume (PDF, DOCX, TXT) and we'll auto-fill the details for you!</strong></p>", unsafe_allow_html=True)
+    # Resume Upload Feature - Auto-Fill (Only for signed-in users)
+    if st.session_state.user_authenticated:
+        st.markdown("---")
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st.markdown("<h3 style='font-weight: 800; color: #2d3748; font-size: 1.75rem;'><strong>📤 Have an Existing Resume?</strong></h3>", unsafe_allow_html=True)
+            st.markdown("<p style='font-weight: 600; color: #4a5568; font-size: 1.05rem;'><strong>Upload your current resume (PDF, DOCX, TXT) and we'll auto-fill the details for you!</strong></p>", unsafe_allow_html=True)
+            
+            uploaded_file = st.file_uploader(
+                "Upload your resume",
+                type=['pdf', 'docx', 'txt'],
+                key="home_resume_upload",
+                help="We'll extract your information and auto-fill the resume builder"
+            )
+            
+            if uploaded_file:
+                with st.spinner("🤖 Analyzing your resume with AI..."):
+                    try:
+                        # Parse the resume
+                        api_key = st.session_state.get('gemini_api_key')
+                        parsed_data = parse_uploaded_resume(uploaded_file, api_key=api_key)
+                        
+                        # Auto-fill session state
+                        parser = ResumeParser(api_key=api_key)
+                        parser.auto_fill_session_state(parsed_data, st.session_state)
+                        
+                        st.success("✅ Resume uploaded successfully! Your information has been auto-filled.")
+                        st.info("💡 Click 'Build Resume For Free' above to start editing with your pre-filled data.")
+                        
+                        # Show preview of extracted data
+                        with st.expander("📋 Preview Extracted Data"):
+                            if parsed_data.get('full_name'):
+                                st.write(f"**Name:** {parsed_data['full_name']}")
+                            if parsed_data.get('email'):
+                                st.write(f"**Email:** {parsed_data['email']}")
+                            if parsed_data.get('phone'):
+                                st.write(f"**Phone:** {parsed_data['phone']}")
+                            if parsed_data.get('summary'):
+                                st.write(f"**Summary:** {parsed_data['summary'][:200]}...")
+                            if parsed_data.get('tech_skills'):
+                                st.write(f"**Skills:** {parsed_data['tech_skills'][:200]}...")
+                            if parsed_data.get('work_entries'):
+                                st.write(f"**Work Experience:** {len(parsed_data['work_entries'])} positions found")
+                            if parsed_data.get('education_entries'):
+                                st.write(f"**Education:** {len(parsed_data['education_entries'])} entries found")
+                    
+                    except Exception as e:
+                        st.error(f"❌ Error parsing resume: {str(e)}")
+                        st.info("💡 Please try a different file format or build your resume from scratch.")
         
-        uploaded_file = st.file_uploader(
-            "Upload your resume",
-            type=['pdf', 'docx', 'txt'],
-            key="home_resume_upload",
-            help="We'll extract your information and auto-fill the resume builder"
-        )
-        
-        if uploaded_file:
-            with st.spinner("🤖 Analyzing your resume with AI..."):
-                try:
-                    # Parse the resume
-                    api_key = st.session_state.get('gemini_api_key')
-                    parsed_data = parse_uploaded_resume(uploaded_file, api_key=api_key)
-                    
-                    # Auto-fill session state
-                    parser = ResumeParser(api_key=api_key)
-                    parser.auto_fill_session_state(parsed_data, st.session_state)
-                    
-                    st.success("✅ Resume uploaded successfully! Your information has been auto-filled.")
-                    st.info("💡 Click 'Build Resume For Free' above to start editing with your pre-filled data.")
-                    
-                    # Show preview of extracted data
-                    with st.expander("📋 Preview Extracted Data"):
-                        if parsed_data.get('full_name'):
-                            st.write(f"**Name:** {parsed_data['full_name']}")
-                        if parsed_data.get('email'):
-                            st.write(f"**Email:** {parsed_data['email']}")
-                        if parsed_data.get('phone'):
-                            st.write(f"**Phone:** {parsed_data['phone']}")
-                        if parsed_data.get('summary'):
-                            st.write(f"**Summary:** {parsed_data['summary'][:200]}...")
-                        if parsed_data.get('tech_skills'):
-                            st.write(f"**Skills:** {parsed_data['tech_skills'][:200]}...")
-                        if parsed_data.get('work_entries'):
-                            st.write(f"**Work Experience:** {len(parsed_data['work_entries'])} positions found")
-                        if parsed_data.get('education_entries'):
-                            st.write(f"**Education:** {len(parsed_data['education_entries'])} entries found")
-                
-                except Exception as e:
-                    st.error(f"❌ Error parsing resume: {str(e)}")
-                    st.info("💡 Please try a different file format or build your resume from scratch.")
-    
-    st.markdown("---")
+        st.markdown("---")
     st.markdown("<br>", unsafe_allow_html=True)
     
     # Features Section
@@ -3025,9 +3023,115 @@ The letter should be compelling, specific, and highlight relevant experience. Ke
             st.session_state.mode = 'dashboard'
             st.rerun()
     with col3:
-        if st.button("📄 Build Resume", use_container_width=True, key="cl_resume_btn"):
+        if st.button("🎓 Masters SOP", use_container_width=True, key="cl_masters_btn"):
+            st.session_state.mode = 'masters'
+            st.rerun()
+
+elif st.session_state.mode == 'masters':
+    # MASTERS/SOP LETTER BUILDER
+    st.markdown("""
+    <div class='hero-section' style='padding: 2rem; margin-bottom: 1rem;'>
+        <h1 class='hero-title' style='font-size: 2rem;'>🎓 Statement of Purpose Builder</h1>
+        <p class='hero-subtitle' style='font-size: 1rem;'>Create compelling applications for graduate programs</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col_form, col_preview = st.columns([1, 1])
+    
+    with col_form:
+        st.markdown("### 📝 Application Details")
+        
+        # University and Program
+        col1, col2 = st.columns(2)
+        with col1:
+            university = st.text_input("University Name *", value=st.session_state.get('sop_university', ''), 
+                                   placeholder="e.g., Stanford University", key="sop_university_input")
+            st.session_state.sop_university = university
+        with col2:
+            program = st.text_input("Program *", value=st.session_state.get('sop_program', ''),
+                                    placeholder="e.g., MS in Computer Science", key="sop_program_input")
+            st.session_state.sop_program = program
+        
+        # Personal details
+        col1, col2 = st.columns(2)
+        with col1:
+            name = st.text_input("Your Name *", value=st.session_state.get('full_name', ''),
+                               placeholder="John Doe", key="sop_name_input")
+        with col2:
+            email = st.text_input("Email *", value=st.session_state.get('email', ''),
+                                placeholder="john@email.com", key="sop_email_input")
+        
+        st.markdown("---")
+        st.markdown("### ✍️ Edit Statement of Purpose")
+        sop_content = st.text_area(
+            "SOP Content",
+            value=st.session_state.get('sop_content', ''),
+            height=450,
+            placeholder="Write your statement of purpose here...",
+            key="sop_text_area"
+        )
+        st.session_state.sop_content = sop_content
+        
+        # Export options
+        st.markdown("### 💾 Save & Export")
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("📋 Copy Text", use_container_width=True):
+                st.success("✅ Select and copy the text above!")
+        with col2:
+            if sop_content:
+                st.download_button(
+                    "📥 Download TXT",
+                    sop_content,
+                    file_name=f"SOP_{program.replace(' ', '_') if program else 'Statement'}.txt",
+                    mime="text/plain",
+                    use_container_width=True
+                )
+    
+    with col_preview:
+        st.markdown("### 👁️ Live Preview")
+        
+        if sop_content:
+            # Display preview
+            preview_html = f"""
+<div style='background: white; padding: 2.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-family: "Times New Roman", serif; max-width: 800px; margin: 0 auto;'>
+    <div style='margin-bottom: 2rem; text-align: right;'>
+        <p style='margin: 0; font-weight: 600; color: #333;'>{name if name else '[Your Name]'}</p>
+        <p style='margin: 0.25rem 0 0 0; color: #666;'>{email if email else '[Your Email]'}</p>
+    </div>
+    <div style='margin-bottom: 2rem;'>
+        <p style='margin: 0; color: #666;'>{datetime.now().strftime('%B %d, %Y')}</p>
+    </div>
+    <div style='margin-bottom: 2rem;'>
+        <p style='margin: 0; font-weight: 600; color: #333;'>Admissions Committee</p>
+        <p style='margin: 0.25rem 0 0 0; color: #666;'>{program if program else '[Program]'}</p>
+        <p style='margin: 0.25rem 0 0 0; color: #666;'>{university if university else '[University]'}</p>
+    </div>
+    <div style='white-space: pre-wrap; line-height: 1.8; color: #333;'>
+{sop_content}
+    </div>
+</div>
+"""
+            st.components.v1.html(preview_html, height=650, scrolling=True)
+        else:
+            st.info("📝 Your statement of purpose preview will appear here")
+            st.caption("Fill in the details above to see preview")
+    
+    # Navigation
+    st.markdown("---")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("🏠 Home", use_container_width=True, key="sop_home_btn"):
+            st.session_state.mode = 'home'
+            st.rerun()
+    with col2:
+        if st.button("📄 Build Resume", use_container_width=True, key="sop_resume_btn"):
             st.session_state.mode = 'builder'
             st.session_state.step = 1
+            st.rerun()
+    with col3:
+        if st.button("✉️ Cover Letter", use_container_width=True, key="sop_cl_btn"):
+            st.session_state.mode = 'coverletter'
             st.rerun()
 
 elif st.session_state.mode == 'about':
