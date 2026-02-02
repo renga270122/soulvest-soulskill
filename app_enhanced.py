@@ -68,11 +68,41 @@ if 'show_auth_modal' not in st.session_state:
 # Apply custom theme
 apply_custom_theme()
 
-# Top Navigation Bar - HIGH VISIBILITY VERSION
+# Top Navigation Bar - RESPONSIVE VERSION
 st.markdown("""
-<div style='display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); border-radius: 0; margin: -1rem -1rem 1rem -1rem; box-shadow: 0 2px 8px rgba(30, 58, 138, 0.15);'>
-    <div style='font-size: 1.5rem; font-weight: 900; color: white; margin: 0;'>✨ SoulSkill</div>
-    <div style='display: flex; gap: 0.75rem; align-items: center;'>
+<style>
+@media (max-width: 768px) {
+    .navbar-container {
+        flex-direction: column !important;
+        padding: 1rem !important;
+        gap: 1rem !important;
+    }
+    .navbar-buttons {
+        flex-direction: column !important;
+        width: 100% !important;
+        gap: 0.5rem !important;
+    }
+    .navbar-buttons a {
+        width: 100% !important;
+        text-align: center !important;
+        padding: 0.6rem 1rem !important;
+        font-size: 0.95rem !important;
+    }
+    .navbar-logo {
+        text-align: center !important;
+        width: 100% !important;
+    }
+}
+@media (max-width: 480px) {
+    .navbar-buttons a {
+        padding: 0.5rem 0.8rem !important;
+        font-size: 0.9rem !important;
+    }
+}
+</style>
+<div class='navbar-container' style='display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); border-radius: 0; margin: -1rem -1rem 1rem -1rem; box-shadow: 0 2px 8px rgba(30, 58, 138, 0.15);'>
+    <div class='navbar-logo' style='font-size: 1.5rem; font-weight: 900; color: white; margin: 0;'>✨ SoulSkill</div>
+    <div class='navbar-buttons' style='display: flex; gap: 0.75rem; align-items: center;'>
         <a href='#' style='background: #ffffff; color: #1e3a8a; text-decoration: none; font-weight: 900; font-size: 1.05rem; padding: 0.65rem 1.5rem; border-radius: 8px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); display: inline-block; transition: all 0.2s;'>🚀 Build Resume</a>
         <a href='#' style='background: transparent; color: #ffffff; text-decoration: none; font-weight: 900; font-size: 1.05rem; padding: 0.65rem 1.5rem; border: 2px solid #ffffff; border-radius: 8px; cursor: pointer; display: inline-block; transition: all 0.2s;'>🔐 Sign In</a>
         <a href='#' style='background: transparent; color: #ffffff; text-decoration: none; font-weight: 900; font-size: 1.05rem; padding: 0.65rem 1.5rem; border: 2px solid #ffffff; border-radius: 8px; cursor: pointer; display: inline-block; transition: all 0.2s;'>✨ Create Account</a>
@@ -83,12 +113,31 @@ st.markdown("""
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# Enhanced CSS for ResumeGemini-like experience
+# Enhanced CSS for ResumeGemini-like experience with FULL RESPONSIVE SUPPORT
 st.markdown("""
 <style>
     .main {
         padding: 1rem;
         background: linear-gradient(135deg, #f5f7fb 0%, #e8eef7 100%);
+    }
+    
+    /* Responsive Typography */
+    @media (max-width: 768px) {
+        .main {
+            padding: 0.5rem;
+        }
+        h1 { font-size: 1.8rem !important; }
+        h2 { font-size: 1.5rem !important; }
+        h3 { font-size: 1.2rem !important; }
+        .hero-text { font-size: 2rem !important; }
+        .hero-subtext { font-size: 1.2rem !important; }
+    }
+    @media (max-width: 480px) {
+        h1 { font-size: 1.5rem !important; }
+        h2 { font-size: 1.3rem !important; }
+        h3 { font-size: 1.1rem !important; }
+        .hero-text { font-size: 1.6rem !important; }
+        .hero-subtext { font-size: 1rem !important; }
     }
     
     /* Primary Buttons */
@@ -123,6 +172,12 @@ st.markdown("""
         -webkit-appearance: none;
     }
     
+    /* Responsive columns */
+    @media (max-width: 768px) {
+        .row-widget.stHorizontal { flex-direction: column !important; }
+        .stColumn { width: 100% !important; margin-bottom: 1rem; }
+    }
+    
     /* Step Indicator */
     .step-indicator {
         display: flex;
@@ -133,6 +188,15 @@ st.markdown("""
         background: white;
         border-radius: 15px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    @media (max-width: 768px) {
+        .step-indicator {
+            flex-direction: column;
+            padding: 1rem;
+        }
+        .step-item:not(:last-child):after {
+            display: none;
+        }
     }
     .step-item {
         flex: 1;
@@ -1064,10 +1128,22 @@ if st.session_state.mode == 'home':
         # Center - Hero Title + Welcome Banner Combined
         with col_center:
             st.markdown("""
+            <style>
+            @media (max-width: 768px) {
+                .hero-welcome { font-size: 2rem !important; }
+                .hero-headline { font-size: 1.3rem !important; }
+                .hero-desc { font-size: 1rem !important; }
+            }
+            @media (max-width: 480px) {
+                .hero-welcome { font-size: 1.6rem !important; }
+                .hero-headline { font-size: 1.1rem !important; }
+                .hero-desc { font-size: 0.9rem !important; }
+            }
+            </style>
             <div style='text-align: center; padding: 2rem; background: linear-gradient(135deg, #eaf2ff 0%, #dfe9ff 50%, #f6f9ff 100%); border-radius: 18px; border: 1px solid rgba(37, 99, 235, 0.25); box-shadow: 0 14px 30px rgba(30, 58, 138, 0.18);'>
-                <div style='color: #000000; font-size: 2.5rem; font-weight: 900; margin-bottom: 0.8rem;'>Welcome to SoulSkill! 👋</div>
-                <div style='color: #000000; font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem;'>Build Your Resume in as little as 5 minutes</div>
-                <div style='color: #000000; font-size: 1.1rem; font-weight: 500;'>Build professional resumes, cover letters, and more with AI-powered assistance.</div>
+                <div class='hero-welcome' style='color: #000000; font-size: 2.5rem; font-weight: 900; margin-bottom: 0.8rem;'>Welcome to SoulSkill! 👋</div>
+                <div class='hero-headline' style='color: #000000; font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem;'>Build Your Resume in as little as 5 minutes</div>
+                <div class='hero-desc' style='color: #000000; font-size: 1.1rem; font-weight: 500;'>Build professional resumes, cover letters, and more with AI-powered assistance.</div>
             </div>
             """, unsafe_allow_html=True)
         
@@ -1171,10 +1247,22 @@ if st.session_state.mode == 'home':
             # Center - Hero Title + Welcome
             with col_center:
                 st.markdown(f"""
+                <style>
+                @media (max-width: 768px) {{
+                    .hero-welcome-auth {{ font-size: 1.9rem !important; }}
+                    .hero-headline-auth {{ font-size: 1.3rem !important; }}
+                    .hero-desc-auth {{ font-size: 1rem !important; }}
+                }}
+                @media (max-width: 480px) {{
+                    .hero-welcome-auth {{ font-size: 1.5rem !important; }}
+                    .hero-headline-auth {{ font-size: 1.1rem !important; }}
+                    .hero-desc-auth {{ font-size: 0.9rem !important; }}
+                }}
+                </style>
                 <div style='text-align: center; padding: 2rem; background: linear-gradient(135deg, #eaf2ff 0%, #dfe9ff 50%, #f6f9ff 100%); border-radius: 18px; border: 1px solid rgba(37, 99, 235, 0.25); box-shadow: 0 14px 30px rgba(30, 58, 138, 0.18);'>
-                    <div style='color: #000000; font-size: 2.3rem; font-weight: 900; margin-bottom: 0.8rem;'>👋 Welcome back, {st.session_state.get('user_name', 'User')}!</div>
-                    <div style='color: #000000; font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem;'>Build Your Resume in as little as 5 minutes</div>
-                    <div style='color: #000000; font-size: 1.1rem; font-weight: 500;'>Ready to create amazing resumes?</div>
+                    <div class='hero-welcome-auth' style='color: #000000; font-size: 2.3rem; font-weight: 900; margin-bottom: 0.8rem;'>👋 Welcome back, {st.session_state.get('user_name', 'User')}!</div>
+                    <div class='hero-headline-auth' style='color: #000000; font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem;'>Build Your Resume in as little as 5 minutes</div>
+                    <div class='hero-desc-auth' style='color: #000000; font-size: 1.1rem; font-weight: 500;'>Ready to create amazing resumes?</div>
                 </div>
                 """, unsafe_allow_html=True)
             
