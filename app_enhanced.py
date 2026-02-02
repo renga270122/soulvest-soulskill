@@ -1307,38 +1307,6 @@ if st.session_state.mode == 'home':
                 <p style='color:#4a5568; font-size:0.8rem; margin:0;'>ATS‑ready templates</p>
             </div>
             """, unsafe_allow_html=True)
-
-            cta_left, cta_center, cta_right = st.columns([1, 2, 1])
-            with cta_center:
-                if st.button("🚀 Build Your Resume For Free", use_container_width=True, key="hero_build_free_auth", type="primary"):
-                    st.session_state['mode'] = 'builder'
-                    st.session_state['step'] = 1
-                    st.rerun()
-                st.markdown("<p style='text-align:center; color:#4a5568; font-weight:600; font-size:0.85rem; margin-top:0.35rem;'>No credit card required</p>", unsafe_allow_html=True)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-    
-    # CTA Buttons (Only for signed-in users)
-    if st.session_state.user_authenticated:
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            # Use unique keys and direct state changes
-            if st.button("🚀 Build Resume For Free", use_container_width=True, type="primary", key="home_build_btn"):
-                st.session_state['mode'] = 'builder'
-                st.session_state['step'] = 1
-                st.rerun()
-            
-            if st.button("✉️ Create Cover Letter", use_container_width=True, key="home_coverletter_btn"):
-                st.session_state['mode'] = 'coverletter'
-                st.rerun()
-            
-            if st.button("🎓 Masters Application Letter", use_container_width=True, key="home_masters_btn"):
-                st.session_state['mode'] = 'masters'
-                st.rerun()
-            
-            if st.button("📂 My Resumes Dashboard", use_container_width=True, key="home_dashboard_btn"):
-                st.session_state['mode'] = 'dashboard'
-                st.rerun()
         
         st.markdown("<br>", unsafe_allow_html=True)
     
@@ -1896,17 +1864,6 @@ elif st.session_state.mode == 'builder':
                 job_title = st.text_input("Target Job Title *", value=job_title_value, 
                                          placeholder="e.g., Software Engineer (Type for suggestions...)", 
                                          key="jobtitle_step2")
-                
-                # Show popular suggestions
-                if not job_title_value:
-                    with st.expander("💡 Popular Job Titles", expanded=False):
-                        cols = st.columns(3)
-                        for idx, title in enumerate(JOB_TITLES[:12]):
-                            with cols[idx % 3]:
-                                if st.button(title, key=f"jobtitle_suggest_{idx}", use_container_width=True):
-                                    st.session_state.job_title_target = title
-                                    st.rerun()
-                
                 st.session_state.job_title_target = job_title
             with col2:
                 ind_idx = 0
@@ -1914,6 +1871,16 @@ elif st.session_state.mode == 'builder':
                     ind_idx = INDUSTRY_OPTIONS.index(st.session_state.get('industry')) + 1
                 industry = st.selectbox("Industry *", options=[""] + INDUSTRY_OPTIONS, index=ind_idx, key="industry_step2")
                 st.session_state.industry = industry
+            
+            # Show popular suggestions outside column context
+            if not job_title_value:
+                with st.expander("💡 Popular Job Titles", expanded=False):
+                    cols = st.columns(3)
+                    for idx, title in enumerate(JOB_TITLES[:12]):
+                        with cols[idx % 3]:
+                            if st.button(title, key=f"jobtitle_suggest_{idx}", use_container_width=True):
+                                st.session_state.job_title_target = title
+                                st.rerun()
             
             # Professional Summary with AI and Examples
             st.markdown("### 📝 Professional Summary")
