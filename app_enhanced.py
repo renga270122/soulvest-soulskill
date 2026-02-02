@@ -1919,7 +1919,61 @@ elif st.session_state.mode == 'builder':
                 st.session_state.show_photo = show_photo
                 
                 if show_photo:
-                    st.info("💡 **Best Practice**: Use a professional LinkedIn photo instead. Most recruiters check LinkedIn anyway, keeping your resume ATS-friendly.")
+                    # Show detailed tips when photo is enabled
+                    st.warning("⚠️ **Photo Added - Important Tips:**")
+                    
+                    with st.expander("📸 **Professional Photo Guidelines** (Click to expand)", expanded=True):
+                        st.markdown("""
+                        **✅ DO:**
+                        - Use a **professional headshot** with good lighting
+                        - **Plain background** (solid color, preferably neutral)
+                        - **Business attire** appropriate for your industry
+                        - **Recent photo** (taken within last 6 months)
+                        - **High resolution** (at least 300 DPI for print)
+                        - **Proper framing**: Head and shoulders, facing camera
+                        - **Neutral expression**: Friendly, confident smile
+                        - **Passport-size dimensions** if required (Germany/France: 2x2 inches)
+                        
+                        **❌ DON'T:**
+                        - Selfies or casual photos
+                        - Sunglasses, hats, or distracting accessories
+                        - Group photos or cropped party pictures
+                        - Filters, heavy editing, or old photos
+                        - Dark, blurry, or low-quality images
+                        - Inappropriate backgrounds (bedroom, bathroom, vacation)
+                        - Full body shots or posed fashion photos
+                        
+                        **⚠️ ATS Warning:**
+                        - **75% of resumes** with photos are auto-rejected by ATS in US/UK/India
+                        - Photos can **confuse parsing algorithms** and cause formatting errors
+                        - May introduce **unconscious bias** based on appearance, age, gender, or ethnicity
+                        
+                        **💡 Better Alternative:**
+                        - Keep your resume photo-free for maximum ATS compatibility
+                        - Use a **professional LinkedIn profile picture** instead
+                        - Recruiters check LinkedIn anyway - this keeps your resume clean and ATS-friendly
+                        - Add your LinkedIn URL to the contact section for easy access
+                        
+                        **🌍 Regional Guidelines:**
+                        - **🇮🇳 India**: Photos strongly discouraged (ATS standard)
+                        - **🇺🇸 USA**: Almost never include photos (illegal to request)
+                        - **🇬🇧 UK**: Photos discouraged (bias concerns)
+                        - **🇨🇦 Canada**: Not recommended (similar to US)
+                        - **🇦🇺 Australia**: Generally avoided (ATS standard)
+                        - **🇩🇪 Germany**: Often expected (but becoming less common)
+                        - **🇫🇷 France**: Sometimes included (but not mandatory)
+                        - **🇸🇬 Singapore**: Depends on industry (conservative approach)
+                        - **🇦🇪 UAE**: Mixed, but trending toward no photos
+                        
+                        **🎯 When Photos ARE Acceptable:**
+                        - Acting, modeling, or entertainment industry
+                        - Media, TV, or on-camera roles
+                        - Countries where it's explicitly expected (Germany, France)
+                        - Personal branding for entrepreneurs/influencers
+                        - Creative portfolios alongside traditional resume
+                        """)
+                    
+                    st.info("💡 **Recommendation**: Consider removing the photo for better ATS results, especially if applying in US, UK, India, Canada, or Australia.")
                 
                 show_icons = st.checkbox("Show Icons", value=st.session_state.get('show_icons', True), key="show_icons_opt")
                 st.session_state.show_icons = show_icons
