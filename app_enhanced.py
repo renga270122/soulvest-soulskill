@@ -1278,15 +1278,10 @@ if st.session_state.mode == 'home':
                 <div style='color: #000000; font-size: 1.1rem; font-weight: 500;'>Continue where you left off or start fresh.</div>
             </div>
             """, unsafe_allow_html=True)
-                        <div style='height: 6px; background: #e6edff; border-radius: 999px; overflow: hidden; margin-bottom: 0.35rem;'>
-                            <div style='width: 84%; height: 100%; background: linear-gradient(90deg, #22c55e, #16a34a);'></div>
-                        </div>
-                        <p style='color: #4a5568; font-size: 0.72rem; font-weight: 700; margin: 0;'>Formatting Score: 84%</p>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-
-            # Quick steps to build trust
+        
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        
+        # Quick steps to build trust
             step1, step2, step3 = st.columns(3)
             with step1:
                 st.markdown("""
