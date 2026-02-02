@@ -1237,51 +1237,18 @@ if st.session_state.mode == 'home':
             </div>
             """, unsafe_allow_html=True)
 
-        # Quick steps to build trust
-        step1, step2, step3 = st.columns(3)
-        with step1:
-            st.markdown("""
-            <div style='text-align: center; padding: 1rem; background: #ffffff; border-radius: 14px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);'>
-                <div style='font-size: 1.4rem;'>📝</div>
-                <p style='color:#1e3a8a; font-weight:800; margin:0.35rem 0 0.2rem 0;'>Fill Details</p>
-                <p style='color:#4a5568; font-size:0.8rem; margin:0;'>Guided sections in minutes</p>
-            </div>
-            """, unsafe_allow_html=True)
-        with step2:
-            st.markdown("""
-            <div style='text-align: center; padding: 1rem; background: #ffffff; border-radius: 14px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);'>
-                <div style='font-size: 1.4rem;'>✨</div>
-                <p style='color:#1e3a8a; font-weight:800; margin:0.35rem 0 0.2rem 0;'>AI Suggestions</p>
-                <p style='color:#4a5568; font-size:0.8rem; margin:0;'>Instant wording improvements</p>
-            </div>
-            """, unsafe_allow_html=True)
-        with step3:
-            st.markdown("""
-            <div style='text-align: center; padding: 1rem; background: #ffffff; border-radius: 14px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);'>
-                <div style='font-size: 1.4rem;'>📄</div>
-                <p style='color:#1e3a8a; font-weight:800; margin:0.35rem 0 0.2rem 0;'>Download PDF</p>
-                <p style='color:#4a5568; font-size:0.8rem; margin:0;'>ATS‑ready templates</p>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        # Auth buttons for guests
-        if not st.session_state.user_authenticated:
-            # Guest view - show regular welcome message (already shown above)
-            pass
-        else:
-            # Logged-in users - show personalized welcome WITHOUT duplicate preview cards
+        # Welcome message - personalized for logged-in users
+        if st.session_state.user_authenticated:
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown(f"""
-            <div style='text-align: center; padding: 2rem; background: linear-gradient(135deg, #eaf2ff 0%, #dfe9ff 50%, #f6f9ff 100%); border-radius: 18px; border: 1px solid rgba(37, 99, 235, 0.25); box-shadow: 0 14px 30px rgba(30, 58, 138, 0.18); max-width: 800px; margin: 0 auto;'>
-                <div style='color: #000000; font-size: 2.3rem; font-weight: 900; margin-bottom: 0.8rem;'>👋 Welcome back, {st.session_state.get('user_name', 'User')}!</div>
-                <div style='color: #000000; font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem;'>Ready to build your next amazing resume?</div>
-                <div style='color: #000000; font-size: 1.1rem; font-weight: 500;'>Continue where you left off or start fresh.</div>
+            <div style='text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #eaf2ff 0%, #dfe9ff 50%, #f6f9ff 100%); border-radius: 18px; border: 1px solid rgba(37, 99, 235, 0.25); box-shadow: 0 12px 24px rgba(30, 58, 138, 0.15); max-width: 700px; margin: 0 auto;'>
+                <div style='color: #000000; font-size: 2rem; font-weight: 900; margin-bottom: 0.6rem;'>👋 Welcome back, {st.session_state.get('user_name', 'User')}!</div>
+                <div style='color: #000000; font-size: 1.3rem; font-weight: 600;'>Ready to build your next amazing resume?</div>
             </div>
             """, unsafe_allow_html=True)
-        
-        st.markdown("<br><br>", unsafe_allow_html=True)
-        
+
         # Quick steps to build trust
+        st.markdown("<br>", unsafe_allow_html=True)
         step1, step2, step3 = st.columns(3)
         with step1:
             st.markdown("""
