@@ -1209,7 +1209,7 @@ if st.session_state.mode == 'home':
             # Main CTA Button
             st.markdown("""
             <div style='text-align: center; margin-top: 1.2rem;'>
-                <button onclick="window.location.href='#'" style='padding: 0.85rem 2rem; background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); color: white; border: none; border-radius: 10px; font-size: 1.05rem; font-weight: 800; cursor: pointer; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3); transition: all 0.3s ease;'>🚀 Build Your Resume For Free</button>
+                <button onclick="window.location.href='#'" style='padding: 0.85rem 2rem; background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); color: #000000; border: none; border-radius: 10px; font-size: 1.05rem; font-weight: 900; cursor: pointer; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3); transition: all 0.3s ease;'>🚀 Build Your Resume For Free</button>
                 <p style='text-align:center; color:#4a5568; font-weight:600; font-size:0.85rem; margin-top:0.5rem;'>No credit card required</p>
             </div>
             """, unsafe_allow_html=True)
@@ -1219,7 +1219,7 @@ if st.session_state.mode == 'home':
             with col_a:
                 st.markdown("""
                 <div style='text-align: center;'>
-                    <button onclick="window.location.href='#'" style='padding: 0.65rem 1.5rem; background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; width: 100%; box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);'>🔐 Sign In</button>
+                    <button onclick="window.location.href='#'" style='padding: 0.65rem 1.5rem; background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); color: #000000; border: none; border-radius: 8px; font-size: 1rem; font-weight: 900; cursor: pointer; width: 100%; box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);'>🔐 Sign In</button>
                 </div>
                 """, unsafe_allow_html=True)
             with col_b:
