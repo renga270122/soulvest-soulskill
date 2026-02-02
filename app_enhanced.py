@@ -1064,10 +1064,10 @@ if st.session_state.mode == 'home':
         # Center - Hero Title + Welcome Banner Combined
         with col_center:
             st.markdown("""
-            <div style='text-align: center; padding: 1.6rem 1.6rem 2.1rem 1.6rem; background: linear-gradient(135deg, #eaf2ff 0%, #dfe9ff 50%, #f6f9ff 100%); border-radius: 18px; border: 1px solid rgba(37, 99, 235, 0.25); box-shadow: 0 14px 30px rgba(30, 58, 138, 0.18);'>
-                <p style='color: #1e3a8a; font-size: 2.4rem; font-weight: 900; margin: 0 0 0.25rem 0;'>Welcome to SoulSkill! 👋</p>
-                <h1 style='color: #000000; font-size: 2.8rem; font-weight: 900; margin: 0 0 0.75rem 0; letter-spacing: 0.2px;'>Build Your Resume in as little as 5 minutes</h1>
-                <p style='color: #1e3a8a; font-size: 1.15rem; font-weight: 700; margin: 0; line-height: 1.55;'>Build professional resumes, cover letters, and more with AI-powered assistance.</p>
+            <div style='text-align: center; padding: 2rem; background: linear-gradient(135deg, #eaf2ff 0%, #dfe9ff 50%, #f6f9ff 100%); border-radius: 18px; border: 1px solid rgba(37, 99, 235, 0.25); box-shadow: 0 14px 30px rgba(30, 58, 138, 0.18);'>
+                <div style='color: #000000; font-size: 2.5rem; font-weight: 900; margin-bottom: 0.8rem;'>Welcome to SoulSkill! 👋</div>
+                <div style='color: #000000; font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem;'>Build Your Resume in as little as 5 minutes</div>
+                <div style='color: #000000; font-size: 1.1rem; font-weight: 500;'>Build professional resumes, cover letters, and more with AI-powered assistance.</div>
             </div>
             """, unsafe_allow_html=True)
         
@@ -1171,10 +1171,10 @@ if st.session_state.mode == 'home':
             # Center - Hero Title + Welcome
             with col_center:
                 st.markdown(f"""
-                <div style='text-align: center; padding: 1.6rem 1.6rem 2.1rem 1.6rem; background: linear-gradient(135deg, #eaf2ff 0%, #dfe9ff 50%, #f6f9ff 100%); border-radius: 18px; border: 1px solid rgba(37, 99, 235, 0.25); box-shadow: 0 14px 30px rgba(30, 58, 138, 0.18);'>
-                    <h2 style='color: #1e3a8a; font-size: 2.2rem; font-weight: 900; margin: 0 0 0.2rem 0;'>👋 Welcome back, {st.session_state.get('user_name', 'User')}!</h2>
-                    <h1 style='color: #000000; font-size: 2.8rem; font-weight: 900; margin: 0 0 0.75rem 0; letter-spacing: 0.2px;'>Build Your Resume in as little as 5 minutes</h1>
-                    <p style='color: #1e3a8a; font-size: 1.15rem; font-weight: 700; margin: 0; line-height: 1.55;'>Ready to create amazing resumes?</p>
+                <div style='text-align: center; padding: 2rem; background: linear-gradient(135deg, #eaf2ff 0%, #dfe9ff 50%, #f6f9ff 100%); border-radius: 18px; border: 1px solid rgba(37, 99, 235, 0.25); box-shadow: 0 14px 30px rgba(30, 58, 138, 0.18);'>
+                    <div style='color: #000000; font-size: 2.3rem; font-weight: 900; margin-bottom: 0.8rem;'>👋 Welcome back, {st.session_state.get('user_name', 'User')}!</div>
+                    <div style='color: #000000; font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem;'>Build Your Resume in as little as 5 minutes</div>
+                    <div style='color: #000000; font-size: 1.1rem; font-weight: 500;'>Ready to create amazing resumes?</div>
                 </div>
                 """, unsafe_allow_html=True)
             
