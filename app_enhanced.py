@@ -1282,31 +1282,31 @@ if st.session_state.mode == 'home':
         st.markdown("<br><br>", unsafe_allow_html=True)
         
         # Quick steps to build trust
-            step1, step2, step3 = st.columns(3)
-            with step1:
-                st.markdown("""
-                <div style='text-align: center; padding: 1rem; background: #ffffff; border-radius: 14px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);'>
-                    <div style='font-size: 1.4rem;'>📝</div>
-                    <p style='color:#1e3a8a; font-weight:800; margin:0.35rem 0 0.2rem 0;'>Fill Details</p>
-                    <p style='color:#4a5568; font-size:0.8rem; margin:0;'>Guided sections in minutes</p>
-                </div>
-                """, unsafe_allow_html=True)
-            with step2:
-                st.markdown("""
-                <div style='text-align: center; padding: 1rem; background: #ffffff; border-radius: 14px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);'>
-                    <div style='font-size: 1.4rem;'>✨</div>
-                    <p style='color:#1e3a8a; font-weight:800; margin:0.35rem 0 0.2rem 0;'>AI Suggestions</p>
-                    <p style='color:#4a5568; font-size:0.8rem; margin:0;'>Instant wording improvements</p>
-                </div>
-                """, unsafe_allow_html=True)
-            with step3:
-                st.markdown("""
-                <div style='text-align: center; padding: 1rem; background: #ffffff; border-radius: 14px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);'>
-                    <div style='font-size: 1.4rem;'>📄</div>
-                    <p style='color:#1e3a8a; font-weight:800; margin:0.35rem 0 0.2rem 0;'>Download PDF</p>
-                    <p style='color:#4a5568; font-size:0.8rem; margin:0;'>ATS‑ready templates</p>
-                </div>
-                """, unsafe_allow_html=True)
+        step1, step2, step3 = st.columns(3)
+        with step1:
+            st.markdown("""
+            <div style='text-align: center; padding: 1rem; background: #ffffff; border-radius: 14px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);'>
+                <div style='font-size: 1.4rem;'>📝</div>
+                <p style='color:#1e3a8a; font-weight:800; margin:0.35rem 0 0.2rem 0;'>Fill Details</p>
+                <p style='color:#4a5568; font-size:0.8rem; margin:0;'>Guided sections in minutes</p>
+            </div>
+            """, unsafe_allow_html=True)
+        with step2:
+            st.markdown("""
+            <div style='text-align: center; padding: 1rem; background: #ffffff; border-radius: 14px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);'>
+                <div style='font-size: 1.4rem;'>✨</div>
+                <p style='color:#1e3a8a; font-weight:800; margin:0.35rem 0 0.2rem 0;'>AI Suggestions</p>
+                <p style='color:#4a5568; font-size:0.8rem; margin:0;'>Instant wording improvements</p>
+            </div>
+            """, unsafe_allow_html=True)
+        with step3:
+            st.markdown("""
+            <div style='text-align: center; padding: 1rem; background: #ffffff; border-radius: 14px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);'>
+                <div style='font-size: 1.4rem;'>📄</div>
+                <p style='color:#1e3a8a; font-weight:800; margin:0.35rem 0 0.2rem 0;'>Download PDF</p>
+                <p style='color:#4a5568; font-size:0.8rem; margin:0;'>ATS‑ready templates</p>
+            </div>
+            """, unsafe_allow_html=True)
 
             cta_left, cta_center, cta_right = st.columns([1, 2, 1])
             with cta_center:
