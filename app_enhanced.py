@@ -100,8 +100,8 @@ st.markdown("""
     .navbar-link {
         color: #ffffff;
         text-decoration: none;
-        font-weight: 700;
-        font-size: 0.95rem;
+        font-weight: 900;
+        font-size: 1rem;
         padding: 0.35rem 0.6rem;
         border-radius: 8px;
         transition: all 0.2s ease;
