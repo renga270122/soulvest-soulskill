@@ -1,0 +1,133 @@
+# GitHub Actions CI/CD Pipeline
+name: Test SoulSkill Resume Builder
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest pytest-cov
+        pip install -r requirements.txt
+    
+    - name: Run unit tests
+      run: |
+        pytest test_app.py -v --cov=. --cov-report=xml --cov-report=term
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false
+
+  e2e-tests:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest playwright
+        playwright install chromium
+    
+    - name: Run E2E tests
+      run: |
+        pytest test_e2e.py -v --headed=false
+      env:
+        PLAYWRIGHT_BROWSERS_PATH: 0
+    
+    - name: Upload test screenshots on failure
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: playwright-screenshots
+        path: test-results/
+
+  live-app-check:
+    name: Live App Health Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Check if app is accessible
+      run: |
+        response=$(curl -s -o /dev/null -w "%{http_code}" https://soulvest-soulskill-rwwrmxhx5mmuak37j9ap6z.streamlit.app/)
+        if [ $response -eq 200 ]; then
+          echo "✅ App is live and accessible"
+        else
+          echo "❌ App returned status code: $response"
+          exit 1
+        fi
+    
+    - name: Check response time
+      run: |
+        start=$(date +%s)
+        curl -s https://soulvest-soulskill-rwwrmxhx5mmuak37j9ap6z.streamlit.app/ > /dev/null
+        end=$(date +%s)
+        duration=$((end - start))
+        
+        echo "Response time: ${duration}s"
+        if [ $duration -gt 15 ]; then
+          echo "⚠️  Warning: App is slow (${duration}s > 15s)"
+        else
+          echo "✅ Response time is good"
+        fi
+
+  lighthouse-audit:
+    name: Lighthouse Performance Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Run Lighthouse CI
+      uses: treosh/lighthouse-ci-action@v9
+      with:
+        urls: |
+          https://soulvest-soulskill-rwwrmxhx5mmuak37j9ap6z.streamlit.app/
+        uploadArtifacts: true
+        temporaryPublicStorage: true
+
+  notify:
+    name: Notify on Test Failure
+    needs: [unit-tests, e2e-tests, live-app-check]
+    if: failure()
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Send notification
+      run: |
+        echo "❌ Tests failed! Check the Actions tab for details."
+        # Add Slack/Discord webhook here if needed
