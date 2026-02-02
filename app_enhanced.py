@@ -1087,29 +1087,27 @@ if st.session_state.mode == 'home':
         
         # Welcome Message for Guests
         if not st.session_state.user_authenticated:
-            col1, col2, col3 = st.columns([1, 3, 1])
-            with col2:
-                st.markdown("""
-                <div style='text-align: center; padding: 1.5rem 1rem; background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%); border-radius: 15px; border-left: 5px solid #2563eb; margin-bottom: 1.5rem;'>
-                    <h2 style='color: #1e3a8a; font-size: 1.5rem; font-weight: 800; margin: 0 0 0.25rem 0;'>Welcome to SoulSkill! 👋</h2>
-                    <p style='color: #4a5568; font-size: 0.95rem; font-weight: 600; margin: 0.25rem 0; line-height: 1.5;'>
-                        Build professional resumes, cover letters, and more with AI-powered assistance.
-                    </p>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                col_a, col_b, col_c = st.columns(3)
-                with col_a:
-                    if st.button("🔐 Sign In", use_container_width=True, key="hero_signin", type="secondary"):
-                        st.session_state.show_auth_modal = True
-                        st.rerun()
-                with col_b:
-                    if st.button("✨ Create Account", use_container_width=True, key="hero_signup", type="primary"):
-                        st.session_state.show_auth_modal = True
-                        st.rerun()
-                with col_c:
-                    if st.button("👤 Continue as Guest", use_container_width=True, key="hero_guest"):
-                        st.info("✅ Great! You can explore as a guest and sign up later.")
+            st.markdown("""
+            <div style='text-align: center; padding: 1.5rem 1rem; background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%); border-radius: 15px; border-left: 5px solid #2563eb; margin: 1rem auto; max-width: 600px;'>
+                <h2 style='color: #1e3a8a; font-size: 1.5rem; font-weight: 800; margin: 0 0 0.25rem 0;'>Welcome to SoulSkill! 👋</h2>
+                <p style='color: #4a5568; font-size: 0.95rem; font-weight: 600; margin: 0.25rem 0; line-height: 1.5;'>
+                    Build professional resumes, cover letters, and more with AI-powered assistance.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            col_a, col_b, col_c = st.columns(3)
+            with col_a:
+                if st.button("🔐 Sign In", use_container_width=True, key="hero_signin", type="secondary"):
+                    st.session_state.show_auth_modal = True
+                    st.rerun()
+            with col_b:
+                if st.button("✨ Create Account", use_container_width=True, key="hero_signup", type="primary"):
+                    st.session_state.show_auth_modal = True
+                    st.rerun()
+            with col_c:
+                if st.button("👤 Continue as Guest", use_container_width=True, key="hero_guest"):
+                    st.info("✅ Great! You can explore as a guest and sign up later.")
             
             # Features text below welcome banner in a box
             st.markdown("""
@@ -1121,10 +1119,12 @@ if st.session_state.mode == 'home':
             """, unsafe_allow_html=True)
         else:
             # Welcome back message for logged-in users
-            col1, col2, col3 = st.columns([1, 3, 1])
-            with col2:
-                user_name = st.session_state.get('user_name', 'User')
-                st.success(f"👋 **Welcome back, {user_name}!** Ready to create amazing resumes?")
+            st.markdown(f"""
+            <div style='text-align: center; padding: 1.5rem 1rem; margin: 1rem auto; max-width: 600px;'>
+                <h2 style='color: #1e3a8a; font-size: 1.5rem; font-weight: 800; margin: 0;'>👋 Welcome back, {st.session_state.get('user_name', 'User')}!</h2>
+                <p style='color: #4a5568; font-size: 0.95rem; font-weight: 600; margin: 0.5rem 0 0 0;'>Ready to create amazing resumes?</p>
+            </div>
+            """, unsafe_allow_html=True)
             
             # Features text below welcome banner in a box
             st.markdown("""
