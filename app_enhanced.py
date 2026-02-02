@@ -142,18 +142,19 @@ with col_nav_mid:
 
 with col_nav_right:
     if not st.session_state.user_authenticated:
-        col_signin, col_signup = st.columns(2, gap="small")
-        with col_signin:
+        # Create a layout for Sign In and Sign Up buttons side by side
+        nav_col1, nav_col2 = st.columns(2, gap="small")
+        with nav_col1:
             if st.button("Sign In", use_container_width=True, key="nav_signin", type="secondary"):
                 st.session_state.show_auth_modal = True
                 st.rerun()
-        with col_signup:
+        with nav_col2:
             if st.button("Sign Up", use_container_width=True, key="nav_signup", type="primary"):
                 st.session_state.show_auth_modal = True
                 st.rerun()
     else:
         user_name = st.session_state.get('user_name', 'User')
-        st.markdown(f"<div style='text-align: right;'><p style='margin: 0; font-weight: 600; color: #2563eb;'>👤 {user_name}</p></div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='text-align: right; padding-top: 0.5rem;'><p style='margin: 0; font-weight: 600; color: #2563eb; font-size: 0.95rem;'>👤 {user_name}</p></div>", unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
