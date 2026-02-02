@@ -3358,8 +3358,8 @@ elif st.session_state.mode == 'about':
     # About Page
     st.markdown("""
     <div style='text-align: center; padding: 2rem 0;'>
-        <div style='font-size: 4rem; margin-bottom: 1rem;'>🚀</div>
-        <h1 style='font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>
+        <div style='font-size: 4rem; margin-bottom: 0.5rem; line-height: 1;'>🚀</div>
+        <h1 style='font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-top: 0;'>
             About SoulSkill
         </h1>
         <p style='font-size: 1.3rem; color: #4a5568; font-weight: 600; margin-top: 1rem;'>
