@@ -1082,7 +1082,6 @@ if st.session_state.mode == 'home':
         st.markdown("""
         <div class='hero-section'>
             <h1 class='hero-title' style='font-weight: 900;'><strong>✨ Build Your Resume in 5 Minutes</strong></h1>
-            <p class='hero-subtitle' style='font-weight: 700; font-size: 1.3rem;'><strong>AI-Powered • ATS-Optimized • 20+ Professional Templates</strong></p>
         </div>
         """, unsafe_allow_html=True)
         
@@ -1091,11 +1090,10 @@ if st.session_state.mode == 'home':
             col1, col2, col3 = st.columns([1, 3, 1])
             with col2:
                 st.markdown("""
-                <div style='text-align: center; padding: 2rem 1rem; background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%); border-radius: 15px; border-left: 5px solid #2563eb; margin-bottom: 2rem;'>
-                    <h2 style='color: #1e3a8a; font-size: 2rem; font-weight: 800; margin: 0 0 0.5rem 0;'>Welcome to SoulSkill! 👋</h2>
-                    <p style='color: #4a5568; font-size: 1.1rem; font-weight: 600; margin: 0.5rem 0; line-height: 1.6;'>
-                        Build professional resumes, cover letters, and more with AI-powered assistance. 
-                        <br><strong>Join thousands of job seekers creating winning resumes.</strong>
+                <div style='text-align: center; padding: 1.5rem 1rem; background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%); border-radius: 15px; border-left: 5px solid #2563eb; margin-bottom: 1.5rem;'>
+                    <h2 style='color: #1e3a8a; font-size: 1.5rem; font-weight: 800; margin: 0 0 0.25rem 0;'>Welcome to SoulSkill! 👋</h2>
+                    <p style='color: #4a5568; font-size: 0.95rem; font-weight: 600; margin: 0.25rem 0; line-height: 1.5;'>
+                        Build professional resumes, cover letters, and more with AI-powered assistance.
                     </p>
                 </div>
                 """, unsafe_allow_html=True)
@@ -1112,12 +1110,26 @@ if st.session_state.mode == 'home':
                 with col_c:
                     if st.button("👤 Continue as Guest", use_container_width=True, key="hero_guest"):
                         st.info("✅ Great! You can explore as a guest and sign up later.")
+            
+            # Features text below welcome banner
+            st.markdown("""
+            <p style='text-align: center; color: #2563eb; font-size: 0.95rem; font-weight: 600; margin-top: 1.5rem;'>
+                <strong>AI-Powered • ATS-Optimized • 20+ Professional Templates</strong>
+            </p>
+            """, unsafe_allow_html=True)
         else:
             # Welcome back message for logged-in users
             col1, col2, col3 = st.columns([1, 3, 1])
             with col2:
                 user_name = st.session_state.get('user_name', 'User')
                 st.success(f"👋 **Welcome back, {user_name}!** Ready to create amazing resumes?")
+            
+            # Features text below welcome banner
+            st.markdown("""
+            <p style='text-align: center; color: #2563eb; font-size: 0.95rem; font-weight: 600; margin-top: 1rem;'>
+                <strong>AI-Powered • ATS-Optimized • 20+ Professional Templates</strong>
+            </p>
+            """, unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
     
