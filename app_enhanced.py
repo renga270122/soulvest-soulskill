@@ -24,6 +24,9 @@ from ats_optimizer_pro import EnterpriseATSOptimizer
 from premium_templates import PREMIUM_TEMPLATES, get_template_recommendations
 from export_manager import ExportManager
 from resume_generator import generate_resume_html
+from resume_parser import ResumeParser, parse_uploaded_resume
+from sidebar_content import render_enhanced_sidebar
+from theme_config import apply_custom_theme
 from advanced_features import (
     ResumeImporter, QRCodeGenerator, SpellChecker, 
     ResumeVersionControl, EmailTemplates, KeywordHighlighter, 
@@ -48,6 +51,9 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Apply custom theme
+apply_custom_theme()
 
 # Enhanced CSS for ResumeGemini-like experience
 st.markdown("""
@@ -449,30 +455,19 @@ def init_session_state():
 
 init_session_state()
 
-# Sidebar - Universal Navigation
+# Enhanced Sidebar with valuable content
+render_enhanced_sidebar()
+
+# Additional sidebar - Universal Navigation
 with st.sidebar:
-    st.markdown("""
-    <div style='text-align: center; padding: 1rem 0;'>
-        <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                    color: white; padding: 1.5rem; border-radius: 15px; margin-bottom: 1rem;
-                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);'>
-            <h1 style='margin: 0; font-size: 2rem;'>✨</h1>
-            <h2 style='margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: 700;'>SOULVEST</h2>
-            <p style='margin: 0.3rem 0 0 0; font-size: 0.8rem; opacity: 0.9;'>AI Resume Builder</p>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("---")
     
     # Auto-save status
     if st.session_state.mode in ['builder', 'coverletter']:
-        st.markdown("---")
         st.success("💾 Auto-Save Active")
         st.caption("✓ All changes saved automatically")
-        st.caption("✓ Works on PC, Mobile & Tablet")
-        st.caption("✓ No Ctrl+Enter needed")
     
     # Quick navigation
-    st.markdown("---")
     st.markdown("### 🚀 Quick Navigation")
     
     if st.button("🏠 Home", use_container_width=True, key="sidebar_home_btn"):
@@ -1012,6 +1007,58 @@ if st.session_state.mode == 'home':
             st.session_state['mode'] = 'dashboard'
             st.rerun()
     
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Resume Upload Feature - Auto-Fill
+    st.markdown("---")
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown("### 📤 Have an Existing Resume?")
+        st.caption("Upload your current resume (PDF, DOCX, TXT) and we'll auto-fill the details for you!")
+        
+        uploaded_file = st.file_uploader(
+            "Upload your resume",
+            type=['pdf', 'docx', 'txt'],
+            key="home_resume_upload",
+            help="We'll extract your information and auto-fill the resume builder"
+        )
+        
+        if uploaded_file:
+            with st.spinner("🤖 Analyzing your resume with AI..."):
+                try:
+                    # Parse the resume
+                    api_key = st.session_state.get('gemini_api_key')
+                    parsed_data = parse_uploaded_resume(uploaded_file, api_key=api_key)
+                    
+                    # Auto-fill session state
+                    parser = ResumeParser(api_key=api_key)
+                    parser.auto_fill_session_state(parsed_data, st.session_state)
+                    
+                    st.success("✅ Resume uploaded successfully! Your information has been auto-filled.")
+                    st.info("💡 Click 'Build Resume For Free' above to start editing with your pre-filled data.")
+                    
+                    # Show preview of extracted data
+                    with st.expander("📋 Preview Extracted Data"):
+                        if parsed_data.get('full_name'):
+                            st.write(f"**Name:** {parsed_data['full_name']}")
+                        if parsed_data.get('email'):
+                            st.write(f"**Email:** {parsed_data['email']}")
+                        if parsed_data.get('phone'):
+                            st.write(f"**Phone:** {parsed_data['phone']}")
+                        if parsed_data.get('summary'):
+                            st.write(f"**Summary:** {parsed_data['summary'][:200]}...")
+                        if parsed_data.get('tech_skills'):
+                            st.write(f"**Skills:** {parsed_data['tech_skills'][:200]}...")
+                        if parsed_data.get('work_entries'):
+                            st.write(f"**Work Experience:** {len(parsed_data['work_entries'])} positions found")
+                        if parsed_data.get('education_entries'):
+                            st.write(f"**Education:** {len(parsed_data['education_entries'])} entries found")
+                
+                except Exception as e:
+                    st.error(f"❌ Error parsing resume: {str(e)}")
+                    st.info("💡 Please try a different file format or build your resume from scratch.")
+    
+    st.markdown("---")
     st.markdown("<br>", unsafe_allow_html=True)
     
     # Features Section
