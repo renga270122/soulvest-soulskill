@@ -1111,11 +1111,13 @@ if st.session_state.mode == 'home':
                     if st.button("👤 Continue as Guest", use_container_width=True, key="hero_guest"):
                         st.info("✅ Great! You can explore as a guest and sign up later.")
             
-            # Features text below welcome banner
+            # Features text below welcome banner in a box
             st.markdown("""
-            <p style='text-align: center; color: #2563eb; font-size: 0.95rem; font-weight: 600; margin-top: 1.5rem;'>
-                <strong>AI-Powered • ATS-Optimized • 20+ Professional Templates</strong>
-            </p>
+            <div style='text-align: center; padding: 1rem; border: 2px solid #2563eb; border-radius: 10px; margin-top: 1.5rem; background-color: #f0f7ff;'>
+                <p style='color: #1e3a8a; font-size: 0.95rem; font-weight: 900; margin: 0;'>
+                    <strong>AI-Powered • ATS-Optimized • 20+ Professional Templates</strong>
+                </p>
+            </div>
             """, unsafe_allow_html=True)
         else:
             # Welcome back message for logged-in users
@@ -1124,11 +1126,13 @@ if st.session_state.mode == 'home':
                 user_name = st.session_state.get('user_name', 'User')
                 st.success(f"👋 **Welcome back, {user_name}!** Ready to create amazing resumes?")
             
-            # Features text below welcome banner
+            # Features text below welcome banner in a box
             st.markdown("""
-            <p style='text-align: center; color: #2563eb; font-size: 0.95rem; font-weight: 600; margin-top: 1rem;'>
-                <strong>AI-Powered • ATS-Optimized • 20+ Professional Templates</strong>
-            </p>
+            <div style='text-align: center; padding: 1rem; border: 2px solid #2563eb; border-radius: 10px; margin-top: 1rem; background-color: #f0f7ff;'>
+                <p style='color: #1e3a8a; font-size: 0.95rem; font-weight: 900; margin: 0;'>
+                    <strong>AI-Powered • ATS-Optimized • 20+ Professional Templates</strong>
+                </p>
+            </div>
             """, unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
