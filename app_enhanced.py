@@ -1085,16 +1085,40 @@ if st.session_state.mode == 'home':
         </div>
         """, unsafe_allow_html=True)
         
-        # Welcome Message for Guests
+        # Welcome Message for Guests with side quotes
         if not st.session_state.user_authenticated:
-            st.markdown("""
-            <div style='text-align: center; padding: 1.5rem 1rem; background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%); border-radius: 15px; border-left: 5px solid #2563eb; margin: 1rem auto; max-width: 600px;'>
-                <h2 style='color: #1e3a8a; font-size: 1.5rem; font-weight: 800; margin: 0 0 0.25rem 0;'>Welcome to SoulSkill! 👋</h2>
-                <p style='color: #4a5568; font-size: 0.95rem; font-weight: 600; margin: 0.25rem 0; line-height: 1.5;'>
-                    Build professional resumes, cover letters, and more with AI-powered assistance.
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
+            col_left, col_center, col_right = st.columns([1, 2, 1])
+            
+            # Left side - Quote
+            with col_left:
+                st.markdown("""
+                <div style='text-align: center; padding: 1.5rem 1rem; background: linear-gradient(135deg, #f0f7ff 0%, #e0e7ff 100%); border-radius: 10px; height: 100%; display: flex; align-items: center; justify-content: center;'>
+                    <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 700; margin: 0; line-height: 1.6;'>
+                        "Your resume is your first impression."
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            # Center - Welcome Banner
+            with col_center:
+                st.markdown("""
+                <div style='text-align: center; padding: 2rem 1.5rem; background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%); border-radius: 15px; border-left: 5px solid #2563eb;'>
+                    <h2 style='color: #1e3a8a; font-size: 1.5rem; font-weight: 800; margin: 0 0 0.5rem 0;'>Welcome to SoulSkill! 👋</h2>
+                    <p style='color: #4a5568; font-size: 0.95rem; font-weight: 600; margin: 0; line-height: 1.5;'>
+                        Build professional resumes, cover letters, and more with AI-powered assistance.
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            # Right side - Quote
+            with col_right:
+                st.markdown("""
+                <div style='text-align: center; padding: 1.5rem 1rem; background: linear-gradient(135deg, #e0e7ff 0%, #f0f7ff 100%); border-radius: 10px; height: 100%; display: flex; align-items: center; justify-content: center;'>
+                    <p style='color: #2563eb; font-size: 0.85rem; font-weight: 700; margin: 0; line-height: 1.6;'>
+                        "Stand out, get hired faster."
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
             
             col_a, col_b, col_c = st.columns(3)
             with col_a:
@@ -1118,13 +1142,37 @@ if st.session_state.mode == 'home':
             </div>
             """, unsafe_allow_html=True)
         else:
-            # Welcome back message for logged-in users
-            st.markdown(f"""
-            <div style='text-align: center; padding: 1.5rem 1rem; margin: 1rem auto; max-width: 600px;'>
-                <h2 style='color: #1e3a8a; font-size: 1.5rem; font-weight: 800; margin: 0;'>👋 Welcome back, {st.session_state.get('user_name', 'User')}!</h2>
-                <p style='color: #4a5568; font-size: 0.95rem; font-weight: 600; margin: 0.5rem 0 0 0;'>Ready to create amazing resumes?</p>
-            </div>
-            """, unsafe_allow_html=True)
+            # Welcome back message for logged-in users with side quotes
+            col_left, col_center, col_right = st.columns([1, 2, 1])
+            
+            # Left side - Quote
+            with col_left:
+                st.markdown("""
+                <div style='text-align: center; padding: 1.5rem 1rem; background: linear-gradient(135deg, #f0f7ff 0%, #e0e7ff 100%); border-radius: 10px; height: 100%; display: flex; align-items: center; justify-content: center;'>
+                    <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 700; margin: 0; line-height: 1.6;'>
+                        "Great resumes open doors."
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            # Center - Welcome Banner
+            with col_center:
+                st.markdown(f"""
+                <div style='text-align: center; padding: 2rem 1.5rem; background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%); border-radius: 15px; border-left: 5px solid #2563eb;'>
+                    <h2 style='color: #1e3a8a; font-size: 1.5rem; font-weight: 800; margin: 0;'>👋 Welcome back, {st.session_state.get('user_name', 'User')}!</h2>
+                    <p style='color: #4a5568; font-size: 0.95rem; font-weight: 600; margin: 0.5rem 0 0 0;'>Ready to create amazing resumes?</p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            # Right side - Quote
+            with col_right:
+                st.markdown("""
+                <div style='text-align: center; padding: 1.5rem 1rem; background: linear-gradient(135deg, #e0e7ff 0%, #f0f7ff 100%); border-radius: 10px; height: 100%; display: flex; align-items: center; justify-content: center;'>
+                    <p style='color: #2563eb; font-size: 0.85rem; font-weight: 700; margin: 0; line-height: 1.6;'>
+                        "Your next opportunity awaits."
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
             
             # Features text below welcome banner in a box
             st.markdown("""
