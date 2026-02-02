@@ -92,6 +92,26 @@ st.markdown("""
         gap: 0.75rem;
         align-items: center;
     }
+    .navbar-links {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+    .navbar-link {
+        color: #ffffff;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.95rem;
+        padding: 0.35rem 0.6rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+    .navbar-link:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+    .navbar-link-outline {
+        border: 1px solid rgba(255, 255, 255, 0.7);
+    }
     .navbar-button {
         padding: 0.5rem 1.25rem;
         border-radius: 8px;
@@ -128,7 +148,10 @@ st.markdown("""
 
 <div class='navbar'>
     <div class='navbar-logo'>✨ SoulSkill</div>
-    <div></div>
+    <div class='navbar-links'>
+        <a class='navbar-link' href='#'>Build Resume</a>
+        <a class='navbar-link navbar-link-outline' href='#'>Sign In</a>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -1081,49 +1104,61 @@ if st.session_state.mode == 'home':
         # Landing Page - Hero Section with Welcome Banner
         col_left, col_center, col_right = st.columns([1, 2, 1])
         
-        # Left side - Quote + Stat
+        # Left side - Resume Preview Mockup
         with col_left:
             st.markdown("""
-            <div style='text-align: center; padding: 1.5rem 1rem; background: linear-gradient(135deg, #f0f7ff 0%, #e0e7ff 100%); border-radius: 10px; min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: space-between;'>
-                <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 700; margin: 0; line-height: 1.6;'>
-                    "Your resume is your first impression."
-                </p>
-                <div style='width: 100%; border-top: 1px solid rgba(37, 99, 235, 0.2); padding-top: 1rem; margin-top: 0.5rem;'>
-                    <p style='color: #2563eb; font-size: 1.2rem; font-weight: 900; margin: 0;'>95%</p>
-                    <p style='color: #4a5568; font-size: 0.75rem; font-weight: 600; margin: 0.25rem 0 0 0;'>ATS Success Rate</p>
-                </div>
+            <div style='text-align: left; padding: 1.4rem 1.2rem; background: #ffffff; border-radius: 14px; min-height: 300px; border: 1px solid rgba(37, 99, 235, 0.2); box-shadow: 0 10px 25px rgba(37, 99, 235, 0.12);'>
+                <p style='color: #2563eb; font-size: 0.8rem; font-weight: 800; margin: 0 0 0.6rem 0; text-transform: uppercase; letter-spacing: 0.7px;'>Resume Preview</p>
+                <h3 style='color: #1e3a8a; font-size: 1.1rem; font-weight: 800; margin: 0;'>Priya Rao</h3>
+                <p style='color: #4a5568; font-size: 0.85rem; font-weight: 600; margin: 0.2rem 0 0.6rem 0;'>Data Analyst • Bengaluru</p>
+                <div style='height: 1px; background: rgba(37, 99, 235, 0.15); margin: 0.75rem 0;'></div>
+                <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 700; margin: 0 0 0.35rem 0;'>Highlights</p>
+                <ul style='color: #4a5568; font-size: 0.78rem; margin: 0; padding-left: 1rem; line-height: 1.6;'>
+                    <li>SQL • Python • Power BI</li>
+                    <li>Built 12+ dashboards</li>
+                    <li>ATS-optimized keywords</li>
+                </ul>
             </div>
             """, unsafe_allow_html=True)
         
         # Center - Hero Title + Welcome Banner Combined
         with col_center:
             st.markdown("""
-            <div style='text-align: center; padding: 1.5rem 1.5rem 2rem 1.5rem; background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%); border-radius: 15px; border-left: 5px solid #2563eb;'>
-                <h1 style='color: #1e3a8a; font-size: 2.2rem; font-weight: 900; margin: 0 0 0.75rem 0;'>✨ Build Your Resume in 5 Minutes</h1>
-                <h2 style='color: #1e3a8a; font-size: 1.3rem; font-weight: 800; margin: 0 0 0.5rem 0;'>Welcome to SoulSkill! 👋</h2>
-                <p style='color: #4a5568; font-size: 0.95rem; font-weight: 600; margin: 0; line-height: 1.5;'>
-                    Build professional resumes, cover letters, and more with AI-powered assistance.
-                </p>
+            <div style='text-align: center; padding: 1.6rem 1.6rem 2.1rem 1.6rem; background: linear-gradient(135deg, #eaf2ff 0%, #dfe9ff 50%, #f6f9ff 100%); border-radius: 18px; border: 1px solid rgba(37, 99, 235, 0.25); box-shadow: 0 14px 30px rgba(30, 58, 138, 0.18);'>
+                <h1 style='color: #1e3a8a; font-size: 2.35rem; font-weight: 900; margin: 0 0 0.5rem 0; letter-spacing: 0.2px;'>Build Your Resume in as little as 5 minutes</h1>
+                <p style='color: #3b4a6b; font-size: 1rem; font-weight: 600; margin: 0 0 0.75rem 0; line-height: 1.55;'>Recruiter‑approved templates, pre‑written examples, and AI‑guided suggestions.</p>
+                <p style='color: #1e3a8a; font-size: 1.2rem; font-weight: 800; margin: 0 0 0.6rem 0;'>Welcome to SoulSkill! 👋</p>
+                <p style='color: #3b4a6b; font-size: 0.98rem; font-weight: 600; margin: 0; line-height: 1.55;'>Build professional resumes, cover letters, and more with AI-powered assistance.</p>
             </div>
             """, unsafe_allow_html=True)
         
-        # Right side - Quote + Stat
+        # Right side - Resume Preview Mockup
         with col_right:
             st.markdown("""
-            <div style='text-align: center; padding: 1.5rem 1rem; background: linear-gradient(135deg, #e0e7ff 0%, #f0f7ff 100%); border-radius: 10px; min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: space-between;'>
-                <p style='color: #2563eb; font-size: 0.85rem; font-weight: 700; margin: 0; line-height: 1.6;'>
-                    "Stand out, get hired faster."
-                </p>
-                <div style='width: 100%; border-top: 1px solid rgba(37, 99, 235, 0.2); padding-top: 1rem; margin-top: 0.5rem;'>
-                    <p style='color: #2563eb; font-size: 1.2rem; font-weight: 900; margin: 0;'>20+</p>
-                    <p style='color: #4a5568; font-size: 0.75rem; font-weight: 600; margin: 0.25rem 0 0 0;'>Professional Templates</p>
-                </div>
+            <div style='text-align: left; padding: 1.4rem 1.2rem; background: #ffffff; border-radius: 14px; min-height: 300px; border: 1px solid rgba(37, 99, 235, 0.2); box-shadow: 0 10px 25px rgba(37, 99, 235, 0.12);'>
+                <p style='color: #2563eb; font-size: 0.8rem; font-weight: 800; margin: 0 0 0.6rem 0; text-transform: uppercase; letter-spacing: 0.7px;'>Resume Preview</p>
+                <h3 style='color: #1e3a8a; font-size: 1.1rem; font-weight: 800; margin: 0;'>Aiden Brooks</h3>
+                <p style='color: #4a5568; font-size: 0.85rem; font-weight: 600; margin: 0.2rem 0 0.6rem 0;'>Product Manager • Austin</p>
+                <div style='height: 1px; background: rgba(37, 99, 235, 0.15); margin: 0.75rem 0;'></div>
+                <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 700; margin: 0 0 0.35rem 0;'>Highlights</p>
+                <ul style='color: #4a5568; font-size: 0.78rem; margin: 0; padding-left: 1rem; line-height: 1.6;'>
+                    <li>Roadmaps • OKRs • GTM</li>
+                    <li>Led 4 product launches</li>
+                    <li>ATS‑friendly layout</li>
+                </ul>
             </div>
             """, unsafe_allow_html=True)
         
         # Auth buttons for guests
         if not st.session_state.user_authenticated:
-            
+
+            cta_left, cta_center, cta_right = st.columns([1, 2, 1])
+            with cta_center:
+                if st.button("🚀 Build Your Resume For Free", use_container_width=True, key="hero_build_free", type="primary"):
+                    st.session_state.show_auth_modal = True
+                    st.rerun()
+                st.markdown("<p style='text-align:center; color:#4a5568; font-weight:600; font-size:0.85rem; margin-top:0.35rem;'>No credit card required</p>", unsafe_allow_html=True)
+
             col_a, col_b, col_c = st.columns(3)
             with col_a:
                 if st.button("🔐 Sign In", use_container_width=True, key="hero_signin", type="secondary"):
@@ -1140,43 +1175,58 @@ if st.session_state.mode == 'home':
             # Hero Section + Welcome for logged-in users with side quotes
             col_left, col_center, col_right = st.columns([1, 2, 1])
             
-            # Left side - Quote + Stat
+            # Left side - Resume Preview Mockup
             with col_left:
                 st.markdown("""
-                <div style='text-align: center; padding: 1.5rem 1rem; background: linear-gradient(135deg, #f0f7ff 0%, #e0e7ff 100%); border-radius: 10px; min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: space-between;'>
-                    <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 700; margin: 0; line-height: 1.6;'>
-                        "Great resumes open doors."
-                    </p>
-                    <div style='width: 100%; border-top: 1px solid rgba(37, 99, 235, 0.2); padding-top: 1rem; margin-top: 0.5rem;'>
-                        <p style='color: #2563eb; font-size: 1.2rem; font-weight: 900; margin: 0;'>50K+</p>
-                        <p style='color: #4a5568; font-size: 0.75rem; font-weight: 600; margin: 0.25rem 0 0 0;'>Users Hired</p>
-                    </div>
+                <div style='text-align: left; padding: 1.4rem 1.2rem; background: #ffffff; border-radius: 14px; min-height: 300px; border: 1px solid rgba(37, 99, 235, 0.2); box-shadow: 0 10px 25px rgba(37, 99, 235, 0.12);'>
+                    <p style='color: #2563eb; font-size: 0.8rem; font-weight: 800; margin: 0 0 0.6rem 0; text-transform: uppercase; letter-spacing: 0.7px;'>Resume Preview</p>
+                    <h3 style='color: #1e3a8a; font-size: 1.1rem; font-weight: 800; margin: 0;'>Priya Rao</h3>
+                    <p style='color: #4a5568; font-size: 0.85rem; font-weight: 600; margin: 0.2rem 0 0.6rem 0;'>Data Analyst • Bengaluru</p>
+                    <div style='height: 1px; background: rgba(37, 99, 235, 0.15); margin: 0.75rem 0;'></div>
+                    <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 700; margin: 0 0 0.35rem 0;'>Highlights</p>
+                    <ul style='color: #4a5568; font-size: 0.78rem; margin: 0; padding-left: 1rem; line-height: 1.6;'>
+                        <li>SQL • Python • Power BI</li>
+                        <li>Built 12+ dashboards</li>
+                        <li>ATS-optimized keywords</li>
+                    </ul>
                 </div>
                 """, unsafe_allow_html=True)
             
             # Center - Hero Title + Welcome
             with col_center:
                 st.markdown(f"""
-                <div style='text-align: center; padding: 1.5rem 1.5rem 2rem 1.5rem; background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%); border-radius: 15px; border-left: 5px solid #2563eb;'>
-                    <h1 style='color: #1e3a8a; font-size: 2.2rem; font-weight: 900; margin: 0 0 0.75rem 0;'>✨ Build Your Resume in 5 Minutes</h1>
-                    <h2 style='color: #1e3a8a; font-size: 1.3rem; font-weight: 800; margin: 0 0 0.5rem 0;'>👋 Welcome back, {st.session_state.get('user_name', 'User')}!</h2>
-                    <p style='color: #4a5568; font-size: 0.95rem; font-weight: 600; margin: 0; line-height: 1.5;'>Ready to create amazing resumes?</p>
+                <div style='text-align: center; padding: 1.6rem 1.6rem 2.1rem 1.6rem; background: linear-gradient(135deg, #eaf2ff 0%, #dfe9ff 50%, #f6f9ff 100%); border-radius: 18px; border: 1px solid rgba(37, 99, 235, 0.25); box-shadow: 0 14px 30px rgba(30, 58, 138, 0.18);'>
+                    <h1 style='color: #1e3a8a; font-size: 2.35rem; font-weight: 900; margin: 0 0 0.5rem 0; letter-spacing: 0.2px;'>Build Your Resume in as little as 5 minutes</h1>
+                    <p style='color: #3b4a6b; font-size: 1rem; font-weight: 600; margin: 0 0 0.75rem 0; line-height: 1.55;'>Recruiter‑approved templates, pre‑written examples, and AI‑guided suggestions.</p>
+                    <h2 style='color: #1e3a8a; font-size: 1.35rem; font-weight: 800; margin: 0 0 0.6rem 0;'>👋 Welcome back, {st.session_state.get('user_name', 'User')}!</h2>
+                    <p style='color: #3b4a6b; font-size: 1rem; font-weight: 600; margin: 0; line-height: 1.55;'>Ready to create amazing resumes?</p>
                 </div>
                 """, unsafe_allow_html=True)
             
-            # Right side - Quote + Stat
+            # Right side - Resume Preview Mockup
             with col_right:
                 st.markdown("""
-                <div style='text-align: center; padding: 1.5rem 1rem; background: linear-gradient(135deg, #e0e7ff 0%, #f0f7ff 100%); border-radius: 10px; min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: space-between;'>
-                    <p style='color: #2563eb; font-size: 0.85rem; font-weight: 700; margin: 0; line-height: 1.6;'>
-                        "Your next opportunity awaits."
-                    </p>
-                    <div style='width: 100%; border-top: 1px solid rgba(37, 99, 235, 0.2); padding-top: 1rem; margin-top: 0.5rem;'>
-                        <p style='color: #2563eb; font-size: 1.2rem; font-weight: 900; margin: 0;'>⚡ 5 Min</p>
-                        <p style='color: #4a5568; font-size: 0.75rem; font-weight: 600; margin: 0.25rem 0 0 0;'>Quick Build</p>
-                    </div>
+                <div style='text-align: left; padding: 1.4rem 1.2rem; background: #ffffff; border-radius: 14px; min-height: 300px; border: 1px solid rgba(37, 99, 235, 0.2); box-shadow: 0 10px 25px rgba(37, 99, 235, 0.12);'>
+                    <p style='color: #2563eb; font-size: 0.8rem; font-weight: 800; margin: 0 0 0.6rem 0; text-transform: uppercase; letter-spacing: 0.7px;'>Resume Preview</p>
+                    <h3 style='color: #1e3a8a; font-size: 1.1rem; font-weight: 800; margin: 0;'>Aiden Brooks</h3>
+                    <p style='color: #4a5568; font-size: 0.85rem; font-weight: 600; margin: 0.2rem 0 0.6rem 0;'>Product Manager • Austin</p>
+                    <div style='height: 1px; background: rgba(37, 99, 235, 0.15); margin: 0.75rem 0;'></div>
+                    <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 700; margin: 0 0 0.35rem 0;'>Highlights</p>
+                    <ul style='color: #4a5568; font-size: 0.78rem; margin: 0; padding-left: 1rem; line-height: 1.6;'>
+                        <li>Roadmaps • OKRs • GTM</li>
+                        <li>Led 4 product launches</li>
+                        <li>ATS‑friendly layout</li>
+                    </ul>
                 </div>
                 """, unsafe_allow_html=True)
+
+            cta_left, cta_center, cta_right = st.columns([1, 2, 1])
+            with cta_center:
+                if st.button("🚀 Build Your Resume For Free", use_container_width=True, key="hero_build_free_auth", type="primary"):
+                    st.session_state['mode'] = 'builder'
+                    st.session_state['step'] = 1
+                    st.rerun()
+                st.markdown("<p style='text-align:center; color:#4a5568; font-weight:600; font-size:0.85rem; margin-top:0.35rem;'>No credit card required</p>", unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
     
