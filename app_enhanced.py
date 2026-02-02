@@ -400,17 +400,17 @@ st.markdown("""
     /* Hero Section */
     .hero-section {
         text-align: center;
-        padding: 3rem 2rem;
-        background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+        padding: 1.5rem 2rem;
+        background: transparent;
         color: white;
-        border-radius: 20px;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 30px rgba(30, 58, 138, 0.25);
+        border-radius: 0;
+        margin-bottom: 1rem;
+        box-shadow: none;
     }
     .hero-title {
-        font-size: 2.5rem;
+        font-size: 2.2rem;
         font-weight: 800;
-        margin-bottom: 1rem;
+        margin-bottom: 0.5rem;
     }
     .hero-subtitle {
         font-size: 1.2rem;
