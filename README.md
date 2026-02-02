@@ -1,53 +1,42 @@
-# ✨ Soulvest AI Resume Builder
+# ✨ SoulSkill AI - Smart Resume Builder
 
-## Enterprise-Grade AI-Powered Resume Platform
-
-**Soulvest** is the next-generation resume builder that combines advanced AI technology with enterprise-grade ATS optimization. Create professional resumes with 20+ premium templates, intelligent career tools, and comprehensive scoring systems designed to help you land your dream job.
-
+[![Deploy](https://img.shields.io/badge/Deploy-Streamlit-FF4B4B?logo=streamlit)](https://soulskill.streamlit.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Streamlit](https://img.shields.io/badge/streamlit-1.31+-red.svg)](https://streamlit.io)
 
----
+**SoulSkill AI** is a next-generation resume builder that combines AI intelligence with emotional support. More than just a resume tool—it's your career companion that understands your journey and helps you shine.
 
-## 🎯 Competitive Positioning
-
-### Soulvest vs. Top 2026 Resume Builders
-
-| Feature | Soulvest | Kickresume | Rezi | Novoresume | Zety | Enhancv |
-|---------|----------|------------|------|------------|------|---------|
-| **AI Summary Generation** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Cover Letter AI** | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ |
-| **ATS Score (0-100)** | ✅ | ✅ | ✅ | ⚠️ | ✅ | ⚠️ |
-| **Job Match Analysis** | ✅ | ⚠️ | ✅ | ❌ | ❌ | ❌ |
-| **Career Advice Engine** | ✅ | ❌ | ❌ | ❌ | ❌ | ⚠️ |
-| **LinkedIn Optimization** | ✅ | ⚠️ | ❌ | ❌ | ❌ | ✅ |
-| **Interview Prep** | ✅ | ⚠️ | ❌ | ❌ | ❌ | ❌ |
-| **Competitive Benchmarking** | ✅ | ❌ | ⚠️ | ❌ | ❌ | ❌ |
-| **20+ Premium Templates** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Multi-Format Export** | ✅ (5 formats) | ⚠️ (3) | ⚠️ (2) | ⚠️ (3) | ⚠️ (3) | ⚠️ (2) |
-| **Open Source** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Free Tier** | ✅ Full | ⚠️ Limited | ⚠️ Limited | ⚠️ Limited | ⚠️ Limited | ⚠️ Limited |
+🌐 **Live Demo**: [soulskill.streamlit.app](https://soulskill.streamlit.app) (Coming soon!)
 
 ---
 
-## 🌟 Key Features
+## 🎯 What Makes SoulSkill Different?
 
-### 🤖 Advanced AI Features (Powered by Google Gemini)
+### The "Soulful" Approach 💫
+Unlike cold, robotic resume builders, SoulSkill combines:
+- **AI Intelligence** - Smart keyword matching, ATS optimization
+- **Emotional Support** - Encouraging affirmations throughout your journey
+- **Practical Guidance** - Real-time tips for quantifying achievements
+- **Career Insight** - Job description matching and skill gap analysis
 
-#### **1. AI Resume Writer**
-- **Professional Summary Generation**: Context-aware summaries tailored to your profile
-- **Smart Content Enhancement**: AI improves work descriptions with powerful action verbs
-- **Achievement Optimization**: Automatically suggests quantifiable metrics
+### vs. Top 2026 Resume Builders
 
-#### **2. Cover Letter Generator**
-- Personalized cover letters matching job descriptions
-- Natural, human-like writing (not robotic)
-- Company-specific customization
-- ATS-optimized with relevant keywords
+| Feature | SoulSkill | Kickresume | Rezi | ResumeGemini |
+|---------|-----------|------------|------|--------------|
+| **Job Description Matcher** | ✅ AI-Powered | ⚠️ Basic | ✅ | ❌ |
+| **Skill Gap Analysis** | ✅ Real-time | ❌ | ⚠️ | ❌ |
+| **ATS Compatibility Check** | ✅ 6-point | ✅ | ✅ | ⚠️ |
+| **LinkedIn Integration** | ✅ Alignment Tips | ⚠️ | ❌ | ❌ |
+| **Motivational Support** | ✅ Unique! | ❌ | ❌ | ❌ |
+| **Country-Specific Templates** | ✅ 29+ (9 countries) | ✅ | ⚠️ | ⚠️ |
+| **Regional Photo Guidance** | ✅ Smart | ❌ | ❌ | ❌ |
+| **100% Free** | ✅ | ⚠️ Limited | ⚠️ | ✅ |
+| **Open Source** | ✅ | ❌ | ❌ | ❌ |
 
-#### **3. Career Advice Engine**
-- Next career steps recommendations
+---
+
+## 🌟 Premium Features
 
 ### 🛠️ Advanced Career Tools (NEW!)
 
