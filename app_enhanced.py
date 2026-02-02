@@ -27,6 +27,7 @@ from resume_generator import generate_resume_html
 from resume_parser import ResumeParser, parse_uploaded_resume
 from sidebar_content import render_enhanced_sidebar
 from theme_config import apply_custom_theme
+from auth_ui import show_signin_signup_modal, show_user_profile, show_auth_prompt_banner
 from advanced_features import (
     ResumeImporter, QRCodeGenerator, SpellChecker, 
     ResumeVersionControl, EmailTemplates, KeywordHighlighter, 
@@ -447,7 +448,12 @@ def init_session_state():
         'cover_letters': {},
         'cl_company': '',
         'cl_position': '',
-        'cl_content': ''
+        'cl_content': '',
+        'show_auth_modal': False,
+        'user_authenticated': False,
+        'user_email': None,
+        'user_name': None,
+        'saved_resumes_count': 0
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -455,8 +461,26 @@ def init_session_state():
 
 init_session_state()
 
+# Import authentication
+from auth import get_auth_manager, show_auth_sidebar
+
 # Enhanced Sidebar with valuable content
 render_enhanced_sidebar()
+
+# Show user profile or auth options
+show_user_profile()
+
+# Authentication status in sidebar (for non-authenticated users)
+if not st.session_state.user_authenticated:
+    with st.sidebar:
+        st.markdown("---")
+        st.markdown("### 🔐 Account")
+        
+        if st.button("Sign In / Sign Up", use_container_width=True, key="sidebar_auth_btn", type="primary"):
+            st.session_state.show_auth_modal = True
+            st.rerun()
+        
+        st.caption("💡 Sign up to save and manage your resumes!")
 
 # Additional sidebar - Universal Navigation
 with st.sidebar:
@@ -969,13 +993,47 @@ def calculate_completeness():
 
 # MAIN APP NAVIGATION
 if st.session_state.mode == 'home':
-    # Landing Page - ResumeGemini Style
-    st.markdown("""
-    <div class='hero-section'>
-        <h1 class='hero-title'>✨ Build Your Resume in 5 Minutes</h1>
-        <p class='hero-subtitle'>AI-Powered • ATS-Optimized • 20+ Professional Templates</p>
-    </div>
-    """, unsafe_allow_html=True)
+    # Show auth modal if requested
+    if st.session_state.get('show_auth_modal', False):
+        show_signin_signup_modal()
+    else:
+        # Landing Page - ResumeGemini Style
+        st.markdown("""
+        <div class='hero-section'>
+            <h1 class='hero-title'>✨ Build Your Resume in 5 Minutes</h1>
+            <p class='hero-subtitle'>AI-Powered • ATS-Optimized • 20+ Professional Templates</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Show auth prompt banner for guest users
+        if not st.session_state.user_authenticated:
+            col1, col2, col3 = st.columns([1, 3, 1])
+            with col2:
+                st.info("""
+                **👋 Welcome!** Sign in to save your resumes and access them from any device.
+                Or continue as guest to try it out!
+                """)
+                
+                col_a, col_b, col_c = st.columns(3)
+                with col_a:
+                    if st.button("🔐 Sign In", use_container_width=True, key="hero_signin"):
+                        st.session_state.show_auth_modal = True
+                        st.rerun()
+                with col_b:
+                    if st.button("✨ Sign Up", use_container_width=True, key="hero_signup", type="primary"):
+                        st.session_state.show_auth_modal = True
+                        st.rerun()
+                with col_c:
+                    if st.button("👤 Guest Mode", use_container_width=True, key="hero_guest"):
+                        st.info("✅ Continue as guest - you can sign up later!")
+        else:
+            # Welcome back message for logged-in users
+            col1, col2, col3 = st.columns([1, 3, 1])
+            with col2:
+                user_name = st.session_state.get('user_name', 'User')
+                st.success(f"👋 **Welcome back, {user_name}!** Ready to create amazing resumes?")
+        
+        st.markdown("<br>", unsafe_allow_html=True)
     
     # Stats Section
     col1, col2, col3, col4 = st.columns(4)
