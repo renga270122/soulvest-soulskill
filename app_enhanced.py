@@ -89,10 +89,10 @@ st.markdown("""
     }
 }
 </style>
-<div class='navbar-container' style='display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); border-radius: 0; margin: -1rem -1rem 1rem -1rem; box-shadow: 0 2px 8px rgba(30, 58, 138, 0.15);'>
+<div class='navbar-container' style='display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%); border-radius: 0; margin: -1rem -1rem 1rem -1rem; box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);'>
     <div>
-        <div class='navbar-logo' style='font-size: 1.5rem; font-weight: 900; color: white; margin: 0;'>✨ SoulSkill</div>
-        <div style='font-size: 0.75rem; color: rgba(255,255,255,0.85); font-style: italic; margin-top: 0.2rem;'>"Your career deserves more than a template"</div>
+        <div class='navbar-logo' style='font-size: 1.5rem; font-weight: 900; color: white; margin: 0; text-shadow: 0 0 10px rgba(168, 85, 247, 0.8);'>✨ SoulSkill</div>
+        <div style='font-size: 0.75rem; color: rgba(255,255,255,0.9); font-style: italic; margin-top: 0.2rem; text-shadow: 0 0 5px rgba(168, 85, 247, 0.6);'>🌟 Manifest Your Dream Job with Law of Attraction</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -178,12 +178,60 @@ else:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# Enhanced CSS for ResumeGemini-like experience with FULL RESPONSIVE SUPPORT
+# Enhanced CSS for ResumeGemini-like experience with COSMIC UNIVERSE THEME
 st.markdown("""
 <style>
     .main {
         padding: 1rem;
-        background: linear-gradient(135deg, #f5f7fb 0%, #e8eef7 100%);
+        background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+        background-attachment: fixed;
+        position: relative;
+    }
+    
+    /* Cosmic Stars Effect */
+    .main::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(2px 2px at 20px 30px, white, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 60px 70px, white, rgba(0,0,0,0)),
+            radial-gradient(1px 1px at 50px 50px, white, rgba(0,0,0,0)),
+            radial-gradient(1px 1px at 130px 80px, white, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 90px 10px, white, rgba(0,0,0,0));
+        background-repeat: repeat;
+        background-size: 200px 200px;
+        opacity: 0.5;
+        animation: twinkle 3s infinite;
+        pointer-events: none;
+        z-index: 0;
+    }
+    
+    @keyframes twinkle {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 1; }
+    }
+    
+    /* Nebula glow effect */
+    .main::after {
+        content: '';
+        position: fixed;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 70%);
+        animation: rotate 60s linear infinite;
+        pointer-events: none;
+        z-index: 0;
+    }
+    
+    @keyframes rotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
     
     /* Responsive Typography */
@@ -1202,10 +1250,11 @@ if st.session_state.mode == 'home':
                 .hero-desc { font-size: 0.9rem !important; }
             }
             </style>
-            <div style='text-align: center; padding: 2rem; background: linear-gradient(135deg, #eaf2ff 0%, #dfe9ff 50%, #f6f9ff 100%); border-radius: 18px; border: 1px solid rgba(37, 99, 235, 0.25); box-shadow: 0 14px 30px rgba(30, 58, 138, 0.18);'>
-                <div class='hero-welcome' style='color: #000000; font-size: 2.5rem; font-weight: 900; margin-bottom: 0.8rem;'>Welcome to SoulSkill! 👋</div>
-                <div class='hero-headline' style='color: #000000; font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem;'>Build Your Resume in as little as 5 minutes</div>
-                <div class='hero-desc' style='color: #000000; font-size: 1.1rem; font-weight: 500;'>Build professional resumes, cover letters, and more with AI-powered assistance.</div>
+            <div style='text-align: center; padding: 2rem; background: linear-gradient(135deg, rgba(229,231,235,0.95) 0%, rgba(219,234,254,0.95) 50%, rgba(224,231,255,0.95) 100%); border-radius: 18px; border: 2px solid rgba(139, 92, 246, 0.4); box-shadow: 0 14px 30px rgba(139, 92, 246, 0.25); backdrop-filter: blur(10px);'>
+                <div class='hero-welcome' style='color: #000000; font-size: 2.5rem; font-weight: 900; margin-bottom: 0.8rem;'>Welcome to SoulSkill! 👋✨</div>
+                <div class='hero-headline' style='color: #5b21b6; font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;'>🌟 Manifest Your Dream Career in 5 Minutes</div>
+                <div class='hero-desc' style='color: #1e1b4b; font-size: 1.2rem; font-weight: 600; margin-bottom: 0.8rem;'>Harness the Power of Law of Attraction + AI Technology</div>
+                <div style='color: #4c1d95; font-size: 1rem; font-weight: 600; font-style: italic; padding: 0.8rem; background: rgba(168, 85, 247, 0.15); border-radius: 12px; margin-top: 0.8rem;'>💫 "The universe is conspiring in your favor. Your perfect job is already seeking you."</div>
             </div>
             """, unsafe_allow_html=True)
         
