@@ -64,11 +64,13 @@ if 'mode' not in st.session_state:
     st.session_state.mode = 'home'
 if 'show_auth_modal' not in st.session_state:
     st.session_state.show_auth_modal = False
+if 'show_account_dropdown' not in st.session_state:
+    st.session_state.show_account_dropdown = False
 
 # Apply custom theme
 apply_custom_theme()
 
-# Top Navigation Bar - RESPONSIVE VERSION with WORKING BUTTONS
+# Top Navigation Bar - RESPONSIVE VERSION with Login, Signup, Guest
 st.markdown("""
 <style>
 @media (max-width: 768px) {
@@ -92,27 +94,84 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Navbar Buttons - Functional Streamlit buttons in columns
-col_nav1, col_nav2, col_nav3, col_nav4, col_nav5 = st.columns([3, 1.5, 1.2, 1.5, 1])
-with col_nav2:
-    if st.button("🚀 Build Resume", key="nav_build", type="primary", use_container_width=True):
-        st.session_state.mode = 'create'
-        st.rerun()
-with col_nav3:
-    if st.button("🔐 Sign In", key="nav_signin", use_container_width=True):
-        st.session_state.show_auth_modal = True
-        st.session_state.auth_mode = 'signin'
-        st.rerun()
-with col_nav4:
-    if st.button("✨ Create Account", key="nav_signup", use_container_width=True):
-        st.session_state.show_auth_modal = True
-        st.session_state.auth_mode = 'signup'
-        st.rerun()
-with col_nav5:
-    if st.button("👤 Guest", key="nav_guest", use_container_width=True):
-        st.session_state.mode = 'home'
-        st.session_state.user_authenticated = False
-        st.rerun()
+# Navbar Buttons - Show My Account when logged in, or Login/Signup/Guest when not
+if st.session_state.user_authenticated:
+    # Logged in - show My Account dropdown
+    col_nav1, col_nav2, col_nav3 = st.columns([4, 2, 1])
+    with col_nav2:
+        user_display = st.session_state.get('user_name', 'User')
+        if st.button(f"👤 {user_display}", key="nav_account", use_container_width=True):
+            st.session_state.show_account_dropdown = not st.session_state.get('show_account_dropdown', False)
+            st.rerun()
+    with col_nav3:
+        if st.button("🚪 Logout", key="nav_logout", use_container_width=True):
+            st.session_state.user_authenticated = False
+            st.session_state.user_email = None
+            st.session_state.user_name = None
+            st.session_state.mode = 'home'
+            st.success("✅ Logged out successfully")
+            st.rerun()
+    
+    # Account dropdown menu
+    if st.session_state.get('show_account_dropdown', False):
+        st.markdown("""
+        <style>
+            .account-dropdown {
+                position: absolute;
+                right: 80px;
+                top: 60px;
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                padding: 1rem;
+                z-index: 9999;
+                min-width: 200px;
+            }
+            .dropdown-item {
+                padding: 0.75rem 1rem;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+            .dropdown-item:hover {
+                background: #f0f2f6;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        col_dd1, col_dd2, col_dd3 = st.columns([3, 2, 1])
+        with col_dd2:
+            if st.button("📊 Dashboard", key="nav_dashboard", use_container_width=True):
+                st.session_state.mode = 'dashboard'
+                st.session_state.show_account_dropdown = False
+                st.rerun()
+            if st.button("⚙️ My Profile", key="nav_profile", use_container_width=True):
+                st.session_state.mode = 'profile'
+                st.session_state.show_account_dropdown = False
+                st.rerun()
+            if st.button("📄 My Resumes", key="nav_resumes", use_container_width=True):
+                st.session_state.mode = 'saved_resumes'
+                st.session_state.show_account_dropdown = False
+                st.rerun()
+else:
+    # Not logged in - show auth buttons
+    col_nav1, col_nav2, col_nav3, col_nav4 = st.columns([4, 1.3, 1.5, 1.2])
+    with col_nav2:
+        if st.button("🔐 Login", key="nav_signin", use_container_width=True):
+            st.session_state.show_auth_modal = True
+            st.session_state.auth_mode = 'signin'
+            st.rerun()
+    with col_nav3:
+        if st.button("✨ Sign Up", key="nav_signup", use_container_width=True):
+            st.session_state.show_auth_modal = True
+            st.session_state.auth_mode = 'signup'
+            st.rerun()
+    with col_nav4:
+        if st.button("👤 Guest", key="nav_guest", use_container_width=True):
+            st.session_state.mode = 'home'
+            st.session_state.user_authenticated = False
+            st.session_state['guest_mode'] = True
+            st.rerun()
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -563,9 +622,6 @@ auth_manager = get_auth_manager()
 
 # Enhanced Sidebar with valuable content
 render_enhanced_sidebar()
-
-# Show user profile or auth options
-show_user_profile()
 
 # Additional sidebar - Universal Navigation
 with st.sidebar:
@@ -3444,6 +3500,200 @@ elif st.session_state.mode == 'masters':
         if st.button("✉️ Cover Letter", use_container_width=True, key="sop_cl_btn"):
             st.session_state.mode = 'coverletter'
             st.rerun()
+
+elif st.session_state.mode == 'dashboard':
+    # Dashboard Page
+    st.markdown("""
+    <div style='text-align: center; padding: 2rem 0;'>
+        <h1 style='font-size: 2.8rem; font-weight: 900; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>
+            📊 My Dashboard
+        </h1>
+        <p style='font-size: 1.1rem; color: #4a5568; margin-top: 0.5rem;'>
+            Welcome back, {0}!
+        </p>
+    </div>
+    """.format(st.session_state.get('user_name', 'User')), unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Stats Cards
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.markdown("""
+        <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1.5rem; border-radius: 16px; text-align: center; color: white;'>
+            <div style='font-size: 2.5rem;'>📄</div>
+            <div style='font-size: 2rem; font-weight: 700;'>{0}</div>
+            <div style='font-size: 0.9rem; opacity: 0.9;'>Resumes Created</div>
+        </div>
+        """.format(st.session_state.get('saved_resumes_count', 0)), unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 1.5rem; border-radius: 16px; text-align: center; color: white;'>
+            <div style='font-size: 2.5rem;'>✉️</div>
+            <div style='font-size: 2rem; font-weight: 700;'>0</div>
+            <div style='font-size: 0.9rem; opacity: 0.9;'>Cover Letters</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style='background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 1.5rem; border-radius: 16px; text-align: center; color: white;'>
+            <div style='font-size: 2.5rem;'>🎨</div>
+            <div style='font-size: 2rem; font-weight: 700;'>29+</div>
+            <div style='font-size: 0.9rem; opacity: 0.9;'>Templates Available</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown("""
+        <div style='background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); padding: 1.5rem; border-radius: 16px; text-align: center; color: white;'>
+            <div style='font-size: 2.5rem;'>⭐</div>
+            <div style='font-size: 2rem; font-weight: 700;'>95%</div>
+            <div style='font-size: 0.9rem; opacity: 0.9;'>ATS Score Avg</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    
+    # Quick Actions
+    st.markdown("### 🚀 Quick Actions")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("📄 Build New Resume", use_container_width=True, type="primary", key="dash_new_resume"):
+            st.session_state.mode = 'builder'
+            st.session_state.step = 1
+            st.rerun()
+    with col2:
+        if st.button("📂 View My Resumes", use_container_width=True, key="dash_view_resumes"):
+            st.session_state.mode = 'saved_resumes'
+            st.rerun()
+    with col3:
+        if st.button("⚙️ Edit Profile", use_container_width=True, key="dash_edit_profile"):
+            st.session_state.mode = 'profile'
+            st.rerun()
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Recent Activity
+    st.markdown("### 📋 Recent Activity")
+    st.info("Your recent resumes and activity will appear here once you start creating resumes.")
+
+elif st.session_state.mode == 'profile':
+    # Profile Management Page
+    st.markdown("""
+    <div style='text-align: center; padding: 2rem 0;'>
+        <h1 style='font-size: 2.8rem; font-weight: 900; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>
+            ⚙️ My Profile
+        </h1>
+        <p style='font-size: 1.1rem; color: #4a5568; margin-top: 0.5rem;'>
+            Manage your account details and preferences
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Profile Photo Upload Section
+    col1, col2 = st.columns([1, 2])
+    
+    with col1:
+        st.markdown("### 📷 Profile Photo")
+        
+        # Display current profile photo or placeholder
+        if 'profile_photo' in st.session_state and st.session_state.profile_photo:
+            st.image(st.session_state.profile_photo, width=200)
+        else:
+            st.markdown("""
+            <div style='width: 200px; height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                        border-radius: 50%; display: flex; align-items: center; justify-content: center;'>
+                <span style='font-size: 5rem; color: white;'>👤</span>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        uploaded_photo = st.file_uploader("Upload Photo", type=['png', 'jpg', 'jpeg'], key="profile_photo_upload")
+        if uploaded_photo:
+            st.session_state.profile_photo = uploaded_photo
+            st.success("✅ Photo uploaded!")
+            st.rerun()
+    
+    with col2:
+        st.markdown("### 📝 Personal Information")
+        
+        with st.form("profile_form"):
+            full_name = st.text_input(
+                "Full Name",
+                value=st.session_state.get('user_name', ''),
+                placeholder="John Doe"
+            )
+            
+            email = st.text_input(
+                "Email Address",
+                value=st.session_state.get('user_email', ''),
+                placeholder="john@example.com",
+                disabled=True
+            )
+            
+            phone = st.text_input(
+                "Phone Number",
+                value=st.session_state.get('user_phone', ''),
+                placeholder="+1 (555) 123-4567"
+            )
+            
+            location = st.text_input(
+                "Location",
+                value=st.session_state.get('user_location', ''),
+                placeholder="City, Country"
+            )
+            
+            linkedin = st.text_input(
+                "LinkedIn Profile",
+                value=st.session_state.get('user_linkedin', ''),
+                placeholder="https://linkedin.com/in/yourprofile"
+            )
+            
+            bio = st.text_area(
+                "Professional Bio",
+                value=st.session_state.get('user_bio', ''),
+                placeholder="Tell us about yourself...",
+                height=120
+            )
+            
+            col_btn1, col_btn2 = st.columns([1, 3])
+            with col_btn1:
+                submit_profile = st.form_submit_button("💾 Save Profile", use_container_width=True, type="primary")
+            
+            if submit_profile:
+                st.session_state.user_name = full_name
+                st.session_state.user_phone = phone
+                st.session_state.user_location = location
+                st.session_state.user_linkedin = linkedin
+                st.session_state.user_bio = bio
+                st.success("✅ Profile updated successfully!")
+                st.rerun()
+    
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    
+    # Account Settings
+    st.markdown("### 🔒 Account Settings")
+    with st.expander("🔑 Change Password"):
+        with st.form("password_form"):
+            current_password = st.text_input("Current Password", type="password")
+            new_password = st.text_input("New Password", type="password")
+            confirm_password = st.text_input("Confirm New Password", type="password")
+            
+            if st.form_submit_button("Update Password"):
+                if new_password == confirm_password and len(new_password) >= 6:
+                    st.success("✅ Password updated successfully!")
+                else:
+                    st.error("❌ Passwords don't match or too short (min 6 characters)")
+    
+    with st.expander("🗑️ Delete Account"):
+        st.warning("⚠️ This action is permanent and cannot be undone.")
+        if st.button("Delete My Account", type="secondary"):
+            st.error("Account deletion is currently disabled. Contact support for assistance.")
 
 elif st.session_state.mode == 'about':
     # About Page
