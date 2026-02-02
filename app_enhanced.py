@@ -1081,13 +1081,17 @@ if st.session_state.mode == 'home':
         # Landing Page - Hero Section with Welcome Banner
         col_left, col_center, col_right = st.columns([1, 2, 1])
         
-        # Left side - Quote
+        # Left side - Quote + Stat
         with col_left:
             st.markdown("""
-            <div style='text-align: center; padding: 1.5rem 1rem; background: linear-gradient(135deg, #f0f7ff 0%, #e0e7ff 100%); border-radius: 10px; height: 100%; display: flex; align-items: center; justify-content: center;'>
+            <div style='text-align: center; padding: 1.5rem 1rem; background: linear-gradient(135deg, #f0f7ff 0%, #e0e7ff 100%); border-radius: 10px; min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: space-between;'>
                 <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 700; margin: 0; line-height: 1.6;'>
                     "Your resume is your first impression."
                 </p>
+                <div style='width: 100%; border-top: 1px solid rgba(37, 99, 235, 0.2); padding-top: 1rem; margin-top: 0.5rem;'>
+                    <p style='color: #2563eb; font-size: 1.2rem; font-weight: 900; margin: 0;'>95%</p>
+                    <p style='color: #4a5568; font-size: 0.75rem; font-weight: 600; margin: 0.25rem 0 0 0;'>ATS Success Rate</p>
+                </div>
             </div>
             """, unsafe_allow_html=True)
         
@@ -1103,13 +1107,17 @@ if st.session_state.mode == 'home':
             </div>
             """, unsafe_allow_html=True)
         
-        # Right side - Quote
+        # Right side - Quote + Stat
         with col_right:
             st.markdown("""
-            <div style='text-align: center; padding: 1.5rem 1rem; background: linear-gradient(135deg, #e0e7ff 0%, #f0f7ff 100%); border-radius: 10px; height: 100%; display: flex; align-items: center; justify-content: center;'>
+            <div style='text-align: center; padding: 1.5rem 1rem; background: linear-gradient(135deg, #e0e7ff 0%, #f0f7ff 100%); border-radius: 10px; min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: space-between;'>
                 <p style='color: #2563eb; font-size: 0.85rem; font-weight: 700; margin: 0; line-height: 1.6;'>
                     "Stand out, get hired faster."
                 </p>
+                <div style='width: 100%; border-top: 1px solid rgba(37, 99, 235, 0.2); padding-top: 1rem; margin-top: 0.5rem;'>
+                    <p style='color: #2563eb; font-size: 1.2rem; font-weight: 900; margin: 0;'>20+</p>
+                    <p style='color: #4a5568; font-size: 0.75rem; font-weight: 600; margin: 0.25rem 0 0 0;'>Professional Templates</p>
+                </div>
             </div>
             """, unsafe_allow_html=True)
         
@@ -1132,13 +1140,17 @@ if st.session_state.mode == 'home':
             # Hero Section + Welcome for logged-in users with side quotes
             col_left, col_center, col_right = st.columns([1, 2, 1])
             
-            # Left side - Quote
+            # Left side - Quote + Stat
             with col_left:
                 st.markdown("""
-                <div style='text-align: center; padding: 1.5rem 1rem; background: linear-gradient(135deg, #f0f7ff 0%, #e0e7ff 100%); border-radius: 10px; height: 100%; display: flex; align-items: center; justify-content: center;'>
+                <div style='text-align: center; padding: 1.5rem 1rem; background: linear-gradient(135deg, #f0f7ff 0%, #e0e7ff 100%); border-radius: 10px; min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: space-between;'>
                     <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 700; margin: 0; line-height: 1.6;'>
                         "Great resumes open doors."
                     </p>
+                    <div style='width: 100%; border-top: 1px solid rgba(37, 99, 235, 0.2); padding-top: 1rem; margin-top: 0.5rem;'>
+                        <p style='color: #2563eb; font-size: 1.2rem; font-weight: 900; margin: 0;'>50K+</p>
+                        <p style='color: #4a5568; font-size: 0.75rem; font-weight: 600; margin: 0.25rem 0 0 0;'>Users Hired</p>
+                    </div>
                 </div>
                 """, unsafe_allow_html=True)
             
@@ -1152,13 +1164,17 @@ if st.session_state.mode == 'home':
                 </div>
                 """, unsafe_allow_html=True)
             
-            # Right side - Quote
+            # Right side - Quote + Stat
             with col_right:
                 st.markdown("""
-                <div style='text-align: center; padding: 1.5rem 1rem; background: linear-gradient(135deg, #e0e7ff 0%, #f0f7ff 100%); border-radius: 10px; height: 100%; display: flex; align-items: center; justify-content: center;'>
+                <div style='text-align: center; padding: 1.5rem 1rem; background: linear-gradient(135deg, #e0e7ff 0%, #f0f7ff 100%); border-radius: 10px; min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: space-between;'>
                     <p style='color: #2563eb; font-size: 0.85rem; font-weight: 700; margin: 0; line-height: 1.6;'>
                         "Your next opportunity awaits."
                     </p>
+                    <div style='width: 100%; border-top: 1px solid rgba(37, 99, 235, 0.2); padding-top: 1rem; margin-top: 0.5rem;'>
+                        <p style='color: #2563eb; font-size: 1.2rem; font-weight: 900; margin: 0;'>⚡ 5 Min</p>
+                        <p style='color: #4a5568; font-size: 0.75rem; font-weight: 600; margin: 0.25rem 0 0 0;'>Quick Build</p>
+                    </div>
                 </div>
                 """, unsafe_allow_html=True)
         
