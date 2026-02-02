@@ -132,30 +132,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-col_nav_left, col_nav_mid, col_nav_right = st.columns([1, 3, 1])
-
-with col_nav_left:
-    pass
-
-with col_nav_mid:
-    pass  # Middle space for nav items if needed
-
-with col_nav_right:
-    if not st.session_state.user_authenticated:
-        # Create a layout for Sign In and Sign Up buttons side by side
-        nav_col1, nav_col2 = st.columns(2, gap="small")
-        with nav_col1:
-            if st.button("Sign In", use_container_width=True, key="nav_signin", type="secondary"):
-                st.session_state.show_auth_modal = True
-                st.rerun()
-        with nav_col2:
-            if st.button("Sign Up", use_container_width=True, key="nav_signup", type="primary"):
-                st.session_state.show_auth_modal = True
-                st.rerun()
-    else:
-        user_name = st.session_state.get('user_name', 'User')
-        st.markdown(f"<div style='text-align: right; padding-top: 0.5rem;'><p style='margin: 0; font-weight: 600; color: #2563eb; font-size: 0.95rem;'>👤 {user_name}</p></div>", unsafe_allow_html=True)
-
 st.markdown("<br>", unsafe_allow_html=True)
 
 # Enhanced CSS for ResumeGemini-like experience
@@ -1109,6 +1085,39 @@ if st.session_state.mode == 'home':
             <p class='hero-subtitle' style='font-weight: 700; font-size: 1.3rem;'><strong>AI-Powered • ATS-Optimized • 20+ Professional Templates</strong></p>
         </div>
         """, unsafe_allow_html=True)
+        
+        # Welcome Message for Guests
+        if not st.session_state.user_authenticated:
+            col1, col2, col3 = st.columns([1, 3, 1])
+            with col2:
+                st.markdown("""
+                <div style='text-align: center; padding: 2rem 1rem; background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%); border-radius: 15px; border-left: 5px solid #2563eb; margin-bottom: 2rem;'>
+                    <h2 style='color: #1e3a8a; font-size: 2rem; font-weight: 800; margin: 0 0 0.5rem 0;'>Welcome to SoulSkill! 👋</h2>
+                    <p style='color: #4a5568; font-size: 1.1rem; font-weight: 600; margin: 0.5rem 0; line-height: 1.6;'>
+                        Build professional resumes, cover letters, and more with AI-powered assistance. 
+                        <br><strong>Join thousands of job seekers creating winning resumes.</strong>
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                col_a, col_b, col_c = st.columns(3)
+                with col_a:
+                    if st.button("🔐 Sign In", use_container_width=True, key="hero_signin", type="secondary"):
+                        st.session_state.show_auth_modal = True
+                        st.rerun()
+                with col_b:
+                    if st.button("✨ Create Account", use_container_width=True, key="hero_signup", type="primary"):
+                        st.session_state.show_auth_modal = True
+                        st.rerun()
+                with col_c:
+                    if st.button("👤 Continue as Guest", use_container_width=True, key="hero_guest"):
+                        st.info("✅ Great! You can explore as a guest and sign up later.")
+        else:
+            # Welcome back message for logged-in users
+            col1, col2, col3 = st.columns([1, 3, 1])
+            with col2:
+                user_name = st.session_state.get('user_name', 'User')
+                st.success(f"👋 **Welcome back, {user_name}!** Ready to create amazing resumes?")
         
         st.markdown("<br>", unsafe_allow_html=True)
     
