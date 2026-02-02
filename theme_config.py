@@ -5,6 +5,19 @@ Enhanced Theme Configuration for SoulSkill
 # Custom CSS for enhanced UI
 ENHANCED_CSS = """
 <style>
+    /* Import Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap');
+    
+    /* Set default font for entire app */
+    * {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    
+    /* Use Poppins for headings */
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Poppins', sans-serif;
+    }
+    
     /* Main app background with gradient */
     .main {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -24,48 +37,158 @@ ENHANCED_CSS = """
     /* Sidebar styling */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        color: white !important;
+    }
+    
+    [data-testid="stSidebar"] * {
+        color: white !important;
     }
     
     [data-testid="stSidebar"] .css-1d391kg {
-        color: white;
+        color: white !important;
     }
     
     [data-testid="stSidebar"] .stMarkdown {
-        color: white;
+        color: white !important;
     }
     
-    /* Sidebar text colors */
+    [data-testid="stSidebar"] .stMarkdown p,
+    [data-testid="stSidebar"] .stMarkdown div {
+        color: white !important;
+    }
+    
+    /* Sidebar text colors - all elements */
     [data-testid="stSidebar"] h1,
     [data-testid="stSidebar"] h2,
     [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] h4,
+    [data-testid="stSidebar"] h5,
+    [data-testid="stSidebar"] h6,
     [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span,
     [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] div,
     [data-testid="stSidebar"] .stCaption {
         color: white !important;
     }
     
     /* Sidebar expander styling */
     [data-testid="stSidebar"] .streamlit-expanderHeader {
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: rgba(255, 255, 255, 0.15);
+        color: white !important;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+    
+    [data-testid="stSidebar"] .streamlit-expanderHeader p {
+        color: white !important;
+    }
+    
+    [data-testid="stSidebar"] .streamlit-expanderContent {
+        background-color: rgba(255, 255, 255, 0.08);
         color: white !important;
         border-radius: 8px;
     }
     
-    [data-testid="stSidebar"] .streamlit-expanderContent {
-        background-color: rgba(255, 255, 255, 0.05);
-        color: white;
-        border-radius: 8px;
+    [data-testid="stSidebar"] .streamlit-expanderContent * {
+        color: white !important;
     }
     
-    /* Headers with gradient text */
-    h1 {
+    /* Sidebar checkboxes */
+    [data-testid="stSidebar"] .stCheckbox label {
+        color: white !important;
+    }
+    
+    /* Sidebar dividers */
+    [data-testid="stSidebar"] hr {
+        border-color: rgba(255, 255, 255, 0.3) !important;
+    }
+    
+    /* Headers with gradient text (main content only, not sidebar) */
+    .main h1 {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 800;
+        font-size: 3rem;
+        margin-bottom: 1rem;
     }
     
+    /* Ensure main content text is visible */
+    .main h2 {
+        color: #2d3748 !important;
+        font-size: 2rem !important;
+        font-weight: 700 !important;
+        margin-top: 2rem !important;
+        margin-bottom: 1rem !important;
+        background: none !important;
+        -webkit-text-fill-color: #2d3748 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+    
+    .main h3 {
+        color: #2d3748 !important;
+        font-size: 1.5rem !important;
+        font-weight: 600 !important;
+        margin-top: 1.5rem !important;
+        margin-bottom: 0.75rem !important;
+        background: none !important;
+        -webkit-text-fill-color: #2d3748 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+    
+    .main h4, .main h5, .main h6 {
+        color: #4a5568 !important;
+        font-weight: 600 !important;
+        background: none !important;
+        -webkit-text-fill-color: #4a5568 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+    
+    /* Ensure paragraph text is dark and readable */
+    .main p {
+        color: #2d3748 !important;
+        font-size: 1rem !important;
+        line-height: 1.7 !important;
+    }
+    
+    .main .stMarkdown p {
+        color: #2d3748 !important;
+    }
+    
+    /* Buttons - Main content */
+    .stButton>button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white !important;
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px 0 rgba(102, 126, 234, 0.4);
+        cursor: pointer;
+    }
+    
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px 0 rgba(102, 126, 234, 0.6);
+    }
+    
+    /* Sidebar buttons specifically */
+    [data-testid="stSidebar"] .stButton>button {
+        background: rgba(255, 255, 255, 0.2);
+        color: white !important;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(10px);
+    }
+    
+    [data-testid="stSidebar"] .stButton>button:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255
     /* Buttons */
     .stButton>button {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -97,30 +220,59 @@ ENHANCED_CSS = """
         transform: translateY(-2px);
     }
     
-    /* Input fields */
+    /* Input fields - modern and visible */
     .stTextInput>div>div>input,
     .stTextArea>div>div>textarea,
     .stSelectbox>div>div>select {
-        border-radius: 10px;
-        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        border: 2px solid #e2e8f0;
+        padding: 0.75rem !important;
+        font-size: 1rem !important;
+        color: #2d3748 !important;
         transition: all 0.3s ease;
+        background: white;
     }
     
     .stTextInput>div>div>input:focus,
     .stTextArea>div>div>textarea:focus,
     .stSelectbox>div>div>select:focus {
         border-color: #667eea;
-        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+    
+    /* Text area specific */
+    .stTextArea>div>div>textarea {
+        min-height: 120px;
+        line-height: 1.6;
+    }
+    
+    /* Select boxes */
+    .stSelectbox>div>div>select {
+        cursor: pointer;
     }
     
     /* Progress bar */
     .stProgress > div > div > div > div {
         background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        height: 8px;
+        border-radius: 10px;
     }
     
-    /* Metrics */
+    /* Metrics - larger and more prominent */
     [data-testid="stMetricValue"] {
-        font-size: 2rem;
+        font-size: 2.5rem !important;
+        font-weight: 800 !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    [data-testid="stMetricLabel"] {
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+        color: #4a5568 !important;
+    }
         font-weight: 700;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
@@ -266,6 +418,145 @@ ENHANCED_CSS = """
         background: #4caf50;
         color: white;
         border-color: #4caf50;
+    }
+    
+    /* Dashboard Cards - Feature Cards */
+    .dashboard-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.75rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        height: 100%;
+        min-height: 180px;
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        border-color: #667eea;
+    }
+    
+    .dashboard-card h3 {
+        color: #2d3748 !important;
+        font-size: 1.3rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 0.75rem !important;
+        background: none !important;
+        -webkit-text-fill-color: #2d3748 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+    
+    .dashboard-card p {
+        color: #4a5568 !important;
+        font-size: 0.95rem !important;
+        line-height: 1.6 !important;
+        margin: 0 !important;
+    }
+    
+    /* Hero Section - Homepage */
+    .hero-section {
+        text-align: center;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .hero-title {
+        font-size: 3.5rem !important;
+        font-weight: 900 !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem !important;
+        line-height: 1.2 !important;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.3rem !important;
+        font-weight: 700 !important;
+        color: #2d3748 !important;
+        margin-bottom: 0 !important;
+    }
+    
+    /* Stats Section */
+    .stat-item {
+        text-align: center;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem !important;
+        font-weight: 900 !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem !important;
+        display: block;
+    }
+    
+    .stat-label {
+        font-size: 1rem !important;
+        font-weight: 700 !important;
+        color: #4a5568 !important;
+        display: block;
+    }
+    
+    /* Info Boxes - How It Works Cards */
+    .info-box {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        border-radius: 15px;
+        padding: 1.75rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        height: 100%;
+        min-height: 180px;
+    }
+    
+    .info-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.25);
+        border-color: #667eea;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    }
+    
+    .info-box h2 {
+        font-size: 2.5rem !important;
+        margin-bottom: 0.5rem !important;
+        color: #2d3748 !important;
+        background: none !important;
+        -webkit-text-fill-color: initial !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+    
+    .info-box h4 {
+        color: #2d3748 !important;
+        font-size: 1.2rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 0.75rem !important;
+        background: none !important;
+        -webkit-text-fill-color: #2d3748 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+    
+    .info-box p {
+        color: #4a5568 !important;
+        font-size: 0.95rem !important;
+        line-height: 1.6 !important;
+        margin: 0 !important;
     }
 </style>
 """

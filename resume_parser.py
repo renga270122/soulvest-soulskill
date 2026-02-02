@@ -103,18 +103,30 @@ class ResumeParser:
             model = genai.GenerativeModel('gemini-pro')
             
             prompt = f"""
-            Extract the following information from this resume and return it as a JSON object.
+            You are an expert resume parser. Extract the following information from this resume and return it as a JSON object.
             If any field is not found, use an empty string or empty array.
+            
+            CRITICAL INSTRUCTIONS FOR NAME EXTRACTION:
+            - The "full_name" should be the PERSON'S ACTUAL NAME (e.g., "John Smith", "Karthik Gowda")
+            - DO NOT use section headers like "Career Summary", "Professional Summary", "Resume", "CV"
+            - DO NOT use location information like "Bengaluru, Karnataka"
+            - DO NOT use job titles or company names
+            - The name is usually at the very top of the resume, often on the first line
+            - Look for a line with 2-4 capitalized words that are names, not headings
+            
+            For "city" field:
+            - Extract ONLY the city name where the person is located
+            - Example: "Bengaluru" or "New York" (just the city, not full address)
             
             Resume text:
             {text}
             
             Return JSON with this exact structure:
             {{
-                "full_name": "Full name",
+                "full_name": "Person's actual name (e.g., John Smith, NOT section headers)",
                 "email": "Email address",
                 "phone": "Phone number",
-                "city": "City/Location",
+                "city": "City name only",
                 "linkedin": "LinkedIn profile URL",
                 "github": "GitHub profile URL",
                 "portfolio": "Portfolio website URL",
@@ -140,7 +152,7 @@ class ResumeParser:
                 "languages": "Comma-separated list of languages"
             }}
             
-            Return ONLY valid JSON, no other text.
+            Return ONLY valid JSON, no other text. Double-check that full_name is a person's name, not a heading.
             """
             
             response = model.generate_content(prompt)
@@ -201,16 +213,134 @@ class ResumeParser:
         if github_match:
             data['github'] = f"https://{github_match.group()}"
         
-        # Extract name (first line or first capitalized words)
+        # Extract name - improved logic
+        # Common resume section headers to avoid
+        section_headers = [
+            'resume', 'cv', 'curriculum vitae', 'profile', 'summary', 'objective',
+            'career summary', 'professional summary', 'about', 'about me',
+            'contact', 'contact information', 'personal information', 'details',
+            'experience', 'work experience', 'employment', 'education',
+            'skills', 'technical skills', 'core competencies', 'expertise',
+            'projects', 'certifications', 'achievements', 'awards',
+            'references', 'hobbies', 'interests', 'languages'
+        ]
+        
+        location_keywords = ['location', 'address', 'city', 'state', 'country', 
+                           'pin', 'zip', 'postal', ':', 'email', 'phone', 
+                           'linkedin', 'github', 'portfolio', 'website']
+        
         lines = text.split('\n')
-        for line in lines[:5]:  # Check first 5 lines
+        name_candidates = []
+        
+        # Strategy 1: Look for name near contact info (within first 15 lines)
+        email_line_idx = -1
+        phone_line_idx = -1
+        
+        for idx, line in enumerate(lines[:15]):
+            if email_match and email_match.group() in line:
+                email_line_idx = idx
+            if phone_match and phone_match.group() in line:
+                phone_line_idx = idx
+        
+        # Check lines around contact info
+        contact_range = set()
+        if email_line_idx >= 0:
+            contact_range.update(range(max(0, email_line_idx - 3), min(len(lines), email_line_idx + 2)))
+        if phone_line_idx >= 0:
+            contact_range.update(range(max(0, phone_line_idx - 3), min(len(lines), phone_line_idx + 2)))
+        
+        # Strategy 2: Check first 20 lines for name-like patterns
+        for idx, line in enumerate(lines[:20]):
             line = line.strip()
-            if len(line) > 3 and len(line) < 50:
-                # Check if it looks like a name (2-4 capitalized words)
-                words = line.split()
-                if 2 <= len(words) <= 4 and all(w[0].isupper() for w in words if w):
-                    data['full_name'] = line
-                    break
+            
+            # Skip empty or very short/long lines
+            if len(line) < 3 or len(line) > 50:
+                continue
+            
+            line_lower = line.lower()
+            
+            # Skip section headers - exact match
+            if any(header == line_lower for header in section_headers):
+                continue
+            
+            # Skip partial matches of section headers
+            if any(header in line_lower for header in section_headers):
+                continue
+            
+            # Skip lines with common section header patterns
+            if line.endswith(':') or line.startswith('-') or line.startswith('•'):
+                continue
+            
+            # Skip lines with location keywords or contact patterns
+            if any(keyword in line_lower for keyword in location_keywords):
+                continue
+            
+            # Skip lines with email or phone
+            if '@' in line or re.search(r'\d{3}[-.\s]\d{3}[-.\s]\d{4}|\+\d{2}[-.\s]\d{10}', line):
+                continue
+            
+            # Skip lines with URLs
+            if 'http' in line_lower or 'www.' in line_lower or '.com' in line_lower:
+                continue
+            
+            # Check if it looks like a name
+            words = line.split()
+            
+            # Names typically have 2-4 words
+            if 2 <= len(words) <= 4:
+                # Additional check: skip if any word is a common resume keyword
+                resume_keywords = ['career', 'professional', 'work', 'technical', 'personal', 
+                                 'contact', 'academic', 'project', 'key', 'core']
+                if any(word.lower() in resume_keywords for word in words):
+                    continue
+                
+                # All words should start with capital and be mostly alphabetic
+                valid_name = True
+                for word in words:
+                    # Remove common punctuation
+                    word_clean = word.strip('.,')
+                    if not word_clean:
+                        continue
+                    # First letter should be uppercase
+                    if not word_clean[0].isupper():
+                        valid_name = False
+                        break
+                    # Should be mostly letters (allow apostrophes)
+                    alpha_chars = sum(c.isalpha() or c == "'" for c in word_clean)
+                    if alpha_chars < len(word_clean) * 0.8:
+                        valid_name = False
+                        break
+                
+                if valid_name:
+                    # Calculate score based on position and context
+                    score = 100 - idx  # Prefer earlier lines
+                    
+                    # Bonus if near contact info
+                    if idx in contact_range:
+                        score += 50
+                    
+                    # Bonus if it's one of the first 3 lines
+                    if idx < 3:
+                        score += 30
+                    
+                    # Penalty if it contains numbers
+                    if any(c.isdigit() for c in line):
+                        score -= 30
+                    
+                    name_candidates.append((score, line, idx))
+        
+        # Select best candidate
+        if name_candidates:
+            name_candidates.sort(reverse=True)
+            data['full_name'] = name_candidates[0][1]
+        
+        # Extract city/location
+        city_pattern = r'(?:Location|City|Address)[:\s]+([A-Za-z\s,]+?)(?:\n|$)'
+        city_match = re.search(city_pattern, text, re.IGNORECASE)
+        if city_match:
+            city_text = city_match.group(1).strip()
+            # Get just the city name (first part before comma)
+            data['city'] = city_text.split(',')[0].strip()
         
         # Try to extract skills section
         skills_section = re.search(r'(?:Skills?|Technical Skills?|Expertise)[:\s]+(.*?)(?:\n\n|\n[A-Z]|$)', 

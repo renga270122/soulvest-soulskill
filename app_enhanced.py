@@ -16,6 +16,8 @@ from template_config import (TEMPLATES, INDIAN_TEMPLATES, US_TEMPLATES, UK_TEMPL
 from industry_config import INDUSTRY_OPTIONS, INDUSTRY_KEYWORDS, MAJOR_INDIAN_CITIES, INDIAN_STATES
 from stream_config import STREAM_OPTIONS
 from education_config import DEGREE_OPTIONS
+from autocomplete_helper import (JOB_TITLES, TECHNICAL_SKILLS, COMPANIES, CITIES,
+                                 create_autocomplete_text_input, get_skill_suggestions)
 
 # Import AI and resume generation modules
 from ai_assistant import AIResumeAssistant, ATSOptimizer
@@ -463,6 +465,9 @@ init_session_state()
 
 # Import authentication
 from auth import get_auth_manager, show_auth_sidebar
+
+# Initialize auth manager early (creates session state keys)
+auth_manager = get_auth_manager()
 
 # Enhanced Sidebar with valuable content
 render_enhanced_sidebar()
@@ -1000,8 +1005,8 @@ if st.session_state.mode == 'home':
         # Landing Page - ResumeGemini Style
         st.markdown("""
         <div class='hero-section'>
-            <h1 class='hero-title'>✨ Build Your Resume in 5 Minutes</h1>
-            <p class='hero-subtitle'>AI-Powered • ATS-Optimized • 20+ Professional Templates</p>
+            <h1 class='hero-title' style='font-weight: 900;'><strong>✨ Build Your Resume in 5 Minutes</strong></h1>
+            <p class='hero-subtitle' style='font-weight: 700; font-size: 1.3rem;'><strong>AI-Powered • ATS-Optimized • 20+ Professional Templates</strong></p>
         </div>
         """, unsafe_allow_html=True)
         
@@ -1011,7 +1016,7 @@ if st.session_state.mode == 'home':
             with col2:
                 st.info("""
                 **👋 Welcome!** Sign in to save your resumes and access them from any device.
-                Or continue as guest to try it out!
+                **Or continue as guest to try it out!**
                 """)
                 
                 col_a, col_b, col_c = st.columns(3)
@@ -1038,13 +1043,13 @@ if st.session_state.mode == 'home':
     # Stats Section
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.markdown("<div class='stat-item'><div class='stat-number'>95%</div><div class='stat-label'>ATS Success Rate</div></div>", unsafe_allow_html=True)
+        st.markdown("<div class='stat-item'><div class='stat-number' style='font-weight: 900;'><strong>95%</strong></div><div class='stat-label' style='font-weight: 700;'><strong>ATS Success Rate</strong></div></div>", unsafe_allow_html=True)
     with col2:
-        st.markdown("<div class='stat-item'><div class='stat-number'>35+</div><div class='stat-label'>Global Templates</div></div>", unsafe_allow_html=True)
+        st.markdown("<div class='stat-item'><div class='stat-number' style='font-weight: 900;'><strong>35+</strong></div><div class='stat-label' style='font-weight: 700;'><strong>Global Templates</strong></div></div>", unsafe_allow_html=True)
     with col3:
-        st.markdown("<div class='stat-item'><div class='stat-number'>100%</div><div class='stat-label'>Free Forever</div></div>", unsafe_allow_html=True)
+        st.markdown("<div class='stat-item'><div class='stat-number' style='font-weight: 900;'><strong>100%</strong></div><div class='stat-label' style='font-weight: 700;'><strong>Free Forever</strong></div></div>", unsafe_allow_html=True)
     with col4:
-        st.markdown("<div class='stat-item'><div class='stat-number'>50K+</div><div class='stat-label'>Resumes Created</div></div>", unsafe_allow_html=True)
+        st.markdown("<div class='stat-item'><div class='stat-number' style='font-weight: 900;'><strong>50K+</strong></div><div class='stat-label' style='font-weight: 700;'><strong>Resumes Created</strong></div></div>", unsafe_allow_html=True)
     
     st.markdown("<br><br>", unsafe_allow_html=True)
     
@@ -1071,8 +1076,8 @@ if st.session_state.mode == 'home':
     st.markdown("---")
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        st.markdown("### 📤 Have an Existing Resume?")
-        st.caption("Upload your current resume (PDF, DOCX, TXT) and we'll auto-fill the details for you!")
+        st.markdown("<h3 style='font-weight: 800; color: #2d3748; font-size: 1.75rem;'><strong>📤 Have an Existing Resume?</strong></h3>", unsafe_allow_html=True)
+        st.markdown("<p style='font-weight: 600; color: #4a5568; font-size: 1.05rem;'><strong>Upload your current resume (PDF, DOCX, TXT) and we'll auto-fill the details for you!</strong></p>", unsafe_allow_html=True)
         
         uploaded_file = st.file_uploader(
             "Upload your resume",
@@ -1554,10 +1559,15 @@ elif st.session_state.mode == 'builder':
                 email = st.text_input("Email *", value=st.session_state.get('email', ''), key="email_step2")
                 phone = st.text_input("Phone *", value=st.session_state.get('phone', ''), key="phone_step2")
             with col2:
-                city_idx = 0
-                if st.session_state.get('city') in MAJOR_INDIAN_CITIES:
-                    city_idx = MAJOR_INDIAN_CITIES.index(st.session_state.get('city')) + 1
-                city = st.selectbox("City *", options=[""] + MAJOR_INDIAN_CITIES, index=city_idx, key="city_step2")
+                # Autocomplete for city
+                datalist_html_city = '<datalist id="cities">' + ''.join([f'<option value="{c}">' for c in CITIES]) + '</datalist>'
+                st.markdown(datalist_html_city, unsafe_allow_html=True)
+                
+                city_value = st.session_state.get('city', '')
+                city = st.text_input("City *", value=city_value, 
+                                    placeholder="Type city name...",
+                                    key="city_step2",
+                                    help="Start typing to see suggestions")
                 
                 linkedin = st.text_input("LinkedIn URL", value=st.session_state.get('linkedin', ''), 
                                         key="linkedin_step2",
@@ -1580,14 +1590,31 @@ elif st.session_state.mode == 'builder':
             st.markdown("### 🎯 Job Target")
             col1, col2 = st.columns(2)
             with col1:
-                job_title = st.text_input("Target Job Title *", value=st.session_state.get('job_title_target', ''), 
-                                         placeholder="e.g., Software Engineer", key="jobtitle_step2")
+                # Autocomplete for job title
+                datalist_html = '<datalist id="jobtitles">' + ''.join([f'<option value="{title}">' for title in JOB_TITLES]) + '</datalist>'
+                st.markdown(datalist_html, unsafe_allow_html=True)
+                
+                job_title_value = st.session_state.get('job_title_target', '')
+                job_title = st.text_input("Target Job Title *", value=job_title_value, 
+                                         placeholder="e.g., Software Engineer (Type for suggestions...)", 
+                                         key="jobtitle_step2")
+                
+                # Show popular suggestions
+                if not job_title_value:
+                    with st.expander("💡 Popular Job Titles", expanded=False):
+                        cols = st.columns(3)
+                        for idx, title in enumerate(JOB_TITLES[:12]):
+                            with cols[idx % 3]:
+                                if st.button(title, key=f"jobtitle_suggest_{idx}", use_container_width=True):
+                                    st.session_state.job_title_target = title
+                                    st.rerun()
+                
                 st.session_state.job_title_target = job_title
             with col2:
                 ind_idx = 0
-                if st.session_state.get('industry') in list(INDUSTRY_OPTIONS.keys()):
-                    ind_idx = list(INDUSTRY_OPTIONS.keys()).index(st.session_state.get('industry')) + 1
-                industry = st.selectbox("Industry *", options=[""] + list(INDUSTRY_OPTIONS.keys()), index=ind_idx, key="industry_step2")
+                if st.session_state.get('industry') in INDUSTRY_OPTIONS:
+                    ind_idx = INDUSTRY_OPTIONS.index(st.session_state.get('industry')) + 1
+                industry = st.selectbox("Industry *", options=[""] + INDUSTRY_OPTIONS, index=ind_idx, key="industry_step2")
                 st.session_state.industry = industry
             
             # Professional Summary with AI and Examples
@@ -1619,11 +1646,14 @@ elif st.session_state.mode == 'builder':
                     if st.button("✨ Generate with AI", key="ai_summary_btn", use_container_width=True):
                         with st.spinner("Generating AI summary..."):
                             profile_data = {
-                                'job_title': job_title,
+                                'job_title_target': job_title,
                                 'industry': industry,
-                                'experience': st.session_state.get('work_entries', [])
+                                'tech_skills': st.session_state.get('tech_skills', ''),
+                                'soft_skills': st.session_state.get('soft_skills', ''),
+                                'profile_type': 'experienced' if st.session_state.get('work_entries') else 'fresher',
+                                'full_name': st.session_state.get('full_name', '')
                             }
-                            ai_summary = ai_assistant.generate_summary(profile_data)
+                            ai_summary = ai_assistant.generate_professional_summary(profile_data)
                             if ai_summary:
                                 st.session_state.summary = ai_summary
                                 st.rerun()
@@ -1646,8 +1676,15 @@ elif st.session_state.mode == 'builder':
                                 st.session_state.tech_skills = skill
                             st.rerun()
             
+            # Autocomplete for skills
+            skill_datalist_html = '<datalist id="techskills">' + ''.join([f'<option value="{skill}">' for skill in TECHNICAL_SKILLS]) + '</datalist>'
+            st.markdown(skill_datalist_html, unsafe_allow_html=True)
+            
             tech_skills = st.text_area("Technical Skills *", value=st.session_state.get('tech_skills', ''), 
-                                      placeholder="Python, JavaScript, React, Node.js, AWS...", key="techskills_step2")
+                                      placeholder="Start typing skill names... (e.g., Python, JavaScript, React)",
+                                      key="techskills_step2",
+                                      help="Type to see autocomplete suggestions. Separate skills with commas.",
+                                      height=100)
             if tech_skills != st.session_state.get('tech_skills', ''):
                 st.session_state.tech_skills = tech_skills
             
@@ -1715,8 +1752,19 @@ elif st.session_state.mode == 'builder':
             
             # Add new work experience
             with st.expander("➕ Add Work Experience", expanded=len(st.session_state.work_entries) == 0):
-                work_title = st.text_input("Job Title", key="new_work_title")
-                work_company = st.text_input("Company", key="new_work_company")
+                # Autocomplete for job title in work experience
+                datalist_work = '<datalist id="worktitles">' + ''.join([f'<option value="{title}">' for title in JOB_TITLES]) + '</datalist>'
+                st.markdown(datalist_work, unsafe_allow_html=True)
+                
+                work_title = st.text_input("Job Title", key="new_work_title", 
+                                          placeholder="Type to see suggestions...")
+                
+                # Autocomplete for company
+                datalist_company = '<datalist id="companies">' + ''.join([f'<option value="{comp}">' for comp in COMPANIES]) + '</datalist>'
+                st.markdown(datalist_company, unsafe_allow_html=True)
+                
+                work_company = st.text_input("Company", key="new_work_company",
+                                            placeholder="Type company name...")
                 col1, col2 = st.columns(2)
                 with col1:
                     work_start = st.text_input("Start Date", placeholder="Jan 2020", key="new_work_start")
@@ -2975,10 +3023,18 @@ The letter should be compelling, specific, and highlight relevant experience. Ke
             st.rerun()
 
 # Footer
+st.markdown("<br><br>", unsafe_allow_html=True)
 st.markdown("---")
 st.markdown("""
-<div style='text-align: center; color: #666; padding: 20px;'>
-    <p><strong>✨ Soulvest AI Resume Builder</strong> - Build Your Resume in 5 Minutes</p>
-    <p>© 2026 Soulvest.ai • 100% Free Forever • No Credit Card Required</p>
+<div style='text-align: center; padding: 2rem 1rem; background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%); border-radius: 15px; margin-top: 2rem;'>
+    <p style='font-size: 1.2rem; font-weight: 700; color: #2d3748; margin-bottom: 0.5rem;'>
+        <strong>✨ Soulvest AI Resume Builder</strong> - Build Your Resume in 5 Minutes
+    </p>
+    <p style='font-size: 1rem; font-weight: 600; color: #4a5568; margin-bottom: 1rem;'>
+        <strong>© 2026 Soulvest.ai • 100% Free Forever • No Credit Card Required</strong>
+    </p>
+    <p style='font-size: 0.9rem; color: #718096; margin-top: 1rem;'>
+        Made with ❤️ for job seekers worldwide
+    </p>
 </div>
 """, unsafe_allow_html=True)

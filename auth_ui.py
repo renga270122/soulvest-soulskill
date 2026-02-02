@@ -253,7 +253,8 @@ def show_user_profile():
     """Display user profile section"""
     auth = get_auth_manager()
     
-    if not auth.is_authenticated() and not st.session_state.user_authenticated:
+    # Check if user is authenticated using legacy session state
+    if not st.session_state.get('user_authenticated', False) and not auth.is_authenticated():
         return
     
     user_email = st.session_state.get('user_email', 'user@example.com')

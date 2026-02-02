@@ -54,6 +54,7 @@ class AuthManager:
     
     def is_authenticated(self) -> bool:
         """Check if user is authenticated"""
+        self._init_session()  # Ensure session is initialized
         return st.session_state[self.session_key]['is_authenticated']
     
     def get_current_user(self) -> Optional[Dict]:

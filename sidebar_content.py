@@ -168,14 +168,14 @@ def show_resume_checklist():
         categories[cat].append((idx, item['item']))
     
     for category, items in categories.items():
-        with st.expander(f"**{category.upper()}**", expanded=False):
-            for idx, item_text in items:
-                checked = st.checkbox(
-                    item_text,
-                    value=st.session_state.checklist_items[idx],
-                    key=f"checklist_{idx}"
-                )
-                st.session_state.checklist_items[idx] = checked
+        st.markdown(f"**{category.upper()}**")
+        for idx, item_text in items:
+            checked = st.checkbox(
+                item_text,
+                value=st.session_state.checklist_items[idx],
+                key=f"checklist_{idx}"
+            )
+            st.session_state.checklist_items[idx] = checked
     
     # Calculate completion
     completed = sum(st.session_state.checklist_items.values())
@@ -258,23 +258,32 @@ def render_enhanced_sidebar():
     Usage: Call this function in your main app
     """
     with st.sidebar:
-        # Logo/branding
-        st.markdown("# 🎯 SoulSkill")
-        st.caption("AI-Powered Resume Builder")
+        # Logo/branding with enhanced design
+        st.markdown("""
+        <div style='text-align: center; padding: 1rem 0; margin-bottom: 1rem;'>
+            <div style='font-size: 3rem; margin-bottom: 0.5rem;'>🚀</div>
+            <h1 style='font-size: 1.8rem; font-weight: 800; margin: 0; color: white; font-family: "Poppins", sans-serif;'>
+                SoulSkill
+            </h1>
+            <p style='font-size: 0.95rem; font-weight: 600; margin: 0.25rem 0; color: rgba(255,255,255,0.9);'>
+                AI-Powered Resume Builder
+            </p>
+            <p style='font-size: 0.85rem; font-weight: 500; margin: 0.25rem 0; color: rgba(255,255,255,0.75); font-style: italic;'>
+                ✨ Build Your Future in Minutes
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
         
         st.divider()
         
-        # Progress tracker
+        # Progress tracker (if in progress)
         if st.session_state.get('step', 0) > 1:
             show_progress_tracker()
             st.divider()
         
-        # Motivational quote
-        show_motivational_quote()
-        st.divider()
-        
-        # Quick tips based on current step
+        # Context-aware tips (most important - show first)
         current_step = st.session_state.get('step', 0)
+        st.markdown("### 💡 Quick Tips")
         if current_step == 2:
             show_quick_tips("summary")
         elif current_step == 3:
@@ -284,25 +293,35 @@ def render_enhanced_sidebar():
         
         st.divider()
         
-        # ATS Statistics
-        with st.expander("📈 Resume Stats", expanded=False):
-            show_ats_statistics()
-        
-        # Resume Checklist
-        with st.expander("✅ Resume Checklist", expanded=False):
+        # Actionable sections
+        st.markdown("### 📋 Your Checklist")
+        with st.expander("Resume Checklist", expanded=False):
             show_resume_checklist()
-        
-        # Success Stories
-        with st.expander("⭐ Success Stories", expanded=False):
-            show_success_stories()
-        
-        # Job Search Resources
-        with st.expander("🔗 Job Resources", expanded=False):
-            show_job_search_resources()
         
         st.divider()
         
-        # Live stats
+        # Resources & Help
+        st.markdown("### 📚 Resources")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            with st.expander("📈 Stats", expanded=False):
+                show_ats_statistics()
+        with col2:
+            with st.expander("🔗 Jobs", expanded=False):
+                show_job_search_resources()
+        
+        with st.expander("⭐ Success Stories", expanded=False):
+            show_success_stories()
+        
+        st.divider()
+        
+        # Motivation
+        show_motivational_quote()
+        
+        st.divider()
+        
+        # Live stats (compact)
         show_live_stats()
         
         st.divider()
