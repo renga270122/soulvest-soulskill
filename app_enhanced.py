@@ -516,6 +516,14 @@ with st.sidebar:
         st.session_state['mode'] = 'dashboard'
         st.rerun()
     
+    if st.button("ℹ️ About", use_container_width=True, key="sidebar_about_btn"):
+        st.session_state['mode'] = 'about'
+        st.rerun()
+    
+    if st.button("📧 Contact Us", use_container_width=True, key="sidebar_contact_btn"):
+        st.session_state['mode'] = 'contact'
+        st.rerun()
+    
     # AI Status
     st.markdown("---")
     if st.session_state.ai_enabled:
@@ -3018,6 +3026,247 @@ The letter should be compelling, specific, and highlight relevant experience. Ke
             st.rerun()
     with col3:
         if st.button("📄 Build Resume", use_container_width=True, key="cl_resume_btn"):
+            st.session_state.mode = 'builder'
+            st.session_state.step = 1
+            st.rerun()
+
+elif st.session_state.mode == 'about':
+    # About Page
+    st.markdown("""
+    <div style='text-align: center; padding: 2rem 0;'>
+        <div style='font-size: 4rem; margin-bottom: 1rem;'>🚀</div>
+        <h1 style='font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>
+            About SoulSkill
+        </h1>
+        <p style='font-size: 1.3rem; color: #4a5568; font-weight: 600; margin-top: 1rem;'>
+            Your AI-Powered Career Companion
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 3, 1])
+    with col2:
+        st.markdown("""
+        ### 🎯 Our Mission
+        
+        **SoulSkill** is more than just a resume builder - it's your complete career success platform. 
+        We believe that everyone deserves a professional, ATS-optimized resume that showcases their 
+        unique skills and experiences, without the need for expensive services or design skills.
+        
+        ### ✨ What Makes Us Different
+        
+        **🤖 AI-Powered Intelligence**
+        - Smart content generation using Google Gemini AI
+        - ATS optimization with real-time scoring
+        - Personalized suggestions based on your role and industry
+        
+        **🎨 Professional Templates**
+        - 35+ professionally designed templates
+        - Global templates (India, US, UK, Canada, Australia, UAE, Singapore)
+        - Industry-specific designs
+        - One-click template switching
+        
+        **💼 Complete Career Tools**
+        - Resume builder with AI assistance
+        - Cover letter generator
+        - ATS score checker
+        - Content library with proven examples
+        - Multi-resume management dashboard
+        
+        **🆓 100% Free Forever**
+        - No credit card required
+        - No hidden fees or premium plans
+        - All features available to everyone
+        - Export to PDF, DOCX, or HTML
+        
+        ### 📊 By The Numbers
+        """)
+        
+        col_a, col_b, col_c = st.columns(3)
+        with col_a:
+            st.metric("Users Helped", "50,000+", "Growing daily")
+        with col_b:
+            st.metric("Resumes Created", "15,000+", "This month")
+        with col_c:
+            st.metric("Success Rate", "95%", "ATS Pass Rate")
+        
+        st.markdown("""
+        ### 🌟 Our Story
+        
+        SoulSkill was born from a simple idea: **job hunting shouldn't be harder than the job itself**.
+        
+        We saw talented professionals struggling with:
+        - Expensive resume services (₹2000-₹5000 per resume)
+        - Complex design tools requiring hours to master
+        - Resumes getting rejected by ATS systems
+        - No guidance on what makes a great resume
+        
+        So we built **SoulSkill** - combining cutting-edge AI technology with professional resume 
+        design expertise to make creating a winning resume as simple as filling out a form.
+        
+        ### 🚀 Technology Stack
+        
+        - **AI Engine**: Google Gemini Pro for intelligent content generation
+        - **Frontend**: Streamlit for fast, responsive user experience
+        - **Templates**: Professional HTML/CSS designs optimized for ATS
+        - **Export**: Multi-format support (PDF, DOCX, HTML)
+        
+        ### 💡 Our Values
+        
+        **🌈 Accessibility**: Career tools should be free and available to everyone
+        
+        **👨 Quality**: Professional results without compromising on quality
+        
+        **🤝 User-First**: Built with feedback from real job seekers
+        
+        **🔒 Privacy**: Your data is yours - we never share or sell it
+        
+        **⚡ Innovation**: Constantly improving with the latest AI technology
+        
+        ### 🎓 Who We Help
+        
+        - **Fresh Graduates**: Launch your career with a standout resume
+        - **Professionals**: Advance your career with ATS-optimized resumes
+        - **Career Changers**: Highlight transferable skills effectively
+        - **Freelancers**: Showcase diverse experience professionally
+        - **International Job Seekers**: Templates for multiple countries
+        
+        ### 🌍 Global Reach
+        
+        We serve job seekers worldwide with localized templates and content for:
+        - 🇮🇳 India (Mumbai, Bangalore, Delhi, Hyderabad, Pune)
+        - 🇺🇸 United States
+        - 🇬🇧 United Kingdom  
+        - 🇨🇦 Canada
+        - 🇦🇺 Australia
+        - 🇦🇪 UAE
+        - 🇸🇬 Singapore
+        
+        ### 💚 Thank You
+        
+        Thank you for choosing **SoulSkill**. We're honored to be part of your career journey.
+        """)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        if st.button("🚀 Start Building Now", use_container_width=True, type="primary", key="about_cta"):
+            st.session_state.mode = 'builder'
+            st.session_state.step = 1
+            st.rerun()
+
+elif st.session_state.mode == 'contact':
+    # Contact Us Page
+    st.markdown("""
+    <div style='text-align: center; padding: 2rem 0;'>
+        <div style='font-size: 4rem; margin-bottom: 1rem;'>📧</div>
+        <h1 style='font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>
+            Contact Us
+        </h1>
+        <p style='font-size: 1.3rem; color: #4a5568; font-weight: 600; margin-top: 1rem;'>
+            We'd Love to Hear From You!
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 3, 1])
+    with col2:
+        st.markdown("""
+        ### 💬 Get in Touch
+        
+        Have questions, feedback, or need help? We're here for you!
+        
+        ### 📧 Email Us
+        
+        For any inquiries, support requests, or feedback, reach out to us at:
+        """)
+        
+        st.markdown("""
+        <div style='text-align: center; padding: 2rem; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); 
+                    border-radius: 15px; margin: 2rem 0; border: 2px solid #667eea;'>
+            <p style='font-size: 0.9rem; color: #666; margin-bottom: 0.5rem; font-weight: 600;'>Official Email</p>
+            <a href='mailto:soulvest1111@gmail.com' style='font-size: 1.5rem; font-weight: 700; color: #667eea; text-decoration: none;'>
+                📧 soulvest1111@gmail.com
+            </a>
+            <p style='font-size: 0.85rem; color: #666; margin-top: 1rem;'>Click to send us an email</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        ### 🤝 How We Can Help
+        
+        **💡 General Inquiries**
+        - Questions about features
+        - Partnership opportunities
+        - Media inquiries
+        
+        **🐛 Technical Support**
+        - Bug reports
+        - Feature requests
+        - Technical issues
+        
+        **💼 Career Services**
+        - Resume review feedback
+        - Template suggestions
+        - Career advice
+        
+        **🌟 Feedback & Suggestions**
+        - Share your experience
+        - Suggest new features
+        - Template requests
+        
+        ### ⏰ Response Time
+        
+        We typically respond within:
+        - **24 hours** for general inquiries
+        - **48 hours** for technical issues
+        - **72 hours** during peak periods
+        
+        ### 🌐 Connect With Us
+        
+        Stay updated with the latest features and career tips!
+        
+        ### 📝 Quick Contact Form
+        
+        Send us a message directly:
+        """)
+        
+        with st.form("contact_form", clear_on_submit=True):
+            contact_name = st.text_input("Your Name *", placeholder="John Doe")
+            contact_email = st.text_input("Your Email *", placeholder="your@email.com")
+            contact_subject = st.selectbox(
+                "Subject *",
+                ["", "General Inquiry", "Technical Support", "Feature Request", 
+                 "Bug Report", "Partnership", "Feedback", "Other"]
+            )
+            contact_message = st.text_area(
+                "Message *",
+                placeholder="Tell us how we can help you...",
+                height=150
+            )
+            
+            submitted = st.form_submit_button("📤 Send Message", use_container_width=True, type="primary")
+            
+            if submitted:
+                if not contact_name or not contact_email or not contact_subject or not contact_message:
+                    st.error("❌ Please fill in all fields")
+                elif "@" not in contact_email:
+                    st.error("❌ Please enter a valid email address")
+                else:
+                    st.success("✅ Thank you for your message!")
+                    st.info("📧 Your message has been prepared. Click below to send via email:")
+                    
+                    mailto_link = f"mailto:soulvest1111@gmail.com?subject={contact_subject} - {contact_name}&body=From: {contact_name} ({contact_email})%0A%0A{contact_message}"
+                    st.markdown(f'<a href="{mailto_link}" target="_blank"><button style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.75rem 2rem; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; font-size: 1rem; width: 100%;">📬 Open Email Client</button></a>', unsafe_allow_html=True)
+                    st.caption("Or copy and paste: soulvest1111@gmail.com")
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("---")
+        
+        if st.button("📄 Build Resume", use_container_width=True, type="primary", key="contact_cta"):
             st.session_state.mode = 'builder'
             st.session_state.step = 1
             st.rerun()
