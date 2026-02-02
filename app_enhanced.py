@@ -1110,24 +1110,6 @@ if st.session_state.mode == 'home':
         </div>
         """, unsafe_allow_html=True)
         
-        # Hero CTA Section (for new users)
-        if not st.session_state.user_authenticated:
-            col1, col2, col3 = st.columns([1, 2, 1])
-            with col2:
-                # Primary CTA: Get Started
-                if st.button("🚀 Start Building For Free", use_container_width=True, type="primary", key="hero_get_started"):
-                    st.session_state.show_auth_modal = True
-                    st.rerun()
-                
-                # Secondary CTA: Already have account
-                col_login_a, col_login_b = st.columns([1.5, 1.5])
-                with col_login_a:
-                    st.markdown("<p style='text-align: center; font-size: 0.9rem; color: #4a5568; margin-top: 0.5rem;'>Already have an account?</p>", unsafe_allow_html=True)
-                with col_login_b:
-                    if st.button("Log in here →", use_container_width=True, type="secondary", key="hero_login"):
-                        st.session_state.show_auth_modal = True
-                        st.rerun()
-        
         st.markdown("<br>", unsafe_allow_html=True)
     
     # Stats Section
