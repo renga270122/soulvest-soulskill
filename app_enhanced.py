@@ -73,8 +73,10 @@ st.markdown("""
 <div style='display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); border-radius: 0; margin: -1rem -1rem 1rem -1rem; box-shadow: 0 2px 8px rgba(30, 58, 138, 0.15);'>
     <div style='font-size: 1.5rem; font-weight: 900; color: white; margin: 0;'>✨ SoulSkill</div>
     <div style='display: flex; gap: 0.75rem; align-items: center;'>
-        <a href='#' style='background: #ffffff; color: #1e3a8a; text-decoration: none; font-weight: 900; font-size: 1.05rem; padding: 0.65rem 1.5rem; border-radius: 8px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); display: inline-block; transition: all 0.2s;'>Build Resume</a>
-        <a href='#' style='background: transparent; color: #ffffff; text-decoration: none; font-weight: 900; font-size: 1.05rem; padding: 0.65rem 1.5rem; border: 2px solid #ffffff; border-radius: 8px; cursor: pointer; display: inline-block; transition: all 0.2s;'>Sign In</a>
+        <a href='#' style='background: #ffffff; color: #1e3a8a; text-decoration: none; font-weight: 900; font-size: 1.05rem; padding: 0.65rem 1.5rem; border-radius: 8px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); display: inline-block; transition: all 0.2s;'>🚀 Build Resume</a>
+        <a href='#' style='background: transparent; color: #ffffff; text-decoration: none; font-weight: 900; font-size: 1.05rem; padding: 0.65rem 1.5rem; border: 2px solid #ffffff; border-radius: 8px; cursor: pointer; display: inline-block; transition: all 0.2s;'>🔐 Sign In</a>
+        <a href='#' style='background: transparent; color: #ffffff; text-decoration: none; font-weight: 900; font-size: 1.05rem; padding: 0.65rem 1.5rem; border: 2px solid #ffffff; border-radius: 8px; cursor: pointer; display: inline-block; transition: all 0.2s;'>✨ Create Account</a>
+        <a href='#' style='background: transparent; color: #ffffff; text-decoration: none; font-weight: 900; font-size: 1.05rem; padding: 0.65rem 1.5rem; border: 2px solid #ffffff; border-radius: 8px; cursor: pointer; display: inline-block; transition: all 0.2s;'>👤 Guest</a>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -1129,35 +1131,8 @@ if st.session_state.mode == 'home':
         
         # Auth buttons for guests
         if not st.session_state.user_authenticated:
-
-            # Main CTA Button
-            st.markdown("""
-            <div style='text-align: center; margin-top: 1.2rem;'>
-                <button onclick="window.location.href='#'" style='padding: 0.85rem 2rem; background: #ffffff; color: #1e3a8a; border: 3px solid #1e3a8a; border-radius: 10px; font-size: 1.08rem; font-weight: 900; cursor: pointer; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); transition: all 0.3s ease;'>🚀 Build Your Resume For Free</button>
-                <p style='text-align:center; color:#4a5568; font-weight:600; font-size:0.85rem; margin-top:0.5rem;'>No credit card required</p>
-            </div>
-            """, unsafe_allow_html=True)
-
-            # Additional Auth Options
-            col_a, col_b, col_c = st.columns(3)
-            with col_a:
-                st.markdown("""
-                <div style='text-align: center;'>
-                    <button onclick="window.location.href='#'" style='padding: 0.65rem 1.5rem; background: #ffffff; color: #1e3a8a; border: 3px solid #1e3a8a; border-radius: 8px; font-size: 1rem; font-weight: 900; cursor: pointer; width: 100%; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);'>🔐 Sign In</button>
-                </div>
-                """, unsafe_allow_html=True)
-            with col_b:
-                st.markdown("""
-                <div style='text-align: center;'>
-                    <button onclick="window.location.href='#'" style='padding: 0.65rem 1.5rem; background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; width: 100%; box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);'>✨ Create Account</button>
-                </div>
-                """, unsafe_allow_html=True)
-            with col_c:
-                st.markdown("""
-                <div style='text-align: center;'>
-                    <button onclick="window.location.href='#'" style='padding: 0.65rem 1.5rem; background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; width: 100%; box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);'>👤 Continue as Guest</button>
-                </div>
-                """, unsafe_allow_html=True)
+            # Guest view - just show the hero with CTA
+            pass
         else:
             # Hero Section + Welcome for logged-in users with side quotes
             col_left, col_center, col_right = st.columns([1, 2, 1])
