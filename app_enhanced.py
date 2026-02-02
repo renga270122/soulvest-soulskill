@@ -68,91 +68,16 @@ if 'show_auth_modal' not in st.session_state:
 # Apply custom theme
 apply_custom_theme()
 
-# Top Navigation Bar (Udemy-style with blue theme)
+# Top Navigation Bar - HIGH VISIBILITY VERSION
 st.markdown("""
-<style>
-    .navbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem 1.5rem;
-        background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
-        border-radius: 0;
-        margin: -1rem -1rem 1rem -1rem;
-        box-shadow: 0 2px 8px rgba(30, 58, 138, 0.15);
-    }
-    .navbar-logo {
-        font-size: 1.5rem;
-        font-weight: 900;
-        color: white;
-        margin: 0;
-    }
-    .navbar-auth {
-        display: flex;
-        gap: 0.75rem;
-        align-items: center;
-    }
-    .navbar-links {
-        display: flex;
-        gap: 1rem;
-        align-items: center;
-    }
-    .navbar-link {
-        color: #ffffff;
-        text-decoration: none;
-        font-weight: 900;
-        font-size: 1rem;
-        padding: 0.35rem 0.6rem;
-        border-radius: 8px;
-        transition: all 0.2s ease;
-    }
-    .navbar-link:hover {
-        background: rgba(255, 255, 255, 0.12);
-    }
-    .navbar-link-outline {
-        border: 1px solid rgba(255, 255, 255, 0.7);
-    }
-    .navbar-button {
-        padding: 0.5rem 1.25rem;
-        border-radius: 8px;
-        border: none;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 0.95rem;
-    }
-    .navbar-signin {
-        background: transparent;
-        color: white;
-        border: 1.5px solid white;
-    }
-    .navbar-signin:hover {
-        background: rgba(255, 255, 255, 0.1);
-        transform: translateY(-1px);
-    }
-    .navbar-signup {
-        background: white;
-        color: #2563eb;
-    }
-    .navbar-signup:hover {
-        background: #f0f4f8;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
-    }
-    .navbar-user {
-        color: white;
-        font-weight: 600;
-        margin: 0;
-    }
-</style>
-
-<div class='navbar'>
-    <div class='navbar-logo'>✨ SoulSkill</div>
-    <div class='navbar-links'>
-        <a class='navbar-link' href='#'>Build Resume</a>
-        <a class='navbar-link navbar-link-outline' href='#'>Sign In</a>
+<div style='display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); border-radius: 0; margin: -1rem -1rem 1rem -1rem; box-shadow: 0 2px 8px rgba(30, 58, 138, 0.15);'>
+    <div style='font-size: 1.5rem; font-weight: 900; color: white; margin: 0;'>✨ SoulSkill</div>
+    <div style='display: flex; gap: 0.75rem; align-items: center;'>
+        <a href='#' style='background: #ffffff; color: #1e3a8a; text-decoration: none; font-weight: 900; font-size: 1.05rem; padding: 0.65rem 1.5rem; border-radius: 8px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); display: inline-block; transition: all 0.2s;'>Build Resume</a>
+        <a href='#' style='background: transparent; color: #ffffff; text-decoration: none; font-weight: 900; font-size: 1.05rem; padding: 0.65rem 1.5rem; border: 2px solid #ffffff; border-radius: 8px; cursor: pointer; display: inline-block; transition: all 0.2s;'>Sign In</a>
     </div>
 </div>
+""", unsafe_allow_html=True)
 """, unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
