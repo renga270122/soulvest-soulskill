@@ -1350,20 +1350,44 @@ if st.session_state.mode == 'home':
         </div>
         """, unsafe_allow_html=True)
     
-    # Resume Upload Feature - Auto-Fill (Only for signed-in users)
-    if st.session_state.user_authenticated:
+    # Get Started Options - First Time vs Existing Resume
+    if st.session_state.user_authenticated or st.session_state.get('mode') == 'guest':
         st.markdown("---")
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            st.markdown("<h3 style='font-weight: 800; color: #2d3748; font-size: 1.75rem;'><strong>📤 Have an Existing Resume?</strong></h3>", unsafe_allow_html=True)
-            st.markdown("<p style='font-weight: 600; color: #4a5568; font-size: 1.05rem;'><strong>Upload your current resume (PDF, DOCX, TXT) and we'll auto-fill the details for you!</strong></p>", unsafe_allow_html=True)
-            
+        st.markdown("### 🚀 Get Started Your Way")
+        opt1, opt2 = st.columns(2)
+        
+        with opt1:
+            st.markdown("""
+            <div style='text-align: center; padding: 1.4rem; background: #ffffff; border-radius: 16px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 10px 22px rgba(37, 99, 235, 0.12);'>
+                <div style='font-size: 1.8rem;'>🆕</div>
+                <div style='color:#1e3a8a; font-weight:900; font-size:1.1rem; margin-top:0.3rem;'>First Time Building?</div>
+                <div style='color:#4a5568; font-size:0.9rem; margin-top:0.3rem;'>Start from scratch with guided sections and AI help.</div>
+            </div>
+            """, unsafe_allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.button("🚀 Build Resume", use_container_width=True, type="primary", key="first_time_build_resume"):
+                st.session_state.page = 'resume'
+                st.rerun()
+        
+        with opt2:
+            st.markdown("""
+            <div style='text-align: center; padding: 1.4rem; background: #ffffff; border-radius: 16px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 10px 22px rgba(37, 99, 235, 0.12);'>
+                <div style='font-size: 1.8rem;'>📤</div>
+                <div style='color:#1e3a8a; font-weight:900; font-size:1.1rem; margin-top:0.3rem;'>Have an Existing Resume?</div>
+                <div style='color:#4a5568; font-size:0.9rem; margin-top:0.3rem;'>Upload it and we'll auto‑fill your details.</div>
+            </div>
+            """, unsafe_allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
             uploaded_file = st.file_uploader(
                 "Upload your resume",
                 type=['pdf', 'docx', 'txt'],
                 key="home_resume_upload",
                 help="We'll extract your information and auto-fill the resume builder"
             )
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.button("🚀 Build Resume", use_container_width=True, type="primary", key="existing_resume_build_resume"):
+                st.session_state.page = 'resume'
+                st.rerun()
             
             if uploaded_file:
                 with st.spinner("🤖 Analyzing your resume with AI..."):
@@ -1377,7 +1401,7 @@ if st.session_state.mode == 'home':
                         parser.auto_fill_session_state(parsed_data, st.session_state)
                         
                         st.success("✅ Resume uploaded successfully! Your information has been auto-filled.")
-                        st.info("💡 Click 'Build Resume For Free' above to start editing with your pre-filled data.")
+                        st.info("💡 Click 'Build Resume' below to start editing with your pre-filled data.")
                         
                         # Show preview of extracted data
                         with st.expander("📋 Preview Extracted Data"):
