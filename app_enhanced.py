@@ -1206,25 +1206,34 @@ if st.session_state.mode == 'home':
         # Auth buttons for guests
         if not st.session_state.user_authenticated:
 
-            cta_left, cta_center, cta_right = st.columns([1, 2, 1])
-            with cta_center:
-                if st.button("🚀 Build Your Resume For Free", use_container_width=True, key="hero_build_free", type="primary"):
-                    st.session_state.show_auth_modal = True
-                    st.rerun()
-                st.markdown("<p style='text-align:center; color:#4a5568; font-weight:600; font-size:0.85rem; margin-top:0.35rem;'>No credit card required</p>", unsafe_allow_html=True)
+            # Main CTA Button
+            st.markdown("""
+            <div style='text-align: center; margin-top: 1.2rem;'>
+                <button onclick="window.location.href='#'" style='padding: 0.85rem 2rem; background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); color: white; border: none; border-radius: 10px; font-size: 1.05rem; font-weight: 800; cursor: pointer; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3); transition: all 0.3s ease;'>🚀 Build Your Resume For Free</button>
+                <p style='text-align:center; color:#4a5568; font-weight:600; font-size:0.85rem; margin-top:0.5rem;'>No credit card required</p>
+            </div>
+            """, unsafe_allow_html=True)
 
+            # Additional Auth Options
             col_a, col_b, col_c = st.columns(3)
             with col_a:
-                if st.button("🔐 Sign In", use_container_width=True, key="hero_signin", type="primary"):
-                    st.session_state.show_auth_modal = True
-                    st.rerun()
+                st.markdown("""
+                <div style='text-align: center;'>
+                    <button onclick="window.location.href='#'" style='padding: 0.65rem 1.5rem; background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; width: 100%; box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);'>🔐 Sign In</button>
+                </div>
+                """, unsafe_allow_html=True)
             with col_b:
-                if st.button("✨ Create Account", use_container_width=True, key="hero_signup", type="primary"):
-                    st.session_state.show_auth_modal = True
-                    st.rerun()
+                st.markdown("""
+                <div style='text-align: center;'>
+                    <button onclick="window.location.href='#'" style='padding: 0.65rem 1.5rem; background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; width: 100%; box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);'>✨ Create Account</button>
+                </div>
+                """, unsafe_allow_html=True)
             with col_c:
-                if st.button("👤 Continue as Guest", use_container_width=True, key="hero_guest", type="primary"):
-                    st.info("✅ Great! You can explore as a guest and sign up later.")
+                st.markdown("""
+                <div style='text-align: center;'>
+                    <button onclick="window.location.href='#'" style='padding: 0.65rem 1.5rem; background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; width: 100%; box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);'>👤 Continue as Guest</button>
+                </div>
+                """, unsafe_allow_html=True)
         else:
             # Hero Section + Welcome for logged-in users with side quotes
             col_left, col_center, col_right = st.columns([1, 2, 1])
