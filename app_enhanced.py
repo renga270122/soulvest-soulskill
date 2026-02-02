@@ -90,7 +90,10 @@ st.markdown("""
 }
 </style>
 <div class='navbar-container' style='display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); border-radius: 0; margin: -1rem -1rem 1rem -1rem; box-shadow: 0 2px 8px rgba(30, 58, 138, 0.15);'>
-    <div class='navbar-logo' style='font-size: 1.5rem; font-weight: 900; color: white; margin: 0;'>✨ SoulSkill</div>
+    <div>
+        <div class='navbar-logo' style='font-size: 1.5rem; font-weight: 900; color: white; margin: 0;'>✨ SoulSkill</div>
+        <div style='font-size: 0.75rem; color: rgba(255,255,255,0.85); font-style: italic; margin-top: 0.2rem;'>"Your career deserves more than a template"</div>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -1237,6 +1240,17 @@ if st.session_state.mode == 'home':
             </div>
             """, unsafe_allow_html=True)
 
+        # Motivational quote section
+        st.markdown("""<br>""", unsafe_allow_html=True)
+        quote_col1, quote_col2, quote_col3 = st.columns([1, 2, 1])
+        with quote_col2:
+            st.markdown("""
+            <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; border: 1px solid rgba(245, 158, 11, 0.3); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);'>
+                <div style='font-size: 1.2rem; color: #92400e; font-weight: 700; font-style: italic; margin-bottom: 0.3rem;'>💡 "Success is not final, failure is not fatal"</div>
+                <div style='font-size: 0.85rem; color: #78350f; font-weight: 600;'>— Winston Churchill</div>
+            </div>
+            """, unsafe_allow_html=True)
+
         # Welcome message - personalized for logged-in users
         if st.session_state.user_authenticated:
             st.markdown("<br>", unsafe_allow_html=True)
@@ -1276,6 +1290,16 @@ if st.session_state.mode == 'home':
             """, unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Motivational sidebar quote
+    st.markdown("""<br>""", unsafe_allow_html=True)
+    side_col1, side_col2, side_col3 = st.columns([0.5, 3, 0.5])
+    with side_col2:
+        st.markdown("""
+        <div style='text-align: center; padding: 0.8rem; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 12px; border: 1px solid rgba(37, 99, 235, 0.3); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);'>
+            <div style='font-size: 1rem; color: #1e3a8a; font-weight: 700; font-style: italic;'>💪 "The only way to do great work is to love what you do" — Steve Jobs</div>
+        </div>
+        """, unsafe_allow_html=True)
     
     # Resume Upload Feature - Auto-Fill (Only for signed-in users)
     if st.session_state.user_authenticated:
@@ -1329,6 +1353,15 @@ if st.session_state.mode == 'home':
         
         st.markdown("---")
     st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Daily LOA Affirmation Box
+    st.markdown("""
+    <div style='text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%); border-radius: 16px; border: 2px solid rgba(16, 185, 129, 0.4); margin-bottom: 2rem; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);'>
+        <div style='font-size: 1.4rem; color: #065f46; font-weight: 900; margin-bottom: 0.8rem;'>🌈 Daily Career Manifestation</div>
+        <div style='font-size: 1.2rem; color: #064e3b; font-weight: 700; font-style: italic; margin-bottom: 0.5rem;'>"I am a magnet for career opportunities. The universe is aligning everything in my favor."</div>
+        <div style='font-size: 0.95rem; color: #065f46; font-weight: 600;'>💡 Practice: Repeat this affirmation 3 times while visualizing your ideal job offer.</div>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Features Section
     st.markdown("### 🌟 Stand Out with AI-Powered Career Tools")
@@ -2883,6 +2916,13 @@ WORK EXPERIENCE
 
 elif st.session_state.mode == 'coverletter':
     # COVER LETTER BUILDER
+    # LOA Visualization Practice
+    st.markdown("""
+    <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); border-radius: 12px; border: 1px solid rgba(236, 72, 153, 0.3); margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(236, 72, 153, 0.15);'>
+        <div style='font-size: 1.1rem; color: #831843; font-weight: 700; font-style: italic;'>💫 "Visualize yourself already in your dream role. Feel the joy, the confidence, the success. You are worthy of abundance!"</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
     st.markdown("""
     <div class='hero-section' style='padding: 2rem; margin-bottom: 1rem;'>
         <h1 class='hero-title' style='font-size: 2rem;'>✉️ AI Cover Letter Builder</h1>
@@ -3255,6 +3295,13 @@ The letter should be compelling, specific, and highlight relevant experience. Ke
 
 elif st.session_state.mode == 'masters':
     # MASTERS/SOP LETTER BUILDER
+    # LOA for Academic Success
+    st.markdown("""
+    <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%); border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.3); margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);'>
+        <div style='font-size: 1.1rem; color: #5b21b6; font-weight: 700; font-style: italic;'>🎯 "I am worthy of this academic opportunity. My educational dreams are manifesting perfectly. The universe supports my growth."</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
     st.markdown("""
     <div class='hero-section' style='padding: 2rem; margin-bottom: 1rem;'>
         <h1 class='hero-title' style='font-size: 2rem;'>🎓 Statement of Purpose Builder</h1>
@@ -3372,6 +3419,13 @@ elif st.session_state.mode == 'dashboard':
         </p>
     </div>
     """.format(st.session_state.get('user_name', 'User')), unsafe_allow_html=True)
+    
+    # LOA Manifestation Quote
+    st.markdown("""
+    <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); border-radius: 12px; border: 1px solid rgba(99, 102, 241, 0.3); margin-bottom: 1.5rem;'>
+        <div style='font-size: 1.2rem; color: #3730a3; font-weight: 700; font-style: italic;'>🌟 "What you seek is seeking you. Your dream career is manifesting now." — Rumi</div>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.markdown("<br>", unsafe_allow_html=True)
     
@@ -3556,6 +3610,15 @@ elif st.session_state.mode == 'profile':
 
 elif st.session_state.mode == 'about':
     # About Page
+    # LOA Introduction Banner
+    st.markdown("""
+    <div style='text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 16px; border: 2px solid rgba(37, 99, 235, 0.4); margin-bottom: 2rem; box-shadow: 0 6px 20px rgba(37, 99, 235, 0.2);'>
+        <div style='font-size: 1.5rem; color: #1e3a8a; font-weight: 900; margin-bottom: 0.5rem;'>🌟 The Power of Manifestation & LOA</div>
+        <div style='font-size: 1.05rem; color: #1e40af; font-weight: 600; font-style: italic; margin-bottom: 0.3rem;'>"Your thoughts create your reality. Focus on success, and success will find you."</div>
+        <div style='font-size: 0.95rem; color: #1e40af;'>At SoulSkill, we combine practical career tools with the Law of Attraction to help you manifest your dream career.</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
     st.markdown("""
     <div style='text-align: center; padding: 2rem 0;'>
         <div style='font-size: 4rem; margin-bottom: 0.5rem; line-height: 1;'>🚀</div>
