@@ -261,11 +261,22 @@ def render_enhanced_sidebar():
         # Logo/branding with enhanced design
         st.markdown("""
         <div style='text-align: center; padding: 1rem 0; margin-bottom: 1rem;'>
+        """, unsafe_allow_html=True)
+        
+        # Display logo image
+        try:
+            st.image("assets/logo.png", use_column_width=True, width=200)
+        except:
+            # Fallback if logo doesn't load
+            st.markdown("""
             <div style='font-size: 3rem; margin-bottom: 0.5rem;'>🚀</div>
             <h1 style='font-size: 1.8rem; font-weight: 800; margin: 0; color: white; font-family: "Poppins", sans-serif;'>
                 SoulSkill
             </h1>
-            <p style='font-size: 0.95rem; font-weight: 600; margin: 0.25rem 0; color: rgba(255,255,255,0.9);'>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("""
+            <p style='font-size: 0.95rem; font-weight: 600; margin: 0.5rem 0; color: rgba(255,255,255,0.9);'>
                 AI-Powered Resume Builder
             </p>
             <p style='font-size: 0.85rem; font-weight: 500; margin: 0.25rem 0; color: rgba(255,255,255,0.75); font-style: italic;'>
