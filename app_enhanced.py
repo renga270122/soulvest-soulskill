@@ -1266,88 +1266,18 @@ if st.session_state.mode == 'home':
         
         # Auth buttons for guests
         if not st.session_state.user_authenticated:
-            # Guest view - just show the hero with CTA
+            # Guest view - show regular welcome message (already shown above)
             pass
         else:
-            # Hero Section + Welcome for logged-in users with side quotes
-            col_left, col_center, col_right = st.columns([1, 2, 1])
-            
-            # Left side - Resume Preview Mockup
-            with col_left:
-                st.markdown("""
-                <div style='text-align: left; padding: 1.4rem 1.2rem; background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%); border-radius: 16px; min-height: 320px; border: 1px solid rgba(37, 99, 235, 0.2); box-shadow: 0 12px 28px rgba(37, 99, 235, 0.14);'>
-                    <div style='display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;'>
-                        <span style='background: #e0e7ff; color: #1e3a8a; font-size: 0.72rem; font-weight: 800; padding: 0.25rem 0.55rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.6px;'>ATS Friendly</span>
-                        <span style='color: #2563eb; font-size: 0.75rem; font-weight: 800;'>★ 4.9</span>
-                    </div>
-                    <div style='display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem;'>
-                        <div style='width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 800;'>PR</div>
-                        <div>
-                            <h3 style='color: #1e3a8a; font-size: 1.1rem; font-weight: 800; margin: 0;'>Priya Rao</h3>
-                            <p style='color: #4a5568; font-size: 0.82rem; font-weight: 600; margin: 0.1rem 0 0 0;'>Data Analyst • Bengaluru</p>
-                        </div>
-                    </div>
-                    <div style='height: 1px; background: rgba(37, 99, 235, 0.15); margin: 0.7rem 0;'></div>
-                    <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 800; margin: 0 0 0.35rem 0;'>Highlights</p>
-                    <ul style='color: #4a5568; font-size: 0.78rem; margin: 0; padding-left: 1rem; line-height: 1.6;'>
-                        <li>SQL • Python • Power BI</li>
-                        <li>Built 12+ dashboards</li>
-                        <li>ATS‑optimized keywords</li>
-                    </ul>
-                    <div style='margin-top: 0.7rem;'>
-                        <div style='height: 6px; background: #e6edff; border-radius: 999px; overflow: hidden; margin-bottom: 0.35rem;'>
-                            <div style='width: 78%; height: 100%; background: linear-gradient(90deg, #2563eb, #1e3a8a);'></div>
-                        </div>
-                        <p style='color: #4a5568; font-size: 0.72rem; font-weight: 700; margin: 0;'>Keyword Match: 78%</p>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            # Center - Hero Title + Welcome
-            with col_center:
-                st.markdown(f"""
-                <style>
-                @media (max-width: 768px) {{
-                    .hero-welcome-auth {{ font-size: 1.9rem !important; }}
-                    .hero-headline-auth {{ font-size: 1.3rem !important; }}
-                    .hero-desc-auth {{ font-size: 1rem !important; }}
-                }}
-                @media (max-width: 480px) {{
-                    .hero-welcome-auth {{ font-size: 1.5rem !important; }}
-                    .hero-headline-auth {{ font-size: 1.1rem !important; }}
-                    .hero-desc-auth {{ font-size: 0.9rem !important; }}
-                }}
-                </style>
-                <div style='text-align: center; padding: 2rem; background: linear-gradient(135deg, #eaf2ff 0%, #dfe9ff 50%, #f6f9ff 100%); border-radius: 18px; border: 1px solid rgba(37, 99, 235, 0.25); box-shadow: 0 14px 30px rgba(30, 58, 138, 0.18);'>
-                    <div class='hero-welcome-auth' style='color: #000000; font-size: 2.3rem; font-weight: 900; margin-bottom: 0.8rem;'>👋 Welcome back, {st.session_state.get('user_name', 'User')}!</div>
-                    <div class='hero-headline-auth' style='color: #000000; font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem;'>Build Your Resume in as little as 5 minutes</div>
-                    <div class='hero-desc-auth' style='color: #000000; font-size: 1.1rem; font-weight: 500;'>Ready to create amazing resumes?</div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            # Right side - Resume Preview Mockup
-            with col_right:
-                st.markdown("""
-                <div style='text-align: left; padding: 1.4rem 1.2rem; background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%); border-radius: 16px; min-height: 320px; border: 1px solid rgba(37, 99, 235, 0.2); box-shadow: 0 12px 28px rgba(37, 99, 235, 0.14);'>
-                    <div style='display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;'>
-                        <span style='background: #e0e7ff; color: #1e3a8a; font-size: 0.72rem; font-weight: 800; padding: 0.25rem 0.55rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.6px;'>Recruiter Ready</span>
-                        <span style='color: #2563eb; font-size: 0.75rem; font-weight: 800;'>★ 4.8</span>
-                    </div>
-                    <div style='display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem;'>
-                        <div style='width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 800;'>AB</div>
-                        <div>
-                            <h3 style='color: #1e3a8a; font-size: 1.1rem; font-weight: 800; margin: 0;'>Aiden Brooks</h3>
-                            <p style='color: #4a5568; font-size: 0.82rem; font-weight: 600; margin: 0.1rem 0 0 0;'>Product Manager • Austin</p>
-                        </div>
-                    </div>
-                    <div style='height: 1px; background: rgba(37, 99, 235, 0.15); margin: 0.7rem 0;'></div>
-                    <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 800; margin: 0 0 0.35rem 0;'>Highlights</p>
-                    <ul style='color: #4a5568; font-size: 0.78rem; margin: 0; padding-left: 1rem; line-height: 1.6;'>
-                        <li>Roadmaps • OKRs • GTM</li>
-                        <li>Led 4 product launches</li>
-                        <li>ATS‑friendly layout</li>
-                    </ul>
-                    <div style='margin-top: 0.7rem;'>
+            # Logged-in users - show personalized welcome WITHOUT duplicate preview cards
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown(f"""
+            <div style='text-align: center; padding: 2rem; background: linear-gradient(135deg, #eaf2ff 0%, #dfe9ff 50%, #f6f9ff 100%); border-radius: 18px; border: 1px solid rgba(37, 99, 235, 0.25); box-shadow: 0 14px 30px rgba(30, 58, 138, 0.18); max-width: 800px; margin: 0 auto;'>
+                <div style='color: #000000; font-size: 2.3rem; font-weight: 900; margin-bottom: 0.8rem;'>👋 Welcome back, {st.session_state.get('user_name', 'User')}!</div>
+                <div style='color: #000000; font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem;'>Ready to build your next amazing resume?</div>
+                <div style='color: #000000; font-size: 1.1rem; font-weight: 500;'>Continue where you left off or start fresh.</div>
+            </div>
+            """, unsafe_allow_html=True)
                         <div style='height: 6px; background: #e6edff; border-radius: 999px; overflow: hidden; margin-bottom: 0.35rem;'>
                             <div style='width: 84%; height: 100%; background: linear-gradient(90deg, #22c55e, #16a34a);'></div>
                         </div>
