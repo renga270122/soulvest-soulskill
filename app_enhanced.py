@@ -1215,7 +1215,7 @@ if st.session_state.mode == 'home':
 
             col_a, col_b, col_c = st.columns(3)
             with col_a:
-                if st.button("🔐 Sign In", use_container_width=True, key="hero_signin", type="secondary"):
+                if st.button("🔐 Sign In", use_container_width=True, key="hero_signin", type="primary"):
                     st.session_state.show_auth_modal = True
                     st.rerun()
             with col_b:
@@ -1223,7 +1223,7 @@ if st.session_state.mode == 'home':
                     st.session_state.show_auth_modal = True
                     st.rerun()
             with col_c:
-                if st.button("👤 Continue as Guest", use_container_width=True, key="hero_guest"):
+                if st.button("👤 Continue as Guest", use_container_width=True, key="hero_guest", type="primary"):
                     st.info("✅ Great! You can explore as a guest and sign up later.")
         else:
             # Hero Section + Welcome for logged-in users with side quotes
