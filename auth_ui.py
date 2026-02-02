@@ -72,40 +72,18 @@ def show_signin_signup_modal():
     with st.container():
         st.markdown('<div class="auth-modal">', unsafe_allow_html=True)
         
-        # Header
-        st.markdown("""
-        <div class="auth-header">
-            <h2>✨ Join SoulSkill</h2>
-            <p style="color: #666; font-size: 1rem;">Sign up to save and manage your resumes</p>
-        </div>
-        """, unsafe_allow_html=True)
+        # Check which mode to show (signin or signup)
+        auth_mode = st.session_state.get('auth_mode', 'signin')
         
-        # Benefits section
-        st.markdown("""
-        <div class="auth-benefits">
-            <div class="benefit-item">
-                <span class="benefit-icon">💾</span>
-                <span><b>Save unlimited resumes</b> - Access from any device</span>
+        if auth_mode == 'signin':
+            # Header
+            st.markdown("""
+            <div class="auth-header">
+                <h2>🔐 Sign In</h2>
+                <p style="color: #666; font-size: 1rem;">Welcome back to SoulSkill</p>
             </div>
-            <div class="benefit-item">
-                <span class="benefit-icon">📊</span>
-                <span><b>Track your applications</b> - See which resumes perform best</span>
-            </div>
-            <div class="benefit-item">
-                <span class="benefit-icon">🤖</span>
-                <span><b>AI-powered suggestions</b> - Get personalized content</span>
-            </div>
-            <div class="benefit-item">
-                <span class="benefit-icon">🔒</span>
-                <span><b>100% secure</b> - Your data is encrypted and private</span>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Tab selection
-        tab1, tab2 = st.tabs(["🔐 Sign In", "✨ Sign Up"])
-        
-        with tab1:
+            """, unsafe_allow_html=True)
+            
             # Sign In Form
             st.markdown("### Welcome Back!")
             
@@ -161,8 +139,48 @@ def show_signin_signup_modal():
             with col3:
                 if st.button("Ⓜ️ Microsoft", use_container_width=True, key="signin_microsoft"):
                     st.info("🔄 Microsoft OAuth coming soon!")
+                    
+            # Link to signup
+            st.markdown("---")
+            col1, col2 = st.columns([3, 2])
+            with col1:
+                st.caption("Don't have an account?")
+            with col2:
+                if st.button("✨ Sign Up", use_container_width=True, key="switch_to_signup"):
+                    st.session_state.auth_mode = 'signup'
+                    st.rerun()
         
-        with tab2:
+        else:  # signup mode
+            # Header
+            st.markdown("""
+            <div class="auth-header">
+                <h2>✨ Join SoulSkill</h2>
+                <p style="color: #666; font-size: 1rem;">Sign up to save and manage your resumes</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Benefits section
+            st.markdown("""
+            <div class="auth-benefits">
+                <div class="benefit-item">
+                    <span class="benefit-icon">💾</span>
+                    <span><b>Save unlimited resumes</b> - Access from any device</span>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-icon">📊</span>
+                    <span><b>Track your applications</b> - See which resumes perform best</span>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-icon">🤖</span>
+                    <span><b>AI-powered suggestions</b> - Get personalized content</span>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-icon">🔒</span>
+                    <span><b>100% secure</b> - Your data is encrypted and private</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
             # Sign Up Form
             st.markdown("### Create Your Account")
             
@@ -234,17 +252,16 @@ def show_signin_signup_modal():
             with col3:
                 if st.button("Ⓜ️ Microsoft", use_container_width=True, key="signup_microsoft"):
                     st.info("🔄 Microsoft OAuth coming soon!")
-        
-        # Guest mode option
-        st.markdown("---")
-        col1, col2 = st.columns([3, 2])
-        with col1:
-            st.caption("No account needed? Continue as guest")
-        with col2:
-            if st.button("👤 Continue as Guest", use_container_width=True, key="guest_mode"):
-                st.session_state.show_auth_modal = False
-                st.info("✅ You can build resumes as a guest! Sign up later to save them.")
-                st.rerun()
+                    
+            # Link to signin
+            st.markdown("---")
+            col1, col2 = st.columns([3, 2])
+            with col1:
+                st.caption("Already have an account?")
+            with col2:
+                if st.button("🔐 Sign In", use_container_width=True, key="switch_to_signin"):
+                    st.session_state.auth_mode = 'signin'
+                    st.rerun()
         
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -310,4 +327,5 @@ def show_auth_prompt_banner():
     with col2:
         if st.button("✨ Sign Up Now", use_container_width=True, key="banner_signup"):
             st.session_state.show_auth_modal = True
+            st.session_state.auth_mode = 'signup'
             st.rerun()
