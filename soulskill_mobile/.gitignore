@@ -1,0 +1,16 @@
+android/
+.dart_tool/
+build/
+.packages
+.pub
+pubspec.lock
+*.swp
+*.swo
+*~
+.DS_Store
+.env
+*.apk
+*.ipa
+.gradle/
+local.properties
+GeneratedPluginRegistrant.java

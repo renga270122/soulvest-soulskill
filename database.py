@@ -105,7 +105,16 @@ class DatabaseManager:
                 name VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 last_login TIMESTAMP,
-                subscription_tier VARCHAR(50) DEFAULT 'free'
+                subscription_plan VARCHAR(50) DEFAULT 'free',
+                subscription_status VARCHAR(50) DEFAULT 'active',
+                is_trial BOOLEAN DEFAULT FALSE,
+                has_used_trial BOOLEAN DEFAULT FALSE,
+                trial_ends_at TIMESTAMP,
+                subscription_ends_at TIMESTAMP,
+                payment_id VARCHAR(255),
+                last_payment_date TIMESTAMP,
+                downloads_this_month INTEGER DEFAULT 0,
+                last_download_reset TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
         

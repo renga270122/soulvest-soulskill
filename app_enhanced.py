@@ -671,59 +671,7 @@ from auth import get_auth_manager, show_auth_sidebar
 # Initialize auth manager early (creates session state keys)
 auth_manager = get_auth_manager()
 
-# Enhanced Sidebar with valuable content
 render_enhanced_sidebar()
-
-# Additional sidebar - Universal Navigation
-with st.sidebar:
-    st.markdown("---")
-    
-    # Auto-save status
-    if st.session_state.mode in ['builder', 'coverletter']:
-        st.success("💾 Auto-Save Active")
-        st.caption("✓ All changes saved automatically")
-    
-    # Quick navigation
-    st.markdown("### 🚀 Quick Navigation")
-    
-    if st.button("🏠 Home", use_container_width=True, key="sidebar_home_btn"):
-        st.session_state['mode'] = 'home'
-        st.rerun()
-    
-    if st.button("📄 Build Resume", use_container_width=True, key="sidebar_resume_btn"):
-        st.session_state['mode'] = 'builder'
-        st.session_state['step'] = 1
-        st.rerun()
-    
-    if st.button("✉️ Cover Letter", use_container_width=True, key="sidebar_cl_btn"):
-        st.session_state['mode'] = 'coverletter'
-        st.rerun()
-    
-    if st.button("🎓 Masters SOP", use_container_width=True, key="sidebar_masters_btn"):
-        st.session_state['mode'] = 'masters'
-        st.rerun()
-    
-    if st.button("📂 Dashboard", use_container_width=True, key="sidebar_dash_btn"):
-        st.session_state['mode'] = 'dashboard'
-        st.rerun()
-    
-    if st.button("ℹ️ About", use_container_width=True, key="sidebar_about_btn"):
-        st.session_state['mode'] = 'about'
-        st.rerun()
-    
-    if st.button("📧 Contact Us", use_container_width=True, key="sidebar_contact_btn"):
-        st.session_state['mode'] = 'contact'
-        st.rerun()
-    
-    # AI Status
-    st.markdown("---")
-    if st.session_state.ai_enabled:
-        st.success("✨ AI: ACTIVE")
-        st.caption("Google Gemini enabled")
-    else:
-        st.warning("⚠️ AI: Offline")
-        with st.expander("Enable AI"):
-            st.caption("[Get API Key](https://makersuite.google.com/app/apikey)")
 
 # Content Library - Pre-written examples
 CONTENT_LIBRARY = {
@@ -1340,6 +1288,37 @@ if st.session_state.mode == 'home':
         
         st.markdown("<br>", unsafe_allow_html=True)
     
+    # PRICING CTA - Freemium Model
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("""
+    <div style='text-align: center; padding: 2.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                border-radius: 20px; margin: 2rem 0; box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);'>
+        <h2 style='color: white; font-size: 2.2rem; margin-bottom: 0.5rem;'>🚀 Unlock Premium Features</h2>
+        <p style='color: rgba(255,255,255,0.95); font-size: 1.3rem; margin-bottom: 1.5rem;'>
+            Get unlimited access to 20+ premium templates, AI suggestions, and more
+        </p>
+        <div style='display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-top: 1.5rem;'>
+            <div style='background: rgba(255,255,255,0.15); padding: 1rem 1.5rem; border-radius: 15px; backdrop-filter: blur(10px);'>
+                <div style='color: white; font-size: 1.8rem; font-weight: 800;'>₹199</div>
+                <div style='color: rgba(255,255,255,0.9); font-size: 0.9rem;'>per month</div>
+            </div>
+            <div style='background: rgba(255,255,255,0.25); padding: 1rem 1.5rem; border-radius: 15px; backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.5);'>
+                <div style='color: white; font-size: 1.8rem; font-weight: 800;'>₹999</div>
+                <div style='color: rgba(255,255,255,0.9); font-size: 0.9rem;'>per year • Save 58%</div>
+            </div>
+        </div>
+        <p style='color: rgba(255,255,255,0.95); font-size: 1.1rem; margin-top: 1.5rem;'>
+            ✨ 7-Day Free Trial • No Credit Card Required
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col_pricing1, col_pricing2, col_pricing3 = st.columns([1, 2, 1])
+    with col_pricing2:
+        if st.button("💎 View Pricing Plans", use_container_width=True, type="primary", key="home_pricing_btn"):
+            st.session_state.mode = 'pricing'
+            st.rerun()
+    
     # Motivational sidebar quote
     st.markdown("""<br>""", unsafe_allow_html=True)
     side_col1, side_col2, side_col3 = st.columns([0.5, 3, 0.5])
@@ -1556,22 +1535,27 @@ if st.session_state.mode == 'home':
     st.markdown("<br><br>", unsafe_allow_html=True)
     st.markdown("---")
     
-    footer_col1, footer_col2, footer_col3, footer_col4 = st.columns([1, 1, 1, 1])
+    footer_col1, footer_col2, footer_col3, footer_col4, footer_col5 = st.columns([1, 1, 1, 1, 1])
     
     with footer_col1:
         st.markdown("<p style='font-size: 0.85rem; color: #666;'>© 2026 SoulSkill. All rights reserved.</p>", unsafe_allow_html=True)
     
     with footer_col2:
+        if st.button("💰 Pricing", use_container_width=True, key="footer_pricing", type="secondary"):
+            st.session_state.mode = 'pricing'
+            st.rerun()
+    
+    with footer_col3:
         if st.button("About", use_container_width=True, key="footer_about", type="secondary"):
             st.session_state.mode = 'about'
             st.rerun()
     
-    with footer_col3:
+    with footer_col4:
         if st.button("Contact", use_container_width=True, key="footer_contact", type="secondary"):
             st.session_state.mode = 'contact'
             st.rerun()
     
-    with footer_col4:
+    with footer_col5:
         if not st.session_state.user_authenticated:
             if st.button("Sign In", use_container_width=True, key="footer_signin", type="secondary"):
                 st.session_state.show_auth_modal = True
@@ -3930,6 +3914,17 @@ elif st.session_state.mode == 'contact':
             st.session_state.mode = 'builder'
             st.session_state.step = 1
             st.rerun()
+
+elif st.session_state.mode == 'pricing':
+    # PRICING PAGE
+    from pricing_ui import render_pricing_page
+    render_pricing_page()
+
+elif st.session_state.mode == 'checkout':
+    # CHECKOUT PAGE
+    from pricing_ui import render_checkout_page
+    selected_plan = st.session_state.get('selected_plan', 'premium_monthly')
+    render_checkout_page(selected_plan)
 
 # Footer
 st.markdown("<br><br>", unsafe_allow_html=True)

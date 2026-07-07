@@ -169,10 +169,11 @@ def show_resume_checklist():
     for category, items in categories.items():
         st.markdown(f"**{category.upper()}**")
         for idx, item_text in items:
+            unique_key = f"checklist_{category}_{idx}"
             checked = st.checkbox(
                 item_text,
                 value=st.session_state.checklist_items[idx],
-                key=f"checklist_{idx}"
+                key=unique_key
             )
             st.session_state.checklist_items[idx] = checked
     
@@ -257,85 +258,18 @@ def render_enhanced_sidebar():
     Usage: Call this function in your main app
     """
     with st.sidebar:
-        # Logo/branding with enhanced design
         st.markdown("""
         <div style='text-align: center; padding: 1rem 0; margin-bottom: 1rem;'>
         """, unsafe_allow_html=True)
-        
-        # Display logo image
         try:
             st.image("assets/logo.png", use_column_width=True, width=200)
         except:
-            # Fallback if logo doesn't load
             st.markdown("""
             <div style='font-size: 3rem; margin-bottom: 0.5rem;'>🚀</div>
-            <h1 style='font-size: 1.8rem; font-weight: 800; margin: 0; color: white; font-family: "Poppins", sans-serif;'>
-                SoulSkill
-            </h1>
+            <h1 style='font-size: 1.8rem; font-weight: 800; margin: 0; color: white; font-family: 'Poppins', sans-serif;'>SoulSkill</h1>
             """, unsafe_allow_html=True)
-        
         st.markdown("""
-            <p style='font-size: 0.95rem; font-weight: 600; margin: 0.5rem 0; color: rgba(255,255,255,0.9);'>
-                AI-Powered Resume Builder
-            </p>
-            <p style='font-size: 0.85rem; font-weight: 500; margin: 0.25rem 0; color: rgba(255,255,255,0.75); font-style: italic;'>
-                ✨ Build Your Future in Minutes
-            </p>
+            <p style='font-size: 0.95rem; font-weight: 600; margin: 0.5rem 0; color: rgba(255,255,255,0.9);'>AI-Powered Resume Builder</p>
+            <p style='font-size: 0.85rem; font-weight: 500; margin: 0.25rem 0; color: rgba(255,255,255,0.75); font-style: italic;'>✨ Build Your Future in Minutes</p>
         </div>
         """, unsafe_allow_html=True)
-        
-        st.divider()
-        
-        # Progress tracker (if in progress)
-        if st.session_state.get('step', 0) > 1:
-            show_progress_tracker()
-            st.divider()
-        
-        # Context-aware tips (most important - show first)
-        current_step = st.session_state.get('step', 0)
-        st.markdown("### 💡 Quick Tips")
-        if current_step == 2:
-            show_quick_tips("summary")
-        elif current_step == 3:
-            show_quick_tips("experience")
-        else:
-            show_quick_tips("general")
-        
-        st.divider()
-        
-        # Actionable sections
-        st.markdown("### 📋 Your Checklist")
-        with st.expander("Resume Checklist", expanded=False):
-            show_resume_checklist()
-        
-        st.divider()
-        
-        # Resources & Help
-        st.markdown("### 📚 Resources")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            with st.expander("📈 Stats", expanded=False):
-                show_ats_statistics()
-        with col2:
-            with st.expander("🔗 Jobs", expanded=False):
-                show_job_search_resources()
-        
-        with st.expander("⭐ Success Stories", expanded=False):
-            show_success_stories()
-        
-        st.divider()
-        
-        # Motivation
-        show_motivational_quote()
-        
-        st.divider()
-        
-        # Live stats (compact)
-        show_live_stats()
-        
-        st.divider()
-        
-        # Footer
-        st.caption("Made with ❤️ by SoulSkill")
-        st.caption("© 2026 All rights reserved")
