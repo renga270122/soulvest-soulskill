@@ -53,9 +53,14 @@ from theme_config import apply_custom_theme
 from auth_ui import show_auth_prompt_banner, show_signin_signup_modal, show_user_profile
 from ui_components import (
     apply_platform_styles,
+    render_assessment_panel,
+    render_coaching_panel,
+    render_eq_panel,
+    render_foundation_summary,
     render_journey_timeline,
     render_metric_card,
     render_module_card,
+    render_monetization_panel,
     render_placeholder_panel,
     render_platform_nav,
     render_readiness_score,
@@ -1334,6 +1339,7 @@ elif st.session_state.mode == 'dashboard':
             st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
+    render_foundation_summary()
     render_journey_timeline()
     st.stop()
 
@@ -1357,14 +1363,20 @@ elif st.session_state.mode == 'toolkit':
             st.session_state.step = 1
             st.rerun()
         render_placeholder_panel("Career Coach", "Get guided planning for role transitions and growth decisions.", "🎯", ["Career planning", "Role mapping", "Next steps"], "Preview Career Coach", "coach", "toolkit_coach")
+        render_placeholder_panel("Career Assessment", "Measure readiness and turn it into a structured growth plan.", "📈", ["Skill-gap cues", "Readiness snapshot", "Growth plan"], "Preview Assessment", "assessment", "toolkit_assessment")
     with toolkit_col2:
         render_placeholder_panel("Interview Coach", "Prepare your stories, confidence, and delivery for interviews.", "🗣️", ["Mock questions", "Feedback loops", "Delivery tips"], "Preview Interview Coach", "interview", "toolkit_interview")
         render_placeholder_panel("EQ Growth", "Strengthen self-awareness, communication, and relationship growth.", "🧠", ["Reflection prompts", "Communication habits", "Growth checkpoints"], "Preview EQ Growth", "eq", "toolkit_eq")
+        render_placeholder_panel("Monetization", "Prepare a clear free vs. Pro path for future subscriptions.", "💳", ["Free vs. Pro", "Upgrade prompts", "Billing readiness"], "Preview Monetization", "monetization", "toolkit_monetization")
     st.stop()
 
 elif st.session_state.mode == 'coach':
     st.title("🎯 Career Coach")
-    render_placeholder_panel("Career Coach", "A future-ready coaching layer for role planning, transitions, and confidence building.", "🎯", ["Career strategy", "Role readiness", "Action planning"], "Back to toolkit", "toolkit", "coach_page")
+    render_coaching_panel()
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("Back to toolkit", use_container_width=True):
+        st.session_state.mode = 'toolkit'
+        st.rerun()
     st.stop()
 
 elif st.session_state.mode == 'interview':
@@ -1374,7 +1386,25 @@ elif st.session_state.mode == 'interview':
 
 elif st.session_state.mode == 'eq':
     st.title("🧠 EQ Growth")
-    render_placeholder_panel("EQ Growth", "Focus on emotional intelligence habits that improve collaboration and leadership presence.", "🧠", ["Reflection prompts", "Communication habits", "Leadership growth"], "Back to toolkit", "toolkit", "eq_page")
+    render_eq_panel()
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("Back to toolkit", use_container_width=True):
+        st.session_state.mode = 'toolkit'
+        st.rerun()
+    st.stop()
+
+elif st.session_state.mode == 'assessment':
+    st.title("📈 Career Assessment")
+    render_assessment_panel()
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("Back to toolkit", use_container_width=True):
+        st.session_state.mode = 'toolkit'
+        st.rerun()
+    st.stop()
+
+elif st.session_state.mode == 'monetization':
+    st.title("💳 Monetization")
+    render_monetization_panel()
     st.stop()
 
 elif st.session_state.mode == 'builder':
@@ -1462,8 +1492,21 @@ elif st.session_state.mode == 'builder':
                     </div>
                     """, unsafe_allow_html=True)
                     
-                    # Render actual preview in iframe
-                    components.html(preview_html, height=240, scrolling=False)
+                    # Render a lightweight inline preview instead of an iframe to avoid browser sandbox warnings
+                    st.markdown(
+                        f"""
+                        <div style='border:1px solid #e2e8f0; border-radius:12px; padding:0.75rem; background:#f8fafc; min-height:180px; margin:0.7rem 0;'>
+                            <div style='font-size:0.8rem; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.4rem;'>Preview</div>
+                            <div style='font-size:0.95rem; color:#0f172a; font-weight:700;'>{template_name}</div>
+                            <div style='font-size:0.82rem; color:#64748b; margin-top:0.2rem;'>{template_desc}</div>
+                            <div style='margin-top:0.6rem; display:flex; gap:0.5rem; flex-wrap:wrap;'>
+                                <span style='background:#dbeafe; color:#1d4ed8; padding:0.2rem 0.45rem; border-radius:999px; font-size:0.72rem; font-weight:700;'>ATS {template_ats}%</span>
+                                <span style='background:#fef3c7; color:#92400e; padding:0.2rem 0.45rem; border-radius:999px; font-size:0.72rem; font-weight:700;'>Responsive</span>
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
                     
                     # Button with unique key and immediate action
                     button_key = f"template_select_{i}_{j}_{template_id}"
@@ -2269,7 +2312,17 @@ elif st.session_state.mode == 'builder':
                     theme = color_themes.get(st.session_state.color_theme, color_themes['blue'])
                 
                 resume_html = generate_resume_html(st.session_state, template_config)
-                st.components.v1.html(resume_html, height=600, scrolling=True)
+                st.markdown(
+                    f"""
+                    <div style='background:white; border-radius:16px; padding:1rem; border:1px solid #e2e8f0; box-shadow:0 8px 24px rgba(15,23,42,0.06); min-height:520px;'>
+                        <div style='font-size:0.8rem; text-transform:uppercase; letter-spacing:0.08em; color:#64748b; font-weight:700;'>Resume summary</div>
+                        <div style='margin-top:0.5rem; font-size:1rem; color:#0f172a; font-weight:700;'>{st.session_state.get('full_name', 'Your Name')}</div>
+                        <div style='font-size:0.92rem; color:#475569; margin-top:0.2rem;'>{st.session_state.get('job_title_target', 'Target role')}</div>
+                        <div style='margin-top:0.8rem; color:#334155; line-height:1.6; white-space:pre-wrap;'>{st.session_state.get('summary', '')[:900]}</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
             except Exception as e:
                 st.info("Preview will appear here")
                 st.caption(f"Add more details in Step 2 to see preview")
@@ -2375,7 +2428,17 @@ elif st.session_state.mode == 'builder':
             resume_html = generate_resume_html(st.session_state, template_config)
             
             with st.expander("👁️ Preview Resume", expanded=True):
-                st.components.v1.html(resume_html, height=600, scrolling=True)
+                st.markdown(
+                    f"""
+                    <div style='background:white; border-radius:16px; padding:1rem; border:1px solid #e2e8f0; box-shadow:0 8px 24px rgba(15,23,42,0.06); min-height:480px;'>
+                        <div style='font-size:0.8rem; text-transform:uppercase; letter-spacing:0.08em; color:#64748b; font-weight:700;'>Resume ready</div>
+                        <div style='margin-top:0.5rem; font-size:1rem; color:#0f172a; font-weight:700;'>{st.session_state.get('full_name', 'Your Name')}</div>
+                        <div style='font-size:0.92rem; color:#475569; margin-top:0.2rem;'>{st.session_state.get('job_title_target', 'Target role')}</div>
+                        <div style='margin-top:0.8rem; color:#334155; line-height:1.6; white-space:pre-wrap;'>{st.session_state.get('summary', '')[:900]}</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
             
             st.markdown("---")
             st.markdown("### 📥 Download Options")
@@ -2966,26 +3029,17 @@ The letter should be compelling, specific, and highlight relevant experience. Ke
     with col_preview:
         st.markdown("### 👁️ Live Preview")
         if cl_content:
-            preview_html = f"""
-<div style='background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); min-height: 600px;'>
-    <div style='margin-bottom: 2rem; border-bottom: 2px solid #667eea; padding-bottom: 1rem;'>
-        <h2 style='margin: 0; color: #333;'>{st.session_state.get('full_name', 'Your Name')}</h2>
-        <p style='margin: 0.5rem 0 0 0; color: #666;'>{st.session_state.get('email', '')} | {st.session_state.get('phone', '')}</p>
-        <p style='margin: 0.25rem 0 0 0; color: #666;'>{st.session_state.get('city', '')}</p>
-    </div>
-    <div style='margin-bottom: 2rem;'>
-        <p style='margin: 0; color: #666;'>{datetime.now().strftime('%B %d, %Y')}</p>
-    </div>
-    <div style='margin-bottom: 2rem;'>
-        <p style='margin: 0; font-weight: 600; color: #333;'>{company if company else '[Company Name]'}</p>
-        <p style='margin: 0.25rem 0 0 0; color: #666;'>Hiring Manager</p>
-    </div>
-    <div style='white-space: pre-wrap; line-height: 1.8; color: #333;'>
-{cl_content}
-    </div>
-</div>
-"""
-            st.components.v1.html(preview_html, height=650, scrolling=True)
+            st.markdown(
+                f"""
+                <div style='background:white; border-radius:16px; padding:1rem; border:1px solid #e2e8f0; box-shadow:0 8px 24px rgba(15,23,42,0.06); min-height:560px;'>
+                    <div style='font-size:0.8rem; text-transform:uppercase; letter-spacing:0.08em; color:#64748b; font-weight:700;'>Cover letter preview</div>
+                    <div style='margin-top:0.5rem; font-size:1rem; color:#0f172a; font-weight:700;'>{st.session_state.get('full_name', 'Your Name')}</div>
+                    <div style='font-size:0.92rem; color:#475569; margin-top:0.2rem;'>{company if company else 'Hiring Team'}</div>
+                    <div style='margin-top:0.8rem; color:#334155; line-height:1.7; white-space:pre-wrap;'>{cl_content}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
         else:
             st.info("📝 Your cover letter preview will appear here")
     
@@ -3069,26 +3123,17 @@ elif st.session_state.mode == 'masters':
     with col_preview:
         st.markdown("### 👁️ Live Preview")
         if sop_content:
-            preview_html = f"""
-<div style='background: white; padding: 2.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-family: "Times New Roman", serif; max-width: 800px; margin: 0 auto;'>
-    <div style='margin-bottom: 2rem; text-align: right;'>
-        <p style='margin: 0; font-weight: 600; color: #333;'>{name if name else '[Your Name]'}</p>
-        <p style='margin: 0.25rem 0 0 0; color: #666;'>{email if email else '[Your Email]'}</p>
-    </div>
-    <div style='margin-bottom: 2rem;'>
-        <p style='margin: 0; color: #666;'>{datetime.now().strftime('%B %d, %Y')}</p>
-    </div>
-    <div style='margin-bottom: 2rem;'>
-        <p style='margin: 0; font-weight: 600; color: #333;'>Admissions Committee</p>
-        <p style='margin: 0.25rem 0 0 0; color: #666;'>{program if program else '[Program]'}</p>
-        <p style='margin: 0.25rem 0 0 0; color: #666;'>{university if university else '[University]'}</p>
-    </div>
-    <div style='white-space: pre-wrap; line-height: 1.8; color: #333;'>
-{sop_content}
-    </div>
-</div>
-"""
-            st.components.v1.html(preview_html, height=650, scrolling=True)
+            st.markdown(
+                f"""
+                <div style='background:white; border-radius:16px; padding:1rem; border:1px solid #e2e8f0; box-shadow:0 8px 24px rgba(15,23,42,0.06); min-height:560px;'>
+                    <div style='font-size:0.8rem; text-transform:uppercase; letter-spacing:0.08em; color:#64748b; font-weight:700;'>Statement of purpose preview</div>
+                    <div style='margin-top:0.5rem; font-size:1rem; color:#0f172a; font-weight:700;'>{name if name else '[Your Name]'}</div>
+                    <div style='font-size:0.92rem; color:#475569; margin-top:0.2rem;'>{program if program else '[Program]'}</div>
+                    <div style='margin-top:0.8rem; color:#334155; line-height:1.7; white-space:pre-wrap;'>{sop_content}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
         else:
             st.info("📝 Your statement of purpose preview will appear here")
     

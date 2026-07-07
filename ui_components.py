@@ -142,6 +142,8 @@ def render_platform_nav(current_mode: str):
         ("Career Coach", "coach"),
         ("Interview Coach", "interview"),
         ("EQ Growth", "eq"),
+        ("Assessment", "assessment"),
+        ("Monetization", "monetization"),
     ]
 
     st.markdown('<div class="nav-pill-row">', unsafe_allow_html=True)
@@ -182,7 +184,7 @@ def render_readiness_score(score: int):
     )
 
 
-def render_module_card(title: str, description: str, icon: str, target_mode: str, key_suffix: str):
+def render_module_card(title: str, description: str, icon: str, key_suffix: str):
     st.markdown(
         f"""
         <div class="module-card">
@@ -233,4 +235,104 @@ def render_journey_timeline():
             """,
             unsafe_allow_html=True,
         )
+    st.markdown('</div>', unsafe_allow_html=True)
+
+
+def render_foundation_summary():
+    st.markdown("""
+    <div class="platform-card">
+        <h3>Foundation overview</h3>
+        <p>The platform now combines career growth guidance with your existing resume workflow, giving users a clearer path from first visit to next opportunity.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+def render_coaching_panel():
+    if "career_goal" not in st.session_state:
+        st.session_state.career_goal = ""
+    if "current_role" not in st.session_state:
+        st.session_state.current_role = ""
+    if "coaching_focus" not in st.session_state:
+        st.session_state.coaching_focus = "growth"
+
+    st.markdown('<div class="platform-card">', unsafe_allow_html=True)
+    st.markdown("### AI Career Coach")
+    st.caption("A lightweight coaching experience that helps users clarify next steps without changing the backend.")
+
+    st.session_state.career_goal = st.text_input(
+        "What role do you want next?",
+        value=st.session_state.career_goal,
+        key="career_goal_input",
+    )
+    st.session_state.current_role = st.text_input(
+        "What is your current role?",
+        value=st.session_state.current_role,
+        key="current_role_input",
+    )
+    st.session_state.coaching_focus = st.selectbox(
+        "What matters most right now?",
+        ["growth", "promotion", "transition", "confidence"],
+        index=["growth", "promotion", "transition", "confidence"].index(st.session_state.coaching_focus),
+        key="coaching_focus_input",
+    )
+
+    focus_map = {
+        "growth": ["Build a stronger narrative", "Add evidence of leadership", "Refine your resume message"],
+        "promotion": ["Highlight impact and ownership", "Prepare a promotion story", "Align with leadership expectations"],
+        "transition": ["Shape a transferable story", "Map adjacent skills", "Create a targeted positioning plan"],
+        "confidence": ["Practice concise storytelling", "Strengthen your delivery", "Reframe feedback into growth"],
+    }
+
+    recommendations = focus_map.get(st.session_state.coaching_focus, focus_map["growth"])
+    st.markdown("**Recommended coaching focus**")
+    for item in recommendations:
+        st.write(f"- {item}")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+
+def render_eq_panel():
+    st.markdown('<div class="platform-card">', unsafe_allow_html=True)
+    st.markdown("### EQ Growth")
+    st.caption("Practice emotional intelligence habits that strengthen collaboration and presence.")
+    pillars = [
+        ("Self-awareness", "Reflect on your recent wins and triggers."),
+        ("Communication", "Use clear, calm language in team settings."),
+        ("Relationship growth", "Build trust with thoughtful follow-ups."),
+    ]
+    for title, description in pillars:
+        st.markdown(f"- **{title}:** {description}")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+
+def render_assessment_panel():
+    st.markdown('<div class="platform-card">', unsafe_allow_html=True)
+    st.markdown("### Career Assessment")
+    st.caption("A simple readiness snapshot that can evolve into a richer assessment experience later.")
+    if "assessment_scores" not in st.session_state:
+        st.session_state.assessment_scores = {
+            "clarity": 70,
+            "proof": 65,
+            "visibility": 60,
+            "confidence": 75,
+        }
+
+    scores = {}
+    for key, label in [("clarity", "Role clarity"), ("proof", "Evidence of impact"), ("visibility", "Visibility in the market"), ("confidence", "Interview confidence")]:
+        scores[key] = st.slider(label, 0, 100, int(st.session_state.assessment_scores[key]), key=f"assessment_{key}")
+    st.session_state.assessment_scores = scores
+
+    average = int(sum(scores.values()) / len(scores))
+    st.metric("Readiness snapshot", f"{average}%")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+
+def render_monetization_panel():
+    st.markdown('<div class="platform-card">', unsafe_allow_html=True)
+    st.markdown("### Monetization Preview")
+    st.caption("Free and Pro paths are now separated cleanly so future subscription flows can slot in without disrupting the app.")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("**Free**\n- Core resume builder\n- Basic toolkit\n- Community guidance")
+    with col2:
+        st.markdown("**Pro**\n- Advanced coaching\n- Priority insights\n- Premium growth plans")
     st.markdown('</div>', unsafe_allow_html=True)
