@@ -21,4 +21,4 @@ numpy==2.4.2
 requests==2.32.5
 
 # Optional backend & testing dependencies (commented out for Streamlit deployment)
-
+xhtml2pdf
