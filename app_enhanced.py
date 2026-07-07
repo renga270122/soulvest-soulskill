@@ -1,23 +1,44 @@
 # app_enhanced.py - Soulvest AI Resume Builder - ResumeGemini Enhanced Version
 # Simplified 4-Step Process • Content Library • Live Preview • Multi-Resume Management
-import streamlit as st
-import streamlit.components.v1 as components
 import base64
-import tempfile
+from datetime import datetime
 import json
 import os
-from datetime import datetime
+import tempfile
 import time
 
+import streamlit as st
+import streamlit.components.v1 as components
+
 # Import configurations
-from template_config import (TEMPLATES, INDIAN_TEMPLATES, US_TEMPLATES, UK_TEMPLATES, 
-                             CANADA_TEMPLATES, AUSTRALIA_TEMPLATES, GERMANY_TEMPLATES, 
-                             FRANCE_TEMPLATES, UAE_TEMPLATES, SINGAPORE_TEMPLATES)
-from industry_config import INDUSTRY_OPTIONS, INDUSTRY_KEYWORDS, MAJOR_INDIAN_CITIES, INDIAN_STATES
+from template_config import (
+    AUSTRALIA_TEMPLATES,
+    CANADA_TEMPLATES,
+    FRANCE_TEMPLATES,
+    GERMANY_TEMPLATES,
+    INDIAN_TEMPLATES,
+    SINGAPORE_TEMPLATES,
+    TEMPLATES,
+    UAE_TEMPLATES,
+    UK_TEMPLATES,
+    US_TEMPLATES,
+)
+from industry_config import (
+    INDUSTRY_KEYWORDS,
+    INDUSTRY_OPTIONS,
+    MAJOR_INDIAN_CITIES,
+    INDIAN_STATES,
+)
 from stream_config import STREAM_OPTIONS
 from education_config import DEGREE_OPTIONS
-from autocomplete_helper import (JOB_TITLES, TECHNICAL_SKILLS, COMPANIES, CITIES,
-                                 create_autocomplete_text_input, get_skill_suggestions)
+from autocomplete_helper import (
+    CITIES,
+    COMPANIES,
+    JOB_TITLES,
+    TECHNICAL_SKILLS,
+    create_autocomplete_text_input,
+    get_skill_suggestions,
+)
 
 # Import AI and resume generation modules
 from ai_assistant import AIResumeAssistant, ATSOptimizer
@@ -29,22 +50,31 @@ from resume_generator import generate_resume_html
 from resume_parser import ResumeParser, parse_uploaded_resume
 from sidebar_content import render_enhanced_sidebar
 from theme_config import apply_custom_theme
-from auth_ui import show_signin_signup_modal, show_user_profile, show_auth_prompt_banner
+from auth_ui import show_auth_prompt_banner, show_signin_signup_modal, show_user_profile
 from advanced_features import (
-    ResumeImporter, QRCodeGenerator, SpellChecker, 
-    ResumeVersionControl, EmailTemplates, KeywordHighlighter, 
-    ResumeLengthOptimizer
+    EmailTemplates,
+    KeywordHighlighter,
+    QRCodeGenerator,
+    ResumeImporter,
+    ResumeLengthOptimizer,
+    ResumeVersionControl,
+    SpellChecker,
 )
 from job_examples import (
-    PROFESSIONAL_SUMMARIES, WORK_EXPERIENCE_EXAMPLES, SKILLS_EXAMPLES,
-    PROJECT_EXAMPLES, get_examples_for_role, get_all_job_roles
+    PROJECT_EXAMPLES,
+    PROFESSIONAL_SUMMARIES,
+    SKILLS_EXAMPLES,
+    WORK_EXPERIENCE_EXAMPLES,
+    get_all_job_roles,
+    get_examples_for_role,
 )
 
-# Try to import PDF generation
+# Pure Python PDF fallback generation replacement modules
+from io import BytesIO
 try:
-    import pdfkit
+    from xhtml2pdf import pisa
     PDF_AVAILABLE = True
-except:
+except ImportError:
     PDF_AVAILABLE = False
 
 # Page Configuration
@@ -1124,25 +1154,6 @@ def get_sample_resume_data():
         'language_entries': []
     }
 
-def calculate_completeness():
-    """Calculate resume completeness percentage"""
-    required_fields = [
-        'full_name', 'email', 'phone', 'city',
-        'summary', 'tech_skills'
-    ]
-    completed = sum(1 for field in required_fields if st.session_state.get(field))
-    
-    # Add work experience check
-    if st.session_state.get('work_entries'):
-        completed += 1
-    
-    # Add education check
-    if st.session_state.get('education_entries'):
-        completed += 1
-    
-    total = len(required_fields) + 2
-    return int((completed / total) * 100)
-
 # MAIN APP NAVIGATION
 if st.session_state.mode == 'home':
     # Show auth modal if requested
@@ -1186,18 +1197,6 @@ if st.session_state.mode == 'home':
         # Center - Hero Title + Welcome Banner Combined
         with col_center:
             st.markdown("""
-            <style>
-            @media (max-width: 768px) {
-                .hero-welcome { font-size: 2rem !important; }
-                .hero-headline { font-size: 1.3rem !important; }
-                .hero-desc { font-size: 1rem !important; }
-            }
-            @media (max-width: 480px) {
-                .hero-welcome { font-size: 1.6rem !important; }
-                .hero-headline { font-size: 1.1rem !important; }
-                .hero-desc { font-size: 0.9rem !important; }
-            }
-            </style>
             <div style='text-align: center; padding: 2rem; background: linear-gradient(135deg, rgba(229,231,235,0.95) 0%, rgba(219,234,254,0.95) 50%, rgba(224,231,255,0.95) 100%); border-radius: 18px; border: 2px solid rgba(139, 92, 246, 0.4); box-shadow: 0 14px 30px rgba(139, 92, 246, 0.25); backdrop-filter: blur(10px);'>
                 <div class='hero-welcome' style='color: #000000; font-size: 2.5rem; font-weight: 900; margin-bottom: 0.8rem;'>Welcome to SoulSkill! 👋✨</div>
                 <div class='hero-headline' style='color: #5b21b6; font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;'>🌟 Manifest Your Dream Career in 5 Minutes</div>
@@ -1319,7 +1318,7 @@ if st.session_state.mode == 'home':
             st.session_state.mode = 'pricing'
             st.rerun()
     
-    # Motivational sidebar quote
+    # Promotional sidebar quote
     st.markdown("""<br>""", unsafe_allow_html=True)
     side_col1, side_col2, side_col3 = st.columns([0.5, 3, 0.5])
     with side_col2:
@@ -1662,8 +1661,8 @@ elif st.session_state.mode == 'builder':
         
         if country_filter == "All Countries":
             all_templates.update({**INDIAN_TEMPLATES, **US_TEMPLATES, **UK_TEMPLATES, 
-                                **CANADA_TEMPLATES, **AUSTRALIA_TEMPLATES, **GERMANY_TEMPLATES,
-                                **FRANCE_TEMPLATES, **UAE_TEMPLATES, **SINGAPORE_TEMPLATES})
+                                 **CANADA_TEMPLATES, **AUSTRALIA_TEMPLATES, **GERMANY_TEMPLATES,
+                                 **FRANCE_TEMPLATES, **UAE_TEMPLATES, **SINGAPORE_TEMPLATES})
         elif country_filter == "India 🇮🇳":
             all_templates.update({**INDIAN_TEMPLATES})
         elif country_filter == "USA 🇺🇸":
@@ -1719,7 +1718,7 @@ elif st.session_state.mode == 'builder':
                     button_key = f"template_select_{i}_{j}_{template_id}"
                     button_label = '✓ Selected' if selected else 'Select This Template'
                     if st.button(button_label, 
-                               key=button_key, 
+                               key=button_key,  
                                use_container_width=True,
                                disabled=selected,
                                type="primary" if selected else "secondary"):
@@ -1763,8 +1762,7 @@ elif st.session_state.mode == 'builder':
             # Job Description Matcher - NEW FEATURE
             with st.expander("🎯 Paste Job Description (AI-Powered Keyword Matcher)", expanded=False):
                 st.markdown("""
-                **Tailor your resume for this specific job!** 
-                Paste the job description below and we'll:
+                **Tailor your resume for this specific job!** Paste the job description below and we'll:
                 - Extract key requirements and skills
                 - Highlight what you already have
                 - Suggest what's missing from your resume
@@ -1984,11 +1982,11 @@ elif st.session_state.mode == 'builder':
             st.markdown("### 💪 Skills")
             
             # Get skill suggestions
-            skill_suggestions = get_content_suggestions(selected_role, "skills")
-            if skill_suggestions:
+            skin_suggestions = get_content_suggestions(selected_role, "skills")
+            if skin_suggestions:
                 st.markdown("**💡 Suggested Skills:**")
                 skill_cols = st.columns(4)
-                for idx, skill in enumerate(skill_suggestions[:12]):
+                for idx, skill in enumerate(skin_suggestions[:12]):
                     with skill_cols[idx % 4]:
                         if st.button(f"➕ {skill}", key=f"skill_suggest_{idx}", use_container_width=True):
                             current_skills = st.session_state.get('tech_skills', '')
@@ -2129,10 +2127,8 @@ elif st.session_state.mode == 'builder':
                                 'end_date': work_end,
                                 'responsibilities': work_resp
                             })
-                            # Affirmation on save
                             st.balloons()
                             st.success("🌟 Great! You're building a powerful story of your professional journey!")
-                            # Clear fields
                             st.session_state.new_work_resp = ''
                             st.success("✅ Work experience added!")
                             st.rerun()
@@ -2325,7 +2321,6 @@ elif st.session_state.mode == 'builder':
             
             col1, col2 = st.columns(2)
             with col1:
-                # Photo option with regional guidance
                 selected_template = st.session_state.get('selected_template', '')
                 
                 # Determine region based on template
@@ -2347,7 +2342,6 @@ elif st.session_state.mode == 'builder':
                 st.session_state.show_photo = show_photo
                 
                 if show_photo:
-                    # Show detailed tips when photo is enabled
                     st.warning("⚠️ **Photo Added - Important Tips:**")
                     
                     with st.expander("📸 **Professional Photo Guidelines** (Click to expand)", expanded=True):
@@ -2420,7 +2414,7 @@ elif st.session_state.mode == 'builder':
                 st.markdown("""
                 **Why Photos Are Generally NOT Recommended:**
                 
-                ✅ **ATS Compatibility**: Most resumes are scanned by Applicant Tracking Systems (ATS). Photos can:
+                **ATS Compatibility**: Most resumes are scanned by Applicant Tracking Systems (ATS). Photos can:
                 - Confuse parsing algorithms
                 - Reduce your resume's chances of being shortlisted
                 - Cause formatting issues that make your resume unreadable
@@ -2516,19 +2510,14 @@ elif st.session_state.mode == 'builder':
         with col_preview:
             st.markdown("### 👁️ Live Preview")
             
-            # Generate preview
             try:
                 all_templates = {**TEMPLATES, **INDIAN_TEMPLATES}
                 template_config = all_templates[st.session_state.get('selected_template', list(all_templates.keys())[0])]
                 
-                # Apply customizations to template
                 if st.session_state.get('color_theme'):
                     theme = color_themes.get(st.session_state.color_theme, color_themes['blue'])
-                    # Inject color theme into HTML (simplified)
                 
                 resume_html = generate_resume_html(st.session_state, template_config)
-                
-                # Show preview in iframe
                 st.components.v1.html(resume_html, height=600, scrolling=True)
             except Exception as e:
                 st.info("Preview will appear here")
@@ -2549,48 +2538,39 @@ elif st.session_state.mode == 'builder':
     elif st.session_state.step == 4:
         # STEP 4: Download & Export with ATS Analysis
         st.title("📥 Download Your Resume")
-        
-        # Congratulatory affirmation
         st.success("🎉 **Congratulations!** You've completed your resume—a powerful reflection of your journey and achievements!")
         
         col_main, col_score = st.columns([2, 1])
         
         with col_main:
-            # ATS Compatibility Checker - NEW FEATURE
             with st.expander("🔍 ATS Compatibility Check", expanded=True):
                 st.markdown("### Ensuring Your Resume Passes ATS Screening")
                 
-                # Check for ATS issues
                 ats_issues = []
                 ats_warnings = []
                 ats_pass = []
                 
-                # Check 1: Photo
                 if st.session_state.get('show_photo'):
                     ats_issues.append("❌ **Photo included**: Remove photo for better ATS compatibility (except Germany/France)")
                 else:
                     ats_pass.append("✅ No photo - ATS friendly")
                 
-                # Check 2: Complex formatting
                 if st.session_state.get('two_column'):
                     ats_warnings.append("⚠️ **Two-column layout**: Some ATS may struggle with columns")
                 else:
                     ats_pass.append("✅ Single column layout - ATS optimal")
                 
-                # Check 3: Content length
                 total_content = len(st.session_state.get('summary', '') + st.session_state.get('tech_skills', ''))
                 if total_content < 200:
                     ats_warnings.append("⚠️ **Thin content**: Add more keywords and details for better ATS matching")
                 else:
                     ats_pass.append("✅ Sufficient content for keyword matching")
                 
-                # Check 4: Keywords presence
                 if st.session_state.get('tech_skills') and len(st.session_state.get('tech_skills', '').split(',')) >= 5:
                     ats_pass.append("✅ Good number of technical skills listed")
                 else:
                     ats_warnings.append("⚠️ **Limited skills**: Add more relevant skills for ATS keyword matching")
                 
-                # Check 5: Quantified achievements
                 work_content = ' '.join([entry.get('responsibilities', '') for entry in st.session_state.get('work_entries', [])])
                 has_numbers = any(char.isdigit() for char in work_content)
                 if has_numbers:
@@ -2598,7 +2578,6 @@ elif st.session_state.mode == 'builder':
                 else:
                     ats_warnings.append("⚠️ **No metrics found**: Add numbers to strengthen impact (e.g., '30% improvement')")
                 
-                # Check 6: Standard sections
                 required_sections = ['summary', 'tech_skills', 'work_entries']
                 all_present = all(st.session_state.get(section) for section in required_sections)
                 if all_present:
@@ -2606,11 +2585,9 @@ elif st.session_state.mode == 'builder':
                 else:
                     ats_issues.append("❌ **Missing sections**: Ensure Summary, Skills, and Experience are filled")
                 
-                # Calculate ATS score
                 total_checks = len(ats_pass) + len(ats_warnings) + len(ats_issues)
                 ats_score = int((len(ats_pass) / total_checks * 100)) if total_checks > 0 else 0
                 
-                # Display score
                 if ats_score >= 80:
                     st.success(f"### 🎯 ATS Score: {ats_score}%")
                     st.markdown("**Excellent!** Your resume is well-optimized for ATS systems.")
@@ -2621,14 +2598,12 @@ elif st.session_state.mode == 'builder':
                     st.error(f"### ❌ ATS Score: {ats_score}%")
                     st.markdown("**Needs attention** - address issues below to improve.")
                 
-                # Show details
                 col1, col2 = st.columns(2)
                 with col1:
                     if ats_pass:
                         st.markdown("**✅ Strengths:**")
                         for item in ats_pass:
                             st.markdown(item)
-                
                 with col2:
                     if ats_warnings:
                         st.markdown("**⚠️ Warnings:**")
@@ -2648,40 +2623,28 @@ elif st.session_state.mode == 'builder':
             template_config = all_templates[st.session_state.get('selected_template', list(all_templates.keys())[0])]
             resume_html = generate_resume_html(st.session_state, template_config)
             
-            # Resume Preview
             with st.expander("👁️ Preview Resume", expanded=True):
                 st.components.v1.html(resume_html, height=600, scrolling=True)
             
             st.markdown("---")
-            
-            # Download Options
             st.markdown("### 📥 Download Options")
             st.caption("Choose your preferred format. All downloads are 100% FREE!")
             
-            # Final Checklist & Affirmation
             st.info("""
             🌟 **You're Ready! Final Checklist:**
-            
             ✅ Resume has quantified achievements
-            
             ✅ Keywords from job description included
-            
             ✅ LinkedIn profile matches resume content
-            
             ✅ No photos (unless Germany/France)
-            
             ✅ Clean, ATS-friendly formatting
             
             💪 **Remember**: You've built something powerful here. Your resume reflects not just your skills, but your growth, resilience, and unique journey. Trust in your value and apply with confidence!
             """)
             
-            # File name
             file_base_name = st.session_state.get('full_name', 'Resume').replace(' ', '_')
-            
             col1, col2, col3 = st.columns(3)
             
             with col1:
-                # HTML Download
                 resume_html_bytes = resume_html.encode('utf-8', errors='ignore')
                 st.download_button(
                     "📄 Download HTML",
@@ -2694,31 +2657,34 @@ elif st.session_state.mode == 'builder':
                 st.caption("✓ Best for web viewing")
             
             with col2:
-                # PDF Download
+                # REPLACED: Pure Python PDF generation layer using xhtml2pdf
                 if PDF_AVAILABLE:
                     try:
-                        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-                            pdfkit.from_string(resume_html, tmp.name)
-                            with open(tmp.name, "rb") as f:
-                                pdf_data = f.read()
-                        st.download_button(
-                            "📑 Download PDF",
-                            pdf_data,
-                            file_name=f"{file_base_name}.pdf",
-                            mime="application/pdf",
-                            use_container_width=True,
-                            key="download_pdf_btn"
-                        )
-                        st.caption("✓ Most popular format")
-                    except:
-                        st.button("📑 PDF (Install wkhtmltopdf)", disabled=True, use_container_width=True)
-                        st.caption("⚠️ PDF generation unavailable")
+                        pdf_buffer = BytesIO()
+                        # Directly write compiled HTML output straight to our raw byte buffer stream
+                        pisa_status = pisa.CreatePDF(resume_html, dest=pdf_buffer)
+                        
+                        if not pisa_status.err:
+                            st.download_button(
+                                "📑 Download PDF",
+                                data=pdf_buffer.getvalue(),
+                                file_name=f"{file_base_name}.pdf",
+                                mime="application/pdf",
+                                use_container_width=True,
+                                key="download_pdf_btn"
+                            )
+                            st.caption("✓ Pure Python compilation (No server binaries needed)")
+                        else:
+                            st.button("📑 PDF Parsing Error", disabled=True, use_container_width=True)
+                            st.caption("⚠️ Layout parsing limitation")
+                    except Exception as e:
+                        st.button("📑 PDF Error", disabled=True, use_container_width=True)
+                        st.caption(f"⚠️ Generation failed: {str(e)}")
                 else:
-                    st.button("📑 PDF (Not Available)", disabled=True, use_container_width=True)
-                    st.caption("⚠️ Install pdfkit")
+                    st.button("📑 PDF (Install xhtml2pdf)", disabled=True, use_container_width=True)
+                    st.caption("⚠️ Add xhtml2pdf to requirements.txt")
             
             with col3:
-                # DOCX Download (using ExportManager)
                 try:
                     exporter = ExportManager()
                     docx_data = exporter.export_to_docx(st.session_state)
@@ -2736,11 +2702,9 @@ elif st.session_state.mode == 'builder':
                     st.caption("⚠️ DOCX export unavailable")
             
             st.markdown("<br>", unsafe_allow_html=True)
-            
             col1, col2, col3 = st.columns(3)
             
             with col1:
-                # Plain Text Export
                 resume_text = f"""
 {st.session_state.get('full_name', '')}
 {st.session_state.get('email', '')} | {st.session_state.get('phone', '')}
@@ -2775,7 +2739,6 @@ WORK EXPERIENCE
                 st.caption("✓ 100% ATS compatible")
             
             with col2:
-                # JSON Export
                 resume_json = json.dumps({k: v for k, v in dict(st.session_state).items() 
                                          if isinstance(v, (str, int, float, bool, list, dict))}, indent=2)
                 st.download_button(
@@ -2789,11 +2752,8 @@ WORK EXPERIENCE
                 st.caption("✓ Data backup")
             
             with col3:
-                # Markdown Export
                 resume_md = f"""# {st.session_state.get('full_name', '')}
-
 **{st.session_state.get('job_title_target', '')}**
-
 📧 {st.session_state.get('email', '')} | 📱 {st.session_state.get('phone', '')}
 
 ## Professional Summary
@@ -2820,8 +2780,6 @@ WORK EXPERIENCE
                 st.caption("✓ GitHub ready")
             
             st.markdown("---")
-            
-            # Save to Dashboard
             st.markdown("### 💾 Save to Dashboard")
             
             col1, col2 = st.columns([2, 1])
@@ -2831,10 +2789,7 @@ WORK EXPERIENCE
                                            key="save_resume_name")
             with col2:
                 if st.button("💾 Save Resume", use_container_width=True, key="save_to_dashboard_btn"):
-                    # Generate unique ID
                     resume_id = f"resume_{int(time.time())}"
-                    
-                    # Save to resumes dict
                     if 'resumes' not in st.session_state:
                         st.session_state.resumes = {}
                     
@@ -2853,22 +2808,15 @@ WORK EXPERIENCE
                         'created_at': datetime.now().strftime('%b %d, %Y %I:%M %p'),
                         'completeness': calculate_completeness()
                     }
-                    
-                    # Save to file
                     with open("soulskill_resumes.json", "w", encoding='utf-8') as f:
                         json.dump(st.session_state.resumes, f, indent=2)
-                    
                     st.success(f"✅ Resume saved as '{resume_name}'!")
             
             st.markdown("---")
-            
-            # Additional Tools
             st.markdown("### 🛠️ Additional Tools")
-            
             col1, col2 = st.columns(2)
             
             with col1:
-                # Generate QR Code
                 if st.button("📱 Generate QR Code", use_container_width=True, key="qr_code_btn"):
                     qr_gen = QRCodeGenerator()
                     qr_data = qr_gen.generate_vcard_qr(st.session_state)
@@ -2882,7 +2830,6 @@ WORK EXPERIENCE
                         )
             
             with col2:
-                # Email Templates
                 if st.button("📧 Get Email Templates", use_container_width=True, key="email_templates_btn"):
                     st.markdown("**📧 Professional Email Templates**")
                     templates = EmailTemplates.get_all_templates(st.session_state)
@@ -2892,8 +2839,6 @@ WORK EXPERIENCE
         
         with col_score:
             st.markdown("### 📊 ATS Score Dashboard")
-            
-            # Job Description Input for ATS
             job_desc = st.text_area(
                 "Paste Job Description",
                 value=st.session_state.get('job_description', ''),
@@ -2906,19 +2851,14 @@ WORK EXPERIENCE
             if st.button("🔍 Calculate ATS Score", use_container_width=True, key="calc_ats_btn"):
                 if job_desc:
                     with st.spinner("Analyzing..."):
-                        # Compile resume text
                         resume_text = f"{st.session_state.get('full_name', '')} {st.session_state.get('job_title_target', '')} {st.session_state.get('summary', '')} {st.session_state.get('tech_skills', '')}"
-                        
                         for work in st.session_state.get('work_entries', []):
                             resume_text += f" {work.get('title', '')} {work.get('company', '')} {work.get('responsibilities', '')}"
                         
-                        # Calculate ATS score
                         ats_result = ai_assistant.calculate_ats_score(resume_text, job_desc)
                         st.session_state.ats_score = ats_result
-                        
                         score = ats_result.get('score', 0)
                         
-                        # Display score
                         if score >= 75:
                             st.success(f"🎉 Excellent! ATS Score: {score}/100")
                         elif score >= 50:
@@ -2929,7 +2869,6 @@ WORK EXPERIENCE
                         st.metric("Keyword Match", f"{ats_result.get('keyword_match', 0)}%")
                         st.metric("Matched Keywords", f"{ats_result.get('matched_keywords', 0)}/{ats_result.get('total_job_keywords', 0)}")
                         
-                        # Missing keywords
                         if ats_result.get('missing_keywords'):
                             st.markdown("**Missing Keywords:**")
                             for kw in ats_result['missing_keywords'][:5]:
@@ -2937,7 +2876,6 @@ WORK EXPERIENCE
                 else:
                     st.info("Paste a job description to analyze")
             
-            # Show previous score if available
             if st.session_state.get('ats_score'):
                 score = st.session_state.ats_score.get('score', 0)
                 st.markdown("---")
@@ -2945,35 +2883,28 @@ WORK EXPERIENCE
                 st.progress(score / 100)
                 st.metric("ATS Score", f"{score}/100")
             
-            # Resume Stats
             st.markdown("---")
             st.markdown("### 📊 Resume Stats")
             st.metric("Completeness", f"{calculate_completeness()}%")
             st.metric("Work Positions", len(st.session_state.get('work_entries', [])))
             st.metric("Education", len(st.session_state.get('education_entries', [])))
         
-        # Navigation
         st.markdown("<br>", unsafe_allow_html=True)
         col1, col2, col3 = st.columns(3)
-        
         with col1:
             if st.button("⬅️ Back to Customize", use_container_width=True, key="back_from_step4"):
                 st.session_state.step = 3
                 st.rerun()
-        
         with col2:
             if st.button("🏠 Home", use_container_width=True, key="home_from_step4"):
                 st.session_state.mode = 'home'
                 st.rerun()
-        
         with col3:
             if st.button("📂 Dashboard", use_container_width=True, key="dashboard_from_step4"):
                 st.session_state.mode = 'dashboard'
                 st.rerun()
 
 elif st.session_state.mode == 'coverletter':
-    # COVER LETTER BUILDER
-    # LOA Visualization Practice
     st.markdown("""
     <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); border-radius: 12px; border: 1px solid rgba(236, 72, 153, 0.3); margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(236, 72, 153, 0.15);'>
         <div style='font-size: 1.1rem; color: #831843; font-weight: 700; font-style: italic;'>💫 "Visualize yourself already in your dream role. Feel the joy, the confidence, the success. You are worthy of abundance!"</div>
@@ -2991,8 +2922,6 @@ elif st.session_state.mode == 'coverletter':
     
     with col_form:
         st.markdown("### 📝 Cover Letter Details")
-        
-        # Company and Position
         col1, col2 = st.columns(2)
         with col1:
             company = st.text_input("Company Name *", value=st.session_state.get('cl_company', ''), 
@@ -3003,11 +2932,9 @@ elif st.session_state.mode == 'coverletter':
                                     placeholder="e.g., Software Engineer", key="cl_position_input")
             st.session_state.cl_position = position
         
-        # Use resume data if available
         if st.session_state.get('full_name'):
             st.info(f"Using your resume data: {st.session_state.get('full_name')} | {st.session_state.get('job_title_target', '')}")
         
-        # Cover Letter Templates
         st.markdown("### 📋 Choose Template")
         
         cl_templates = {
@@ -3058,7 +2985,6 @@ Best regards,
 I'm {name}, and I'm excited to apply for the {position} role at {company}.
 
 Here's why I'm a great fit:
-
 • {bullet_point1}
 • {bullet_point2}  
 • {bullet_point3}
@@ -3108,19 +3034,15 @@ Creatively yours,
             format_func=lambda x: f"{cl_templates[x]['icon']} {cl_templates[x]['name']} - {cl_templates[x]['description']}",
             key="cl_template_select"
         )
-        
         st.markdown("---")
         
-        # AI Generation
         if ai_assistant.enabled:
             st.markdown("### ✨ AI Generation")
-            
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("🤖 Generate with AI", use_container_width=True, key="generate_cl_ai"):
                     if company and position:
                         with st.spinner("AI is crafting your cover letter..."):
-                            # Prepare profile data
                             profile_data = {
                                 'name': st.session_state.get('full_name', 'Your Name'),
                                 'current_role': st.session_state.get('job_title_target', 'Professional'),
@@ -3129,15 +3051,10 @@ Creatively yours,
                                 'skills': st.session_state.get('tech_skills', ''),
                                 'experience': st.session_state.get('work_entries', [])
                             }
-                            
-                            # Generate cover letter using AI
                             prompt = f"""Write a professional cover letter for {profile_data['name']} applying for {position} at {company}.
-                            
 Current role: {profile_data['current_role']}
 Skills: {profile_data['skills']}
-
 The letter should be compelling, specific, and highlight relevant experience. Keep it under 400 words."""
-                            
                             try:
                                 cl_content = ai_assistant.model.generate_content(prompt).text
                                 st.session_state.cl_content = cl_content
@@ -3150,10 +3067,7 @@ The letter should be compelling, specific, and highlight relevant experience. Ke
             
             with col2:
                 if st.button("🔄 Use Template", use_container_width=True, key="use_cl_template"):
-                    # Fill template with data
                     template_text = cl_templates[selected_template]['template']
-                    
-                    # Replace placeholders
                     replacements = {
                         '{name}': st.session_state.get('full_name', 'Your Name'),
                         '{position}': position or '[Position]',
@@ -3194,10 +3108,8 @@ The letter should be compelling, specific, and highlight relevant experience. Ke
                         '{bullet_point2}': 'Proven track record of success',
                         '{bullet_point3}': 'Passionate about driving results'
                     }
-                    
                     for key, value in replacements.items():
                         template_text = template_text.replace(key, str(value))
-                    
                     st.session_state.cl_content = template_text
                     st.success("✅ Template applied!")
                     st.rerun()
@@ -3205,8 +3117,6 @@ The letter should be compelling, specific, and highlight relevant experience. Ke
             st.warning("⚠️ AI features offline. Using templates instead.")
         
         st.markdown("---")
-        
-        # Manual editing
         st.markdown("### ✍️ Edit Cover Letter")
         cl_content = st.text_area(
             "Cover Letter Content",
@@ -3216,13 +3126,10 @@ The letter should be compelling, specific, and highlight relevant experience. Ke
             key="cl_content_input",
             help="Type your content - it saves automatically"
         )
-        
-        # Auto-save functionality
         if cl_content != st.session_state.get('cl_content', ''):
             st.session_state.cl_content = cl_content
             st.caption("💾 Auto-saved")
         
-        # Word count
         if cl_content:
             word_count = len(cl_content.split())
             char_count = len(cl_content)
@@ -3238,10 +3145,7 @@ The letter should be compelling, specific, and highlight relevant experience. Ke
                     st.caption("✅ Great length!")
         
         st.markdown("---")
-        
-        # Download Options
         st.markdown("### 📥 Download Options")
-        
         col1, col2, col3 = st.columns(3)
         
         with col1:
@@ -3258,7 +3162,6 @@ The letter should be compelling, specific, and highlight relevant experience. Ke
         
         with col2:
             if cl_content:
-                # Simple HTML version
                 cl_html = f"""
 <!DOCTYPE html>
 <html>
@@ -3288,28 +3191,30 @@ The letter should be compelling, specific, and highlight relevant experience. Ke
                 )
         
         with col3:
+            # REPLACED: Pure Python PDF generation layer using xhtml2pdf
             if cl_content and PDF_AVAILABLE:
                 try:
-                    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-                        pdfkit.from_string(cl_html, tmp.name)
-                        with open(tmp.name, "rb") as f:
-                            pdf_data = f.read()
-                    st.download_button(
-                        "📑 Download PDF",
-                        pdf_data,
-                        file_name=f"{file_name}.pdf",
-                        mime="application/pdf",
-                        use_container_width=True,
-                        key="download_cl_pdf"
-                    )
-                except:
-                    st.button("📑 PDF (Unavailable)", disabled=True, use_container_width=True)
+                    cl_pdf_buffer = BytesIO()
+                    pisa_status = pisa.CreatePDF(cl_html, dest=cl_pdf_buffer)
+                    if not pisa_status.err:
+                        st.download_button(
+                            "📑 Download PDF",
+                            data=cl_pdf_buffer.getvalue(),
+                            file_name=f"{file_name}.pdf",
+                            mime="application/pdf",
+                            use_container_width=True,
+                            key="download_cl_pdf"
+                        )
+                    else:
+                        st.button("📑 PDF Formatting Error", disabled=True, use_container_width=True)
+                except Exception as e:
+                    st.button("📑 PDF Generation Failed", disabled=True, use_container_width=True)
+            else:
+                st.button("📑 PDF (Unavailable)", disabled=True, use_container_width=True)
     
     with col_preview:
         st.markdown("### 👁️ Live Preview")
-        
         if cl_content:
-            # Display preview
             preview_html = f"""
 <div style='background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); min-height: 600px;'>
     <div style='margin-bottom: 2rem; border-bottom: 2px solid #667eea; padding-bottom: 1rem;'>
@@ -3332,9 +3237,7 @@ The letter should be compelling, specific, and highlight relevant experience. Ke
             st.components.v1.html(preview_html, height=650, scrolling=True)
         else:
             st.info("📝 Your cover letter preview will appear here")
-            st.caption("Fill in the details and use AI or templates to generate content")
     
-    # Navigation
     st.markdown("---")
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -3351,8 +3254,6 @@ The letter should be compelling, specific, and highlight relevant experience. Ke
             st.rerun()
 
 elif st.session_state.mode == 'masters':
-    # MASTERS/SOP LETTER BUILDER
-    # LOA for Academic Success
     st.markdown("""
     <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%); border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.3); margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);'>
         <div style='font-size: 1.1rem; color: #5b21b6; font-weight: 700; font-style: italic;'>🎯 "I am worthy of this academic opportunity. My educational dreams are manifesting perfectly. The universe supports my growth."</div>
@@ -3370,26 +3271,23 @@ elif st.session_state.mode == 'masters':
     
     with col_form:
         st.markdown("### 📝 Application Details")
-        
-        # University and Program
         col1, col2 = st.columns(2)
         with col1:
             university = st.text_input("University Name *", value=st.session_state.get('sop_university', ''), 
-                                   placeholder="e.g., Stanford University", key="sop_university_input")
+                                       placeholder="e.g., Stanford University", key="sop_university_input")
             st.session_state.sop_university = university
         with col2:
             program = st.text_input("Program *", value=st.session_state.get('sop_program', ''),
                                     placeholder="e.g., MS in Computer Science", key="sop_program_input")
             st.session_state.sop_program = program
         
-        # Personal details
         col1, col2 = st.columns(2)
         with col1:
             name = st.text_input("Your Name *", value=st.session_state.get('full_name', ''),
-                               placeholder="John Doe", key="sop_name_input")
+                                 placeholder="John Doe", key="sop_name_input")
         with col2:
             email = st.text_input("Email *", value=st.session_state.get('email', ''),
-                                placeholder="john@email.com", key="sop_email_input")
+                                  placeholder="john@email.com", key="sop_email_input")
         
         st.markdown("---")
         st.markdown("### ✍️ Edit Statement of Purpose")
@@ -3402,7 +3300,6 @@ elif st.session_state.mode == 'masters':
         )
         st.session_state.sop_content = sop_content
         
-        # Export options
         st.markdown("### 💾 Save & Export")
         col1, col2 = st.columns(2)
         with col1:
@@ -3420,9 +3317,7 @@ elif st.session_state.mode == 'masters':
     
     with col_preview:
         st.markdown("### 👁️ Live Preview")
-        
         if sop_content:
-            # Display preview
             preview_html = f"""
 <div style='background: white; padding: 2.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-family: "Times New Roman", serif; max-width: 800px; margin: 0 auto;'>
     <div style='margin-bottom: 2rem; text-align: right;'>
@@ -3445,9 +3340,7 @@ elif st.session_state.mode == 'masters':
             st.components.v1.html(preview_html, height=650, scrolling=True)
         else:
             st.info("📝 Your statement of purpose preview will appear here")
-            st.caption("Fill in the details above to see preview")
     
-    # Navigation
     st.markdown("---")
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -3464,464 +3357,11 @@ elif st.session_state.mode == 'masters':
             st.session_state.mode = 'coverletter'
             st.rerun()
 
-elif st.session_state.mode == 'dashboard':
-    # Dashboard Page
-    st.markdown("""
-    <div style='text-align: center; padding: 2rem 0;'>
-        <h1 style='font-size: 2.8rem; font-weight: 900; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>
-            📊 My Dashboard
-        </h1>
-        <p style='font-size: 1.1rem; color: #4a5568; margin-top: 0.5rem;'>
-            Welcome back, {0}!
-        </p>
-    </div>
-    """.format(st.session_state.get('user_name', 'User')), unsafe_allow_html=True)
-    
-    # LOA Manifestation Quote
-    st.markdown("""
-    <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); border-radius: 12px; border: 1px solid rgba(99, 102, 241, 0.3); margin-bottom: 1.5rem;'>
-        <div style='font-size: 1.2rem; color: #3730a3; font-weight: 700; font-style: italic;'>🌟 "What you seek is seeking you. Your dream career is manifesting now." — Rumi</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Stats Cards
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.markdown("""
-        <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1.5rem; border-radius: 16px; text-align: center; color: white;'>
-            <div style='font-size: 2.5rem;'>📄</div>
-            <div style='font-size: 2rem; font-weight: 700;'>{0}</div>
-            <div style='font-size: 0.9rem; opacity: 0.9;'>Resumes Created</div>
-        </div>
-        """.format(st.session_state.get('saved_resumes_count', 0)), unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 1.5rem; border-radius: 16px; text-align: center; color: white;'>
-            <div style='font-size: 2.5rem;'>✉️</div>
-            <div style='font-size: 2rem; font-weight: 700;'>0</div>
-            <div style='font-size: 0.9rem; opacity: 0.9;'>Cover Letters</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
-        <div style='background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 1.5rem; border-radius: 16px; text-align: center; color: white;'>
-            <div style='font-size: 2.5rem;'>🎨</div>
-            <div style='font-size: 2rem; font-weight: 700;'>29+</div>
-            <div style='font-size: 0.9rem; opacity: 0.9;'>Templates Available</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown("""
-        <div style='background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); padding: 1.5rem; border-radius: 16px; text-align: center; color: white;'>
-            <div style='font-size: 2.5rem;'>⭐</div>
-            <div style='font-size: 2rem; font-weight: 700;'>95%</div>
-            <div style='font-size: 0.9rem; opacity: 0.9;'>ATS Score Avg</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    
-    # Quick Actions
-    st.markdown("### 🚀 Quick Actions")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        if st.button("📄 Build New Resume", use_container_width=True, type="primary", key="dash_new_resume"):
-            st.session_state.mode = 'builder'
-            st.session_state.step = 1
-            st.rerun()
-    with col2:
-        if st.button("📂 View My Resumes", use_container_width=True, key="dash_view_resumes"):
-            st.session_state.mode = 'saved_resumes'
-            st.rerun()
-    with col3:
-        if st.button("⚙️ Edit Profile", use_container_width=True, key="dash_edit_profile"):
-            st.session_state.mode = 'profile'
-            st.rerun()
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Recent Activity
-    st.markdown("### 📋 Recent Activity")
-    st.info("Your recent resumes and activity will appear here once you start creating resumes.")
-
-elif st.session_state.mode == 'profile':
-    # Profile Management Page
-    st.markdown("""
-    <div style='text-align: center; padding: 2rem 0;'>
-        <h1 style='font-size: 2.8rem; font-weight: 900; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>
-            ⚙️ My Profile
-        </h1>
-        <p style='font-size: 1.1rem; color: #4a5568; margin-top: 0.5rem;'>
-            Manage your account details and preferences
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Profile Photo Upload Section
-    col1, col2 = st.columns([1, 2])
-    
-    with col1:
-        st.markdown("### 📷 Profile Photo")
-        
-        # Display current profile photo or placeholder
-        if 'profile_photo' in st.session_state and st.session_state.profile_photo:
-            st.image(st.session_state.profile_photo, width=200)
-        else:
-            st.markdown("""
-            <div style='width: 200px; height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                        border-radius: 50%; display: flex; align-items: center; justify-content: center;'>
-                <span style='font-size: 5rem; color: white;'>👤</span>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        uploaded_photo = st.file_uploader("Upload Photo", type=['png', 'jpg', 'jpeg'], key="profile_photo_upload")
-        if uploaded_photo:
-            st.session_state.profile_photo = uploaded_photo
-            st.success("✅ Photo uploaded!")
-            st.rerun()
-    
-    with col2:
-        st.markdown("### 📝 Personal Information")
-        
-        with st.form("profile_form"):
-            full_name = st.text_input(
-                "Full Name",
-                value=st.session_state.get('user_name', ''),
-                placeholder="John Doe"
-            )
-            
-            email = st.text_input(
-                "Email Address",
-                value=st.session_state.get('user_email', ''),
-                placeholder="john@example.com",
-                disabled=True
-            )
-            
-            phone = st.text_input(
-                "Phone Number",
-                value=st.session_state.get('user_phone', ''),
-                placeholder="+1 (555) 123-4567"
-            )
-            
-            location = st.text_input(
-                "Location",
-                value=st.session_state.get('user_location', ''),
-                placeholder="City, Country"
-            )
-            
-            linkedin = st.text_input(
-                "LinkedIn Profile",
-                value=st.session_state.get('user_linkedin', ''),
-                placeholder="https://linkedin.com/in/yourprofile"
-            )
-            
-            bio = st.text_area(
-                "Professional Bio",
-                value=st.session_state.get('user_bio', ''),
-                placeholder="Tell us about yourself...",
-                height=120
-            )
-            
-            col_btn1, col_btn2 = st.columns([1, 3])
-            with col_btn1:
-                submit_profile = st.form_submit_button("💾 Save Profile", use_container_width=True, type="primary")
-            
-            if submit_profile:
-                st.session_state.user_name = full_name
-                st.session_state.user_phone = phone
-                st.session_state.user_location = location
-                st.session_state.user_linkedin = linkedin
-                st.session_state.user_bio = bio
-                st.success("✅ Profile updated successfully!")
-                st.rerun()
-    
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    
-    # Account Settings
-    st.markdown("### 🔒 Account Settings")
-    with st.expander("🔑 Change Password"):
-        with st.form("password_form"):
-            current_password = st.text_input("Current Password", type="password")
-            new_password = st.text_input("New Password", type="password")
-            confirm_password = st.text_input("Confirm New Password", type="password")
-            
-            if st.form_submit_button("Update Password"):
-                if new_password == confirm_password and len(new_password) >= 6:
-                    st.success("✅ Password updated successfully!")
-                else:
-                    st.error("❌ Passwords don't match or too short (min 6 characters)")
-    
-    with st.expander("🗑️ Delete Account"):
-        st.warning("⚠️ This action is permanent and cannot be undone.")
-        if st.button("Delete My Account", type="secondary"):
-            st.error("Account deletion is currently disabled. Contact support for assistance.")
-
-elif st.session_state.mode == 'about':
-    # About Page
-    # LOA Introduction Banner
-    st.markdown("""
-    <div style='text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 16px; border: 2px solid rgba(37, 99, 235, 0.4); margin-bottom: 2rem; box-shadow: 0 6px 20px rgba(37, 99, 235, 0.2);'>
-        <div style='font-size: 1.5rem; color: #1e3a8a; font-weight: 900; margin-bottom: 0.5rem;'>🌟 The Power of Manifestation & LOA</div>
-        <div style='font-size: 1.05rem; color: #1e40af; font-weight: 600; font-style: italic; margin-bottom: 0.3rem;'>"Your thoughts create your reality. Focus on success, and success will find you."</div>
-        <div style='font-size: 0.95rem; color: #1e40af;'>At SoulSkill, we combine practical career tools with the Law of Attraction to help you manifest your dream career.</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div style='text-align: center; padding: 2rem 0;'>
-        <div style='font-size: 4rem; margin-bottom: 0.5rem; line-height: 1;'>🚀</div>
-        <h1 style='font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-top: 0;'>
-            About SoulSkill
-        </h1>
-        <p style='font-size: 1.3rem; color: #4a5568; font-weight: 600; margin-top: 1rem;'>
-            Your AI-Powered Career Companion
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    col1, col2, col3 = st.columns([1, 3, 1])
-    with col2:
-        st.markdown("""
-        ### 🎯 Our Mission
-        
-        **SoulSkill** is more than just a resume builder - it's your complete career success platform. 
-        We believe that everyone deserves a professional, ATS-optimized resume that showcases their 
-        unique skills and experiences, without the need for expensive services or design skills.
-        
-        ### ✨ What Makes Us Different
-        
-        **🤖 AI-Powered Intelligence**
-        - Smart content generation using Google Gemini AI
-        - ATS optimization with real-time scoring
-        - Personalized suggestions based on your role and industry
-        
-        **🎨 Professional Templates**
-        - 35+ professionally designed templates
-        - Global templates (India, US, UK, Canada, Australia, UAE, Singapore)
-        - Industry-specific designs
-        - One-click template switching
-        
-        **💼 Complete Career Tools**
-        - Resume builder with AI assistance
-        - Cover letter generator
-        - ATS score checker
-        - Content library with proven examples
-        - Multi-resume management dashboard
-        
-        **🆓 100% Free Forever**
-        - No credit card required
-        - No hidden fees or premium plans
-        - All features available to everyone
-        - Export to PDF, DOCX, or HTML
-        
-        ### 📊 By The Numbers
-        """)
-        
-        col_a, col_b, col_c = st.columns(3)
-        with col_a:
-            st.metric("Users Helped", "50,000+", "Growing daily")
-        with col_b:
-            st.metric("Resumes Created", "15,000+", "This month")
-        with col_c:
-            st.metric("Success Rate", "95%", "ATS Pass Rate")
-        
-        st.markdown("""
-        ### 🌟 Our Story
-        
-        SoulSkill was born from a simple idea: **job hunting shouldn't be harder than the job itself**.
-        
-        We saw talented professionals struggling with:
-        - Expensive resume services (₹2000-₹5000 per resume)
-        - Complex design tools requiring hours to master
-        - Resumes getting rejected by ATS systems
-        - No guidance on what makes a great resume
-        
-        So we built **SoulSkill** - combining cutting-edge AI technology with professional resume 
-        design expertise to make creating a winning resume as simple as filling out a form.
-        
-        ### 🚀 Technology Stack
-        
-        - **AI Engine**: Google Gemini Pro for intelligent content generation
-        - **Frontend**: Streamlit for fast, responsive user experience
-        - **Templates**: Professional HTML/CSS designs optimized for ATS
-        - **Export**: Multi-format support (PDF, DOCX, HTML)
-        
-        ### 💡 Our Values
-        
-        **🌈 Accessibility**: Career tools should be free and available to everyone
-        
-        **👨 Quality**: Professional results without compromising on quality
-        
-        **🤝 User-First**: Built with feedback from real job seekers
-        
-        **🔒 Privacy**: Your data is yours - we never share or sell it
-        
-        **⚡ Innovation**: Constantly improving with the latest AI technology
-        
-        ### 🎓 Who We Help
-        
-        - **Fresh Graduates**: Launch your career with a standout resume
-        - **Professionals**: Advance your career with ATS-optimized resumes
-        - **Career Changers**: Highlight transferable skills effectively
-        - **Freelancers**: Showcase diverse experience professionally
-        - **International Job Seekers**: Templates for multiple countries
-        
-        ### 🌍 Global Reach
-        
-        We serve job seekers worldwide with localized templates and content for:
-        - 🇮🇳 India (Mumbai, Bangalore, Delhi, Hyderabad, Pune)
-        - 🇺🇸 United States
-        - 🇬🇧 United Kingdom  
-        - 🇨🇦 Canada
-        - 🇦🇺 Australia
-        - 🇦🇪 UAE
-        - 🇸🇬 Singapore
-        
-        ### 💚 Thank You
-        
-        Thank you for choosing **SoulSkill**. We're honored to be part of your career journey.
-        """)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        if st.button("🚀 Start Building Now", use_container_width=True, type="primary", key="about_cta"):
-            st.session_state.mode = 'builder'
-            st.session_state.step = 1
-            st.rerun()
-
-elif st.session_state.mode == 'contact':
-    # Contact Us Page
-    st.markdown("""
-    <div style='text-align: center; padding: 2rem 0;'>
-        <div style='font-size: 4rem; margin-bottom: 1rem;'>📧</div>
-        <h1 style='font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>
-            Contact Us
-        </h1>
-        <p style='font-size: 1.3rem; color: #4a5568; font-weight: 600; margin-top: 1rem;'>
-            We'd Love to Hear From You!
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    col1, col2, col3 = st.columns([1, 3, 1])
-    with col2:
-        st.markdown("""
-        ### 💬 Get in Touch
-        
-        Have questions, feedback, or need help? We're here for you!
-        
-        ### 📧 Email Us
-        
-        For any inquiries, support requests, or feedback, reach out to us at:
-        """)
-        
-        st.markdown("""
-        <div style='text-align: center; padding: 2rem; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); 
-                    border-radius: 15px; margin: 2rem 0; border: 2px solid #667eea;'>
-            <p style='font-size: 0.9rem; color: #666; margin-bottom: 0.5rem; font-weight: 600;'>Official Email</p>
-            <a href='mailto:soulvest1111@gmail.com' style='font-size: 1.5rem; font-weight: 700; color: #667eea; text-decoration: none;'>
-                📧 soulvest1111@gmail.com
-            </a>
-            <p style='font-size: 0.85rem; color: #666; margin-top: 1rem;'>Click to send us an email</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("""
-        ### 🤝 How We Can Help
-        
-        **💡 General Inquiries**
-        - Questions about features
-        - Partnership opportunities
-        - Media inquiries
-        
-        **🐛 Technical Support**
-        - Bug reports
-        - Feature requests
-        - Technical issues
-        
-        **💼 Career Services**
-        - Resume review feedback
-        - Template suggestions
-        - Career advice
-        
-        **🌟 Feedback & Suggestions**
-        - Share your experience
-        - Suggest new features
-        - Template requests
-        
-        ### ⏰ Response Time
-        
-        We typically respond within:
-        - **24 hours** for general inquiries
-        - **48 hours** for technical issues
-        - **72 hours** during peak periods
-        
-        ### 🌐 Connect With Us
-        
-        Stay updated with the latest features and career tips!
-        
-        ### 📝 Quick Contact Form
-        
-        Send us a message directly:
-        """)
-        
-        with st.form("contact_form", clear_on_submit=True):
-            contact_name = st.text_input("Your Name *", placeholder="John Doe")
-            contact_email = st.text_input("Your Email *", placeholder="your@email.com")
-            contact_subject = st.selectbox(
-                "Subject *",
-                ["", "General Inquiry", "Technical Support", "Feature Request", 
-                 "Bug Report", "Partnership", "Feedback", "Other"]
-            )
-            contact_message = st.text_area(
-                "Message *",
-                placeholder="Tell us how we can help you...",
-                height=150
-            )
-            
-            submitted = st.form_submit_button("📤 Send Message", use_container_width=True, type="primary")
-            
-            if submitted:
-                if not contact_name or not contact_email or not contact_subject or not contact_message:
-                    st.error("❌ Please fill in all fields")
-                elif "@" not in contact_email:
-                    st.error("❌ Please enter a valid email address")
-                else:
-                    st.success("✅ Thank you for your message!")
-                    st.info("📧 Your message has been prepared. Click below to send via email:")
-                    
-                    mailto_link = f"mailto:soulvest1111@gmail.com?subject={contact_subject} - {contact_name}&body=From: {contact_name} ({contact_email})%0A%0A{contact_message}"
-                    st.markdown(f'<a href="{mailto_link}" target="_blank"><button style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.75rem 2rem; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; font-size: 1rem; width: 100%;">📬 Open Email Client</button></a>', unsafe_allow_html=True)
-                    st.caption("Or copy and paste: soulvest1111@gmail.com")
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown("---")
-        
-        if st.button("📄 Build Resume", use_container_width=True, type="primary", key="contact_cta"):
-            st.session_state.mode = 'builder'
-            st.session_state.step = 1
-            st.rerun()
-
 elif st.session_state.mode == 'pricing':
-    # PRICING PAGE
     from pricing_ui import render_pricing_page
     render_pricing_page()
 
 elif st.session_state.mode == 'checkout':
-    # CHECKOUT PAGE
     from pricing_ui import render_checkout_page
     selected_plan = st.session_state.get('selected_plan', 'premium_monthly')
     render_checkout_page(selected_plan)
