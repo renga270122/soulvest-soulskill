@@ -51,6 +51,15 @@ from resume_parser import ResumeParser, parse_uploaded_resume
 from sidebar_content import render_enhanced_sidebar
 from theme_config import apply_custom_theme
 from auth_ui import show_auth_prompt_banner, show_signin_signup_modal, show_user_profile
+from ui_components import (
+    apply_platform_styles,
+    render_journey_timeline,
+    render_metric_card,
+    render_module_card,
+    render_placeholder_panel,
+    render_platform_nav,
+    render_readiness_score,
+)
 from advanced_features import (
     EmailTemplates,
     KeywordHighlighter,
@@ -99,6 +108,7 @@ if 'show_account_dropdown' not in st.session_state:
 
 # Apply custom theme
 apply_custom_theme()
+apply_platform_styles()
 
 # Top Navigation Bar - RESPONSIVE VERSION with Login, Signup, Guest
 st.markdown("""
@@ -206,6 +216,8 @@ else:
             st.session_state['guest_mode'] = True
             st.rerun()
 
+st.markdown("<br>", unsafe_allow_html=True)
+render_platform_nav(st.session_state.mode)
 st.markdown("<br>", unsafe_allow_html=True)
 
 # Enhanced CSS for ResumeGemini-like experience with COSMIC UNIVERSE THEME
@@ -1156,475 +1168,214 @@ def get_sample_resume_data():
 
 # MAIN APP NAVIGATION
 if st.session_state.mode == 'home':
-    # Show auth modal if requested
     if st.session_state.get('show_auth_modal', False):
         show_signin_signup_modal()
-    else:
-        # Landing Page - Hero Section with Welcome Banner
-        col_left, col_center, col_right = st.columns([1, 2, 1])
-        
-        # Left side - Resume Preview Mockup
-        with col_left:
-            st.markdown("""
-            <div style='text-align: left; padding: 1.4rem 1.2rem; background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%); border-radius: 16px; min-height: 320px; border: 1px solid rgba(37, 99, 235, 0.2); box-shadow: 0 12px 28px rgba(37, 99, 235, 0.14);'>
-                <div style='display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;'>
-                    <span style='background: #e0e7ff; color: #1e3a8a; font-size: 0.72rem; font-weight: 800; padding: 0.25rem 0.55rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.6px;'>ATS Friendly</span>
-                    <span style='color: #2563eb; font-size: 0.75rem; font-weight: 800;'>★ 4.9</span>
-                </div>
-                <div style='display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem;'>
-                    <div style='width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 800;'>PR</div>
-                    <div>
-                        <h3 style='color: #1e3a8a; font-size: 1.1rem; font-weight: 800; margin: 0;'>Priya Rao</h3>
-                        <p style='color: #4a5568; font-size: 0.82rem; font-weight: 600; margin: 0.1rem 0 0 0;'>Data Analyst • Bengaluru</p>
-                    </div>
-                </div>
-                <div style='height: 1px; background: rgba(37, 99, 235, 0.15); margin: 0.7rem 0;'></div>
-                <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 800; margin: 0 0 0.35rem 0;'>Highlights</p>
-                <ul style='color: #4a5568; font-size: 0.78rem; margin: 0; padding-left: 1rem; line-height: 1.6;'>
-                    <li>SQL • Python • Power BI</li>
-                    <li>Built 12+ dashboards</li>
-                    <li>ATS‑optimized keywords</li>
-                </ul>
-                <div style='margin-top: 0.7rem;'>
-                    <div style='height: 6px; background: #e6edff; border-radius: 999px; overflow: hidden; margin-bottom: 0.35rem;'>
-                        <div style='width: 78%; height: 100%; background: linear-gradient(90deg, #2563eb, #1e3a8a);'></div>
-                    </div>
-                    <p style='color: #4a5568; font-size: 0.72rem; font-weight: 700; margin: 0;'>Keyword Match: 78%</p>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        # Center - Hero Title + Welcome Banner Combined
-        with col_center:
-            st.markdown("""
-            <div style='text-align: center; padding: 2rem; background: linear-gradient(135deg, rgba(229,231,235,0.95) 0%, rgba(219,234,254,0.95) 50%, rgba(224,231,255,0.95) 100%); border-radius: 18px; border: 2px solid rgba(139, 92, 246, 0.4); box-shadow: 0 14px 30px rgba(139, 92, 246, 0.25); backdrop-filter: blur(10px);'>
-                <div class='hero-welcome' style='color: #000000; font-size: 2.5rem; font-weight: 900; margin-bottom: 0.8rem;'>Welcome to SoulSkill! 👋✨</div>
-                <div class='hero-headline' style='color: #5b21b6; font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;'>🌟 Manifest Your Dream Career in 5 Minutes</div>
-                <div class='hero-desc' style='color: #1e1b4b; font-size: 1.2rem; font-weight: 600; margin-bottom: 0.8rem;'>Harness the Power of Law of Attraction + AI Technology</div>
-                <div style='color: #4c1d95; font-size: 1rem; font-weight: 600; font-style: italic; padding: 0.8rem; background: rgba(168, 85, 247, 0.15); border-radius: 12px; margin-top: 0.8rem;'>💫 "The universe is conspiring in your favor. Your perfect job is already seeking you."</div>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        # Right side - Resume Preview Mockup
-        with col_right:
-            st.markdown("""
-            <div style='text-align: left; padding: 1.4rem 1.2rem; background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%); border-radius: 16px; min-height: 320px; border: 1px solid rgba(37, 99, 235, 0.2); box-shadow: 0 12px 28px rgba(37, 99, 235, 0.14);'>
-                <div style='display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;'>
-                    <span style='background: #e0e7ff; color: #1e3a8a; font-size: 0.72rem; font-weight: 800; padding: 0.25rem 0.55rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.6px;'>Recruiter Ready</span>
-                    <span style='color: #2563eb; font-size: 0.75rem; font-weight: 800;'>★ 4.8</span>
-                </div>
-                <div style='display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem;'>
-                    <div style='width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 800;'>AB</div>
-                    <div>
-                        <h3 style='color: #1e3a8a; font-size: 1.1rem; font-weight: 800; margin: 0;'>Aiden Brooks</h3>
-                        <p style='color: #4a5568; font-size: 0.82rem; font-weight: 600; margin: 0.1rem 0 0 0;'>Product Manager • Austin</p>
-                    </div>
-                </div>
-                <div style='height: 1px; background: rgba(37, 99, 235, 0.15); margin: 0.7rem 0;'></div>
-                <p style='color: #1e3a8a; font-size: 0.85rem; font-weight: 800; margin: 0 0 0.35rem 0;'>Highlights</p>
-                <ul style='color: #4a5568; font-size: 0.78rem; margin: 0; padding-left: 1rem; line-height: 1.6;'>
-                    <li>Roadmaps • OKRs • GTM</li>
-                    <li>Led 4 product launches</li>
-                    <li>ATS‑friendly layout</li>
-                </ul>
-                <div style='margin-top: 0.7rem;'>
-                    <div style='height: 6px; background: #e6edff; border-radius: 999px; overflow: hidden; margin-bottom: 0.35rem;'>
-                        <div style='width: 84%; height: 100%; background: linear-gradient(90deg, #22c55e, #16a34a);'></div>
-                    </div>
-                    <p style='color: #4a5568; font-size: 0.72rem; font-weight: 700; margin: 0;'>Formatting Score: 84%</p>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+        st.stop()
 
-        # Motivational quote section
-        st.markdown("""<br>""", unsafe_allow_html=True)
-        quote_col1, quote_col2, quote_col3 = st.columns([1, 2, 1])
-        with quote_col2:
-            st.markdown("""
-            <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; border: 1px solid rgba(245, 158, 11, 0.3); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);'>
-                <div style='font-size: 1.2rem; color: #92400e; font-weight: 700; font-style: italic; margin-bottom: 0.3rem;'>💡 "Success is not final, failure is not fatal"</div>
-                <div style='font-size: 0.85rem; color: #78350f; font-weight: 600;'>— Winston Churchill</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        # Welcome message - personalized for logged-in users
-        if st.session_state.user_authenticated:
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown(f"""
-            <div style='text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #eaf2ff 0%, #dfe9ff 50%, #f6f9ff 100%); border-radius: 18px; border: 1px solid rgba(37, 99, 235, 0.25); box-shadow: 0 12px 24px rgba(30, 58, 138, 0.15); max-width: 700px; margin: 0 auto;'>
-                <div style='color: #000000; font-size: 2rem; font-weight: 900; margin-bottom: 0.6rem;'>👋 Welcome back, {st.session_state.get('user_name', 'User')}!</div>
-                <div style='color: #000000; font-size: 1.3rem; font-weight: 600;'>Ready to build your next amazing resume?</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        # Quick steps to build trust
-        st.markdown("<br>", unsafe_allow_html=True)
-        step1, step2, step3 = st.columns(3)
-        with step1:
-            st.markdown("""
-            <div style='text-align: center; padding: 1rem; background: #ffffff; border-radius: 14px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);'>
-                <div style='font-size: 1.4rem;'>📝</div>
-                <p style='color:#1e3a8a; font-weight:800; margin:0.35rem 0 0.2rem 0;'>Fill Details</p>
-                <p style='color:#4a5568; font-size:0.8rem; margin:0;'>Guided sections in minutes</p>
-            </div>
-            """, unsafe_allow_html=True)
-        with step2:
-            st.markdown("""
-            <div style='text-align: center; padding: 1rem; background: #ffffff; border-radius: 14px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);'>
-                <div style='font-size: 1.4rem;'>✨</div>
-                <p style='color:#1e3a8a; font-weight:800; margin:0.35rem 0 0.2rem 0;'>AI Suggestions</p>
-                <p style='color:#4a5568; font-size:0.8rem; margin:0;'>Instant wording improvements</p>
-            </div>
-            """, unsafe_allow_html=True)
-        with step3:
-            st.markdown("""
-            <div style='text-align: center; padding: 1rem; background: #ffffff; border-radius: 14px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);'>
-                <div style='font-size: 1.4rem;'>📄</div>
-                <p style='color:#1e3a8a; font-weight:800; margin:0.35rem 0 0.2rem 0;'>Download PDF</p>
-                <p style='color:#4a5568; font-size:0.8rem; margin:0;'>ATS‑ready templates</p>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-    
-    # PRICING CTA - Freemium Model
-    st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("""
-    <div style='text-align: center; padding: 2.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                border-radius: 20px; margin: 2rem 0; box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);'>
-        <h2 style='color: white; font-size: 2.2rem; margin-bottom: 0.5rem;'>🚀 Unlock Premium Features</h2>
-        <p style='color: rgba(255,255,255,0.95); font-size: 1.3rem; margin-bottom: 1.5rem;'>
-            Get unlimited access to 20+ premium templates, AI suggestions, and more
-        </p>
-        <div style='display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-top: 1.5rem;'>
-            <div style='background: rgba(255,255,255,0.15); padding: 1rem 1.5rem; border-radius: 15px; backdrop-filter: blur(10px);'>
-                <div style='color: white; font-size: 1.8rem; font-weight: 800;'>₹199</div>
-                <div style='color: rgba(255,255,255,0.9); font-size: 0.9rem;'>per month</div>
-            </div>
-            <div style='background: rgba(255,255,255,0.25); padding: 1rem 1.5rem; border-radius: 15px; backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.5);'>
-                <div style='color: white; font-size: 1.8rem; font-weight: 800;'>₹999</div>
-                <div style='color: rgba(255,255,255,0.9); font-size: 0.9rem;'>per year • Save 58%</div>
+    <div class="platform-shell">
+        <div class="platform-hero">
+            <div style="display:flex; flex-wrap:wrap; justify-content:space-between; gap:1rem; align-items:center;">
+                <div style="max-width: 640px;">
+                    <div style="font-size:0.85rem; text-transform:uppercase; letter-spacing:0.18em; opacity:0.9; font-weight:700;">AI Career Growth Platform</div>
+                    <h1 style="font-size:2.2rem; margin:0.3rem 0;">Turn your next role into a guided career move.</h1>
+                    <p style="font-size:1.02rem; line-height:1.6; margin:0.55rem 0 0; opacity:0.95;">Build your story, sharpen readiness, and prepare for growth with a modern experience that still keeps your resume workflow intact.</p>
+                </div>
+                <div style="min-width: 260px;">
+                    <div class="score-card">
+                        <div>Career Readiness Score</div>
+                        <div class="score">82%</div>
+                        <div>Placeholder coaching signal</div>
+                    </div>
+                </div>
             </div>
         </div>
-        <p style='color: rgba(255,255,255,0.95); font-size: 1.1rem; margin-top: 1.5rem;'>
-            ✨ 7-Day Free Trial • No Credit Card Required
-        </p>
     </div>
     """, unsafe_allow_html=True)
-    
-    col_pricing1, col_pricing2, col_pricing3 = st.columns([1, 2, 1])
-    with col_pricing2:
-        if st.button("💎 View Pricing Plans", use_container_width=True, type="primary", key="home_pricing_btn"):
-            st.session_state.mode = 'pricing'
-            st.rerun()
-    
-    # Promotional sidebar quote
-    st.markdown("""<br>""", unsafe_allow_html=True)
-    side_col1, side_col2, side_col3 = st.columns([0.5, 3, 0.5])
-    with side_col2:
-        st.markdown("""
-        <div style='text-align: center; padding: 0.8rem; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 12px; border: 1px solid rgba(37, 99, 235, 0.3); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);'>
-            <div style='font-size: 1rem; color: #1e3a8a; font-weight: 700; font-style: italic;'>💪 "The only way to do great work is to love what you do" — Steve Jobs</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # Get Started Options - First Time vs Existing Resume
-    if st.session_state.user_authenticated or st.session_state.get('mode') == 'guest':
-        st.markdown("---")
-        st.markdown("### 🚀 Get Started Your Way")
-        opt1, opt2 = st.columns(2)
-        
-        with opt1:
-            st.markdown("""
-            <div style='text-align: center; padding: 1.4rem; background: #ffffff; border-radius: 16px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 10px 22px rgba(37, 99, 235, 0.12);'>
-                <div style='font-size: 1.8rem;'>🆕</div>
-                <div style='color:#1e3a8a; font-weight:900; font-size:1.1rem; margin-top:0.3rem;'>First Time Building?</div>
-                <div style='color:#4a5568; font-size:0.9rem; margin-top:0.3rem;'>Start from scratch with guided sections and AI help.</div>
-            </div>
-            """, unsafe_allow_html=True)
-            st.markdown("<br>", unsafe_allow_html=True)
-            if st.button("🚀 Build Resume", use_container_width=True, type="primary", key="first_time_build_resume"):
-                st.session_state.page = 'resume'
-                st.rerun()
-        
-        with opt2:
-            st.markdown("""
-            <div style='text-align: center; padding: 1.4rem; background: #ffffff; border-radius: 16px; border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 10px 22px rgba(37, 99, 235, 0.12);'>
-                <div style='font-size: 1.8rem;'>📤</div>
-                <div style='color:#1e3a8a; font-weight:900; font-size:1.1rem; margin-top:0.3rem;'>Have an Existing Resume?</div>
-                <div style='color:#4a5568; font-size:0.9rem; margin-top:0.3rem;'>Upload it and we'll auto‑fill your details.</div>
-            </div>
-            """, unsafe_allow_html=True)
-            st.markdown("<br>", unsafe_allow_html=True)
-            uploaded_file = st.file_uploader(
-                "Upload your resume",
-                type=['pdf', 'docx', 'txt'],
-                key="home_resume_upload",
-                help="We'll extract your information and auto-fill the resume builder"
-            )
-            st.markdown("<br>", unsafe_allow_html=True)
-            if st.button("🚀 Build Resume", use_container_width=True, type="primary", key="existing_resume_build_resume"):
-                st.session_state.page = 'resume'
-                st.rerun()
-            
-            if uploaded_file:
-                with st.spinner("🤖 Analyzing your resume with AI..."):
-                    try:
-                        # Parse the resume
-                        api_key = st.session_state.get('gemini_api_key')
-                        parsed_data = parse_uploaded_resume(uploaded_file, api_key=api_key)
-                        
-                        # Auto-fill session state
-                        parser = ResumeParser(api_key=api_key)
-                        parser.auto_fill_session_state(parsed_data, st.session_state)
-                        
-                        st.success("✅ Resume uploaded successfully! Your information has been auto-filled.")
-                        st.info("💡 Click 'Build Resume' below to start editing with your pre-filled data.")
-                        
-                        # Show preview of extracted data
-                        with st.expander("📋 Preview Extracted Data"):
-                            if parsed_data.get('full_name'):
-                                st.write(f"**Name:** {parsed_data['full_name']}")
-                            if parsed_data.get('email'):
-                                st.write(f"**Email:** {parsed_data['email']}")
-                            if parsed_data.get('phone'):
-                                st.write(f"**Phone:** {parsed_data['phone']}")
-                            if parsed_data.get('summary'):
-                                st.write(f"**Summary:** {parsed_data['summary'][:200]}...")
-                            if parsed_data.get('tech_skills'):
-                                st.write(f"**Skills:** {parsed_data['tech_skills'][:200]}...")
-                            if parsed_data.get('work_entries'):
-                                st.write(f"**Work Experience:** {len(parsed_data['work_entries'])} positions found")
-                            if parsed_data.get('education_entries'):
-                                st.write(f"**Education:** {len(parsed_data['education_entries'])} entries found")
-                    
-                    except Exception as e:
-                        st.error(f"❌ Error parsing resume: {str(e)}")
-                        st.info("💡 Please try a different file format or build your resume from scratch.")
-        
-        st.markdown("---")
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Daily LOA Affirmation Box
-    st.markdown("""
-    <div style='text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%); border-radius: 16px; border: 2px solid rgba(16, 185, 129, 0.4); margin-bottom: 2rem; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);'>
-        <div style='font-size: 1.4rem; color: #065f46; font-weight: 900; margin-bottom: 0.8rem;'>🌈 Daily Career Manifestation</div>
-        <div style='font-size: 1.2rem; color: #064e3b; font-weight: 700; font-style: italic; margin-bottom: 0.5rem;'>"I am a magnet for career opportunities. The universe is aligning everything in my favor."</div>
-        <div style='font-size: 0.95rem; color: #065f46; font-weight: 600;'>💡 Practice: Repeat this affirmation 3 times while visualizing your ideal job offer.</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Features Section
-    st.markdown("### 🌟 Stand Out with AI-Powered Career Tools")
-    
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.markdown("""
-        <div class='dashboard-card'>
-            <h3>🤖 AI Resume Writer</h3>
-            <p>Optimize your resume for any job with our AI. Customize content for specific roles and stand out to recruiters.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div class='dashboard-card'>
-            <h3>✉️ Cover Letter Builder</h3>
-            <p>Create compelling cover letters in minutes with AI. Multiple templates and styles to choose from.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
-        <div class='dashboard-card'>
-            <h3>📊 ATS Score Checker</h3>
-            <p>Ensure your resume passes ATS screening. Get detailed compatibility scores and keyword recommendations.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown("""
-        <div class='dashboard-card'>
-            <h3>💼 Content Library</h3>
-            <p>Access pre-written bullet points and examples across 15+ job roles. Build faster with proven content.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # How It Works
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    st.markdown("### 🎯 Get Your Standout Resume in 4 Easy Steps")
-    
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.markdown("""
-        <div class='info-box' style='text-align: center;'>
-            <h2>🎨</h2>
-            <h4>1. Choose Template</h4>
-            <p>Start with professional ATS-friendly templates. Change anytime with one click!</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div class='info-box' style='text-align: center;'>
-            <h2>📝</h2>
-            <h4>2. Fill Details</h4>
-            <p>Upload existing resume or use pre-written examples. Build your power resume!</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
-        <div class='info-box' style='text-align: center;'>
-            <h2>✨</h2>
-            <h4>3. Customize</h4>
-            <p>Personalize with colors, fonts, and AI-generated content tailored to your profile!</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown("""
-        <div class='info-box' style='text-align: center;'>
-            <h2>📥</h2>
-            <h4>4. Download</h4>
-            <p>Download in PDF, DOCX, or other formats. 100% free, no credit card needed!</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # ATS Optimization Best Practices
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    st.markdown("### 🎯 ATS Optimization Checklist")
-    st.caption("Follow these proven strategies to beat Applicant Tracking Systems")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("""
-        <div class='dashboard-card'>
-            <h4>✅ Do's for ATS Success</h4>
-            <ul style='line-height: 1.8;'>
-                <li><b>Use Keywords</b> from job descriptions (exact matches matter)</li>
-                <li><b>Quantify Everything</b>: "Increased sales by 40%" not "Increased sales"</li>
-                <li><b>Clean Format</b>: Simple layout, standard fonts (Arial, Calibri)</li>
-                <li><b>Standard Sections</b>: Summary, Experience, Education, Skills</li>
-                <li><b>Action Verbs</b>: Led, Built, Improved, Reduced, Increased</li>
-                <li><b>Save as PDF</b> (or DOCX if specifically requested)</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div class='dashboard-card'>
-            <h4>❌ Don'ts That Hurt ATS Scores</h4>
-            <ul style='line-height: 1.8;'>
-                <li><b>NO Photos</b>: Confuses ATS, introduces bias (except Germany/France)</li>
-                <li><b>NO Graphics/Icons</b>: ATS can't read images or charts</li>
-                <li><b>NO Tables</b>: Most ATS struggle with table parsing</li>
-                <li><b>NO Headers/Footers</b>: Content may not be read by ATS</li>
-                <li><b>NO Fancy Fonts</b>: Stick to Arial, Calibri, Times New Roman</li>
-                <li><b>NO Creative Layouts</b>: Two columns can confuse ATS</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # Footer with secondary auth links
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    st.markdown("---")
-    
-    footer_col1, footer_col2, footer_col3, footer_col4, footer_col5 = st.columns([1, 1, 1, 1, 1])
-    
-    with footer_col1:
-        st.markdown("<p style='font-size: 0.85rem; color: #666;'>© 2026 SoulSkill. All rights reserved.</p>", unsafe_allow_html=True)
-    
-    with footer_col2:
-        if st.button("💰 Pricing", use_container_width=True, key="footer_pricing", type="secondary"):
-            st.session_state.mode = 'pricing'
-            st.rerun()
-    
-    with footer_col3:
-        if st.button("About", use_container_width=True, key="footer_about", type="secondary"):
-            st.session_state.mode = 'about'
-            st.rerun()
-    
-    with footer_col4:
-        if st.button("Contact", use_container_width=True, key="footer_contact", type="secondary"):
-            st.session_state.mode = 'contact'
-            st.rerun()
-    
-    with footer_col5:
-        if not st.session_state.user_authenticated:
-            if st.button("Sign In", use_container_width=True, key="footer_signin", type="secondary"):
-                st.session_state.show_auth_modal = True
-                st.rerun()
-        else:
-            st.markdown("<p style='font-size: 0.85rem; color: #2563eb;'>👤 Welcome!</p>", unsafe_allow_html=True)
 
-elif st.session_state.mode == 'dashboard':
-    # Resume Dashboard - Manage Multiple Resumes
-    st.title("📂 My Resumes Dashboard")
-    
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        st.markdown("### Manage all your resumes in one place")
-    with col2:
-        if st.button("➕ Create New Resume", use_container_width=True):
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    col_a, col_b, col_c = st.columns([1.2, 1, 1])
+    with col_a:
+        render_metric_card("Momentum", "4 growth moves", "Resume + coaching + interview prep")
+    with col_b:
+        render_metric_card("Next milestone", "Senior Product role", "Targeted visibility across your toolkit")
+    with col_c:
+        render_metric_card("Active focus", "Resume builder", "Keep your core workflow front and center")
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    st.markdown("### Start your next career chapter")
+    home_col1, home_col2 = st.columns(2)
+    with home_col1:
+        if st.button("Build your resume", use_container_width=True, type="primary"):
             st.session_state.mode = 'builder'
             st.session_state.step = 1
-            st.session_state.current_resume_id = None
             st.rerun()
-    
-    # Load saved resumes
-    saved_resumes = st.session_state.get('resumes', {})
-    
-    if not saved_resumes:
+        if st.button("Open Career Toolkit", use_container_width=True):
+            st.session_state.mode = 'toolkit'
+            st.rerun()
+    with home_col2:
+        if st.button("View my journey", use_container_width=True):
+            st.session_state.mode = 'journey'
+            st.rerun()
+        if st.button("Open dashboard", use_container_width=True):
+            st.session_state.mode = 'dashboard'
+            st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    st.markdown("### Growth modules")
+    mod1, mod2, mod3, mod4 = st.columns(4)
+    with mod1:
         st.markdown("""
-        <div class='info-box' style='text-align: center; padding: 3rem;'>
-            <h2>📝</h2>
-            <h3>No resumes yet</h3>
-            <p>Create your first resume and manage multiple versions here!</p>
+        <div class="module-card">
+            <div class="icon-pill">🧭</div>
+            <div class="title">Career Journey</div>
+            <div class="desc">Follow a guided path from assessment to momentum.</div>
         </div>
         """, unsafe_allow_html=True)
-    else:
-        # Display resumes as cards
-        for resume_id, resume_data in saved_resumes.items():
-            col1, col2, col3, col4 = st.columns([3, 2, 2, 2])
-            
-            with col1:
-                st.markdown(f"""
-                <div class='card-header'>
-                    <div>
-                        <div class='card-title'>{resume_data.get('full_name', 'Untitled Resume')}</div>
-                        <div style='color: #666; font-size: 0.9rem;'>{resume_data.get('job_title_target', 'No job title')}</div>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col2:
-                completeness = resume_data.get('completeness', 0)
-                st.metric("Completeness", f"{completeness}%")
-            
-            with col3:
-                created_date = resume_data.get('created_at', 'Unknown')
-                st.caption(f"Created: {created_date}")
-            
-            with col4:
-                if st.button("✏️ Edit", key=f"edit_{resume_id}", use_container_width=True):
-                    # Load resume data into session state
-                    for key, value in resume_data.items():
-                        st.session_state[key] = value
-                    st.session_state.current_resume_id = resume_id
-                    st.session_state.mode = 'builder'
-                    st.session_state.step = 2
-                    st.rerun()
-            
-            st.markdown("---")
-    
-    if st.button("🏠 Back to Home"):
-        st.session_state.mode = 'home'
+        if st.button("Explore", key="mod_journey", use_container_width=True):
+            st.session_state.mode = 'journey'
+            st.rerun()
+    with mod2:
+        st.markdown("""
+        <div class="module-card">
+            <div class="icon-pill">🛠️</div>
+            <div class="title">Career Toolkit</div>
+            <div class="desc">Keep your resume builder and growth resources together.</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Open", key="mod_toolkit", use_container_width=True):
+            st.session_state.mode = 'toolkit'
+            st.rerun()
+    with mod3:
+        st.markdown("""
+        <div class="module-card">
+            <div class="icon-pill">🎧</div>
+            <div class="title">Career Coach</div>
+            <div class="desc">Guidance and planning placeholders for your next move.</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Preview", key="mod_coach", use_container_width=True):
+            st.session_state.mode = 'coach'
+            st.rerun()
+    with mod4:
+        st.markdown("""
+        <div class="module-card">
+            <div class="icon-pill">🗣️</div>
+            <div class="title">Interview Coach</div>
+            <div class="desc">Practice and sharpen your interview story with structure.</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Preview", key="mod_interview", use_container_width=True):
+            st.session_state.mode = 'interview'
+            st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    render_journey_timeline()
+    st.stop()
+
+elif st.session_state.mode == 'dashboard':
+    st.markdown("""
+    <div class="platform-shell">
+        <div class="platform-hero">
+            <h2 style="margin:0;">AI Career Growth Dashboard</h2>
+            <p style="margin:0.35rem 0 0; opacity:0.95;">A modern control center for your career momentum, readiness, and next best move.</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    left, right = st.columns([1.4, 0.95])
+    with left:
+        render_readiness_score(82)
+        st.markdown("""
+        <div class="platform-card">
+            <h3>Career momentum</h3>
+            <p>Your profile is showing strong fundamentals. A polished toolkit and coaching plan will help you move from “ready” to “selected.”</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with right:
+        st.markdown("""
+        <div class="platform-card">
+            <h3>Next best action</h3>
+            <ul>
+                <li>Update your summary and skills</li>
+                <li>Practice storytelling for interviews</li>
+                <li>Review your resume for keyword alignment</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+    metrics = st.columns(3)
+    with metrics[0]:
+        render_metric_card("Resume completion", "76%", "Your core story is in place")
+    with metrics[1]:
+        render_metric_card("Coaching readiness", "3/4", "Interview and EQ guidance queued")
+    with metrics[2]:
+        render_metric_card("Focus area", "Leadership", "Position your growth narrative")
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("### Quick access")
+    dash1, dash2, dash3 = st.columns(3)
+    with dash1:
+        if st.button("Open toolkit", use_container_width=True):
+            st.session_state.mode = 'toolkit'
+            st.rerun()
+    with dash2:
+        if st.button("View journey", use_container_width=True):
+            st.session_state.mode = 'journey'
+            st.rerun()
+    with dash3:
+        if st.button("Resume builder", use_container_width=True):
+            st.session_state.mode = 'builder'
+            st.session_state.step = 1
+            st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    render_journey_timeline()
+    st.stop()
+
+elif st.session_state.mode == 'journey':
+    st.title("🧭 Career Journey")
+    st.caption("A guided path that keeps your growth goals visible while you work through the platform.")
+    render_journey_timeline()
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("Open Career Toolkit", use_container_width=True):
+        st.session_state.mode = 'toolkit'
         st.rerun()
+    st.stop()
+
+elif st.session_state.mode == 'toolkit':
+    st.title("🛠️ Career Toolkit")
+    st.caption("Your resume builder stays intact while new career growth modules live alongside it.")
+    toolkit_col1, toolkit_col2 = st.columns(2)
+    with toolkit_col1:
+        if st.button("Open Resume Builder", use_container_width=True, type="primary"):
+            st.session_state.mode = 'builder'
+            st.session_state.step = 1
+            st.rerun()
+        render_placeholder_panel("Career Coach", "Get guided planning for role transitions and growth decisions.", "🎯", ["Career planning", "Role mapping", "Next steps"], "Preview Career Coach", "coach", "toolkit_coach")
+    with toolkit_col2:
+        render_placeholder_panel("Interview Coach", "Prepare your stories, confidence, and delivery for interviews.", "🗣️", ["Mock questions", "Feedback loops", "Delivery tips"], "Preview Interview Coach", "interview", "toolkit_interview")
+        render_placeholder_panel("EQ Growth", "Strengthen self-awareness, communication, and relationship growth.", "🧠", ["Reflection prompts", "Communication habits", "Growth checkpoints"], "Preview EQ Growth", "eq", "toolkit_eq")
+    st.stop()
+
+elif st.session_state.mode == 'coach':
+    st.title("🎯 Career Coach")
+    render_placeholder_panel("Career Coach", "A future-ready coaching layer for role planning, transitions, and confidence building.", "🎯", ["Career strategy", "Role readiness", "Action planning"], "Back to toolkit", "toolkit", "coach_page")
+    st.stop()
+
+elif st.session_state.mode == 'interview':
+    st.title("🗣️ Interview Coach")
+    render_placeholder_panel("Interview Coach", "Practice your story, sharpen delivery, and build confidence before every conversation.", "🗣️", ["Practice prompts", "Answer frameworks", "Confidence coaching"], "Back to toolkit", "toolkit", "interview_page")
+    st.stop()
+
+elif st.session_state.mode == 'eq':
+    st.title("🧠 EQ Growth")
+    render_placeholder_panel("EQ Growth", "Focus on emotional intelligence habits that improve collaboration and leadership presence.", "🧠", ["Reflection prompts", "Communication habits", "Leadership growth"], "Back to toolkit", "toolkit", "eq_page")
+    st.stop()
 
 elif st.session_state.mode == 'builder':
     # Resume Builder - 4 Step Process
