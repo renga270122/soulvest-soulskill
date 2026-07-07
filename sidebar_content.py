@@ -262,7 +262,7 @@ def render_enhanced_sidebar():
         <div style='text-align: center; padding: 1rem 0; margin-bottom: 1rem;'>
         """, unsafe_allow_html=True)
         try:
-            st.image("assets/logo.png", use_column_width=True, width=200)
+            st.image("assets/logo.png", width=200)
         except:
             st.markdown("""
             <div style='font-size: 3rem; margin-bottom: 0.5rem;'>🚀</div>

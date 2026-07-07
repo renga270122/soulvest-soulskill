@@ -51,20 +51,45 @@ from resume_parser import ResumeParser, parse_uploaded_resume
 from sidebar_content import render_enhanced_sidebar
 from theme_config import apply_custom_theme
 from auth_ui import show_auth_prompt_banner, show_signin_signup_modal, show_user_profile
-from ui_components import (
-    apply_platform_styles,
-    render_assessment_panel,
-    render_coaching_panel,
-    render_eq_panel,
-    render_foundation_summary,
-    render_journey_timeline,
-    render_metric_card,
-    render_module_card,
-    render_monetization_panel,
-    render_placeholder_panel,
-    render_platform_nav,
-    render_readiness_score,
-)
+
+
+def _fallback_panel(message: str):
+    def _render():
+        st.info(message)
+    return _render
+
+
+try:
+    import ui_components as ui_components_module
+except ImportError:
+    ui_components_module = None
+
+if ui_components_module is not None:
+    apply_platform_styles = getattr(ui_components_module, "apply_platform_styles", lambda: None)
+    render_assessment_panel = getattr(ui_components_module, "render_assessment_panel", _fallback_panel("Assessment tools are currently unavailable. Please refresh the app."))
+    render_coaching_panel = getattr(ui_components_module, "render_coaching_panel", _fallback_panel("Coaching guidance is currently unavailable. Please refresh the app."))
+    render_eq_panel = getattr(ui_components_module, "render_eq_panel", _fallback_panel("EQ growth guidance is currently unavailable. Please refresh the app."))
+    render_foundation_summary = getattr(ui_components_module, "render_foundation_summary", lambda: None)
+    render_journey_timeline = getattr(ui_components_module, "render_journey_timeline", lambda: None)
+    render_metric_card = getattr(ui_components_module, "render_metric_card", lambda *args, **kwargs: None)
+    render_module_card = getattr(ui_components_module, "render_module_card", lambda *args, **kwargs: None)
+    render_monetization_panel = getattr(ui_components_module, "render_monetization_panel", _fallback_panel("Monetization preview is currently unavailable. Please refresh the app."))
+    render_placeholder_panel = getattr(ui_components_module, "render_placeholder_panel", lambda *args, **kwargs: None)
+    render_platform_nav = getattr(ui_components_module, "render_platform_nav", lambda *args, **kwargs: None)
+    render_readiness_score = getattr(ui_components_module, "render_readiness_score", lambda *args, **kwargs: None)
+else:
+    apply_platform_styles = lambda: None
+    render_assessment_panel = _fallback_panel("Assessment tools are currently unavailable. Please refresh the app.")
+    render_coaching_panel = _fallback_panel("Coaching guidance is currently unavailable. Please refresh the app.")
+    render_eq_panel = _fallback_panel("EQ growth guidance is currently unavailable. Please refresh the app.")
+    render_foundation_summary = lambda: None
+    render_journey_timeline = lambda: None
+    render_metric_card = lambda *args, **kwargs: None
+    render_module_card = lambda *args, **kwargs: None
+    render_monetization_panel = _fallback_panel("Monetization preview is currently unavailable. Please refresh the app.")
+    render_placeholder_panel = lambda *args, **kwargs: None
+    render_platform_nav = lambda *args, **kwargs: None
+    render_readiness_score = lambda *args, **kwargs: None
 from advanced_features import (
     EmailTemplates,
     KeywordHighlighter,
