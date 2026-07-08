@@ -1,0 +1,7 @@
+-r requirements.txt
+
+# Test and automation dependencies
+pytest==8.4.1
+httpx==0.28.1
+playwright==1.53.0
+pytest-playwright==0.7.0

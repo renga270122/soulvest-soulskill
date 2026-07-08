@@ -27,11 +27,5 @@ numpy<2.0
 # Additional Libraries
 requests==2.32.5
 
-# Testing
-pytest==8.4.1
-httpx==0.28.1
-playwright==1.53.0
-pytest-playwright==0.7.0
-
 # Optional backend output dependency
 xhtml2pdf
