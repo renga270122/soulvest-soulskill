@@ -128,6 +128,28 @@ def apply_platform_styles():
             font-size: 0.92rem;
             line-height: 1.45;
         }
+        .plan-badge {
+            display: inline-block;
+            margin-top: 0.25rem;
+            padding: 0.2rem 0.55rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+        .plan-badge.premium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .lock-note {
+            margin-top: 0.45rem;
+            font-size: 0.82rem;
+            color: #92400e;
+            font-weight: 600;
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -136,25 +158,30 @@ def apply_platform_styles():
 
 def render_platform_nav(current_mode: str):
     nav_items = [
-        ("Overview", "home"),
-        ("Career Journey", "journey"),
+        ("Home", "home"),
+        ("Dashboard", "dashboard"),
         ("Career Toolkit", "toolkit"),
-        ("Career Coach", "coach"),
-        ("Interview Coach", "interview"),
+        ("Career Growth", "growth"),
+        ("Interview Prep", "interview"),
         ("EQ Growth", "eq"),
-        ("Assessment", "assessment"),
-        ("Monetization", "monetization"),
+        ("AI Career Mentor", "mentor"),
+        ("Resources", "resources"),
+        ("Pricing", "pricing"),
+        ("Profile", "profile"),
     ]
 
     st.markdown('<div class="nav-pill-row">', unsafe_allow_html=True)
-    cols = st.columns(len(nav_items))
-    for col, (label, mode) in zip(cols, nav_items):
-        active = current_mode == mode
-        button_label = f"● {label}" if active else label
-        with col:
-            if st.button(button_label, key=f"nav_{mode}", use_container_width=True):
-                st.session_state.mode = mode
-                st.rerun()
+    chunk_size = 5
+    for row_start in range(0, len(nav_items), chunk_size):
+        row_items = nav_items[row_start:row_start + chunk_size]
+        cols = st.columns(len(row_items))
+        for col, (label, mode) in zip(cols, row_items):
+            active = current_mode == mode
+            button_label = f"● {label}" if active else label
+            with col:
+                if st.button(button_label, key=f"nav_{mode}", use_container_width=True):
+                    st.session_state.mode = mode
+                    st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
 
@@ -177,20 +204,24 @@ def render_readiness_score(score: int):
         <div class="score-card">
             <div style="font-size:0.8rem; text-transform:uppercase; letter-spacing:0.08em; opacity:0.8;">Career Readiness Score</div>
             <div class="score">{score}%</div>
-            <div style="font-size:0.95rem; opacity:0.86;">Placeholder signal • coaching guidance coming soon</div>
+            <div style="font-size:0.95rem; opacity:0.86;">Composite placeholder signal based on resume, ATS, skills, EQ, interview, and planning</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
 
-def render_module_card(title: str, description: str, icon: str, key_suffix: str):
+def render_module_card(title: str, description: str, icon: str, key_suffix: str, plan_badge: str = "Free", locked: bool = False):
+    badge_class = "plan-badge premium" if plan_badge.lower() == "premium" else "plan-badge"
+    lock_html = "<div class='lock-note'>Locked until upgraded</div>" if locked else ""
     st.markdown(
         f"""
         <div class="module-card">
             <div class="icon-pill">{icon}</div>
             <div class="title">{title}</div>
             <div class="desc">{description}</div>
+            <div class="{badge_class}">{plan_badge}</div>
+            {lock_html}
         </div>
         """,
         unsafe_allow_html=True,
@@ -198,13 +229,17 @@ def render_module_card(title: str, description: str, icon: str, key_suffix: str)
     return st.button("Open", key=f"module_{key_suffix}", use_container_width=True)
 
 
-def render_placeholder_panel(title: str, description: str, icon: str, bullets: list, action_label: str, action_mode: str, key_suffix: str):
+def render_placeholder_panel(title: str, description: str, icon: str, bullets: list, action_label: str, action_mode: str, key_suffix: str, plan_badge: str = "Free", locked: bool = False):
+    badge_class = "plan-badge premium" if plan_badge.lower() == "premium" else "plan-badge"
+    lock_html = "<div class='lock-note'>Locked until upgraded</div>" if locked else ""
     st.markdown(
         f"""
         <div class="platform-card">
             <div class="icon-pill">{icon}</div>
             <h3>{title}</h3>
             <p>{description}</p>
+            <div class="{badge_class}">{plan_badge}</div>
+            {lock_html}
             <ul>
                 {''.join([f'<li>{item}</li>' for item in bullets])}
             </ul>
@@ -212,7 +247,10 @@ def render_placeholder_panel(title: str, description: str, icon: str, bullets: l
         """,
         unsafe_allow_html=True,
     )
-    return st.button(action_label, key=f"placeholder_{key_suffix}", use_container_width=True)
+    if st.button(action_label, key=f"placeholder_{key_suffix}", use_container_width=True):
+        st.session_state.mode = action_mode
+        st.rerun()
+    return False
 
 
 def render_journey_timeline():
@@ -256,8 +294,8 @@ def render_coaching_panel():
         st.session_state.coaching_focus = "growth"
 
     st.markdown('<div class="platform-card">', unsafe_allow_html=True)
-    st.markdown("### AI Career Coach")
-    st.caption("A lightweight coaching experience that helps users clarify next steps without changing the backend.")
+    st.markdown("### AI Career Mentor")
+    st.caption("Practical, empathetic guidance to help you make better career decisions with clear next actions.")
 
     st.session_state.career_goal = st.text_input(
         "What role do you want next?",
@@ -276,6 +314,28 @@ def render_coaching_panel():
         key="coaching_focus_input",
     )
 
+    mentor_questions = [
+        "Should I switch careers?",
+        "Why is my resume getting rejected?",
+        "What skills should I learn next?",
+        "I feel stuck in my career.",
+        "I want a promotion. What should I do?",
+        "How do I prepare for interviews better?",
+        "How do I explain a career gap?",
+    ]
+
+    selected_question = st.selectbox(
+        "Choose a mentor question",
+        mentor_questions,
+        key="mentor_question",
+    )
+    extra_context = st.text_area(
+        "Add context (optional)",
+        placeholder="Share your situation so guidance can be more specific.",
+        key="mentor_context",
+        height=110,
+    )
+
     focus_map = {
         "growth": ["Build a stronger narrative", "Add evidence of leadership", "Refine your resume message"],
         "promotion": ["Highlight impact and ownership", "Prepare a promotion story", "Align with leadership expectations"],
@@ -287,20 +347,87 @@ def render_coaching_panel():
     st.markdown("**Recommended coaching focus**")
     for item in recommendations:
         st.write(f"- {item}")
+
+    if st.button("Get AI Mentor Guidance", use_container_width=True, key="mentor_guidance_btn"):
+        profile_data = {
+            "job_title_target": st.session_state.career_goal or "Professional",
+            "tech_skills": st.session_state.get("tech_skills", ""),
+            "soft_skills": st.session_state.get("soft_skills", ""),
+            "industry": st.session_state.get("industry", "Technology"),
+            "work_history": st.session_state.get("work_entries", []),
+        }
+
+        goal = f"{selected_question} Current role: {st.session_state.current_role or 'Not specified'}. Context: {extra_context or 'No additional context.'}"
+        advanced_ai = st.session_state.get("advanced_ai")
+
+        advice = None
+        if advanced_ai:
+            try:
+                advice = advanced_ai.get_career_advice(profile_data, goal)
+            except Exception:
+                advice = None
+
+        if not advice:
+            advice = {
+                "action_plan": [
+                    "Clarify one 90-day career goal and define measurable outcomes.",
+                    "Align resume bullets and interview stories with that goal.",
+                    "Schedule two focused learning sessions each week and one networking action.",
+                ],
+                "skills_to_develop": ["Role-specific technical depth", "Structured communication", "Decision storytelling"],
+                "timeline": "8-12 weeks",
+                "networking_tips": ["Reach out to two practitioners in your target role", "Ask for one feedback conversation"],
+            }
+
+        st.markdown("<hr>", unsafe_allow_html=True)
+        st.markdown("#### Mentor guidance")
+        st.success("You already have momentum. Let's convert it into focused progress.")
+
+        for step in advice.get("action_plan", [])[:5]:
+            st.write(f"- {step}")
+
+        st.markdown("**Skills to prioritize**")
+        for skill in advice.get("skills_to_develop", [])[:5]:
+            st.write(f"- {skill}")
+
+        timeline = advice.get("timeline", "6-12 weeks")
+        st.info(f"Suggested timeline: {timeline}")
+
+        if advice.get("networking_tips"):
+            st.markdown("**Networking suggestions**")
+            for tip in advice.get("networking_tips", [])[:3]:
+                st.write(f"- {tip}")
+
     st.markdown('</div>', unsafe_allow_html=True)
 
 
 def render_eq_panel():
     st.markdown('<div class="platform-card">', unsafe_allow_html=True)
     st.markdown("### EQ Growth")
-    st.caption("Practice emotional intelligence habits that strengthen collaboration and presence.")
+    st.caption("Workplace-focused coaching to improve confidence, communication, and emotional resilience.")
     pillars = [
-        ("Self-awareness", "Reflect on your recent wins and triggers."),
-        ("Communication", "Use clear, calm language in team settings."),
-        ("Relationship growth", "Build trust with thoughtful follow-ups."),
+        ("Self Awareness", "Reflect on current patterns and choose one behavior to improve."),
+        ("Confidence Building", "Practice strength-based reframing before interviews and performance reviews."),
+        ("Interview Anxiety", "Use grounding and rehearsal loops to reduce stress before high-stakes conversations."),
+        ("Communication Skills", "Use concise, outcome-first communication in meetings and updates."),
+        ("Workplace Relationships", "Build trust through follow-through, listening, and clear expectations."),
+        ("Conflict Resolution", "Address tension early using facts, empathy, and collaborative next steps."),
+        ("Leadership Readiness", "Demonstrate ownership, initiative, and stakeholder alignment."),
+        ("Growth Mindset", "Turn setbacks into experiments with clear learning actions."),
+        ("Handling Rejection", "Process feedback, protect confidence, and redirect energy to next opportunities."),
     ]
+
+    selected_pillar = st.selectbox("Choose your EQ focus for this week", [p[0] for p in pillars], key="eq_focus")
     for title, description in pillars:
-        st.markdown(f"- **{title}:** {description}")
+        if title == selected_pillar:
+            st.markdown(f"- **{title}:** {description}")
+
+    st.markdown("**Weekly EQ practice plan**")
+    st.write("- Observe one trigger and write a calm response script.")
+    st.write("- Practice one high-stakes conversation using STAR-style structure.")
+    st.write("- End each day by noting one growth win and one improvement action.")
+
+    st.info("Mentor tone guideline: practical, encouraging, and realistic. No pressure language, no false promises.")
     st.markdown('</div>', unsafe_allow_html=True)
 
 
@@ -323,6 +450,39 @@ def render_assessment_panel():
 
     average = int(sum(scores.values()) / len(scores))
     st.metric("Readiness snapshot", f"{average}%")
+
+    st.markdown("### Skill Gap Analysis")
+    target_role = st.text_input("Target role", value=st.session_state.get("target_role", ""), key="assessment_target_role")
+    current_skills = st.text_area(
+        "Current skills (comma-separated)",
+        value=st.session_state.get("current_skills_text", ""),
+        key="assessment_current_skills",
+        height=90,
+    )
+    target_skills = st.text_area(
+        "Target role skills (comma-separated)",
+        value=st.session_state.get("target_skills_text", ""),
+        key="assessment_target_skills",
+        height=90,
+    )
+
+    current_set = {s.strip().lower() for s in current_skills.split(",") if s.strip()}
+    target_set = {s.strip().lower() for s in target_skills.split(",") if s.strip()}
+    missing = sorted(list(target_set - current_set))
+    match_pct = int(((len(target_set) - len(missing)) / len(target_set)) * 100) if target_set else 0
+
+    if target_set:
+        st.metric("Skill match", f"{match_pct}%")
+        if missing:
+            st.markdown("**Priority gaps to close**")
+            for skill in missing[:8]:
+                st.write(f"- {skill.title()}")
+            st.info("Recommended next step: pick 2 gap skills and schedule focused practice over the next 4 weeks.")
+        else:
+            st.success("Great alignment. Your current skills match the target role list.")
+
+    if target_role:
+        st.caption(f"Assessment target: {target_role}")
     st.markdown('</div>', unsafe_allow_html=True)
 
 

@@ -6,6 +6,8 @@ import os
 import hashlib
 import secrets
 from typing import Optional, Dict
+import json
+from datetime import datetime
 import streamlit as st
 
 # OAuth Configuration
@@ -41,7 +43,41 @@ class AuthManager:
     
     def __init__(self):
         self.session_key = 'soulskill_auth'
+        self.users_file = 'soulskill_users.json'
         self._init_session()
+
+    def _load_users(self) -> Dict:
+        if not os.path.exists(self.users_file):
+            return {'users': []}
+        try:
+            with open(self.users_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            return {'users': []}
+
+    def _save_users(self, users_data: Dict):
+        with open(self.users_file, 'w', encoding='utf-8') as f:
+            json.dump(users_data, f, indent=2)
+
+    def create_account(self, name: str, email: str, password: str) -> bool:
+        """Create a user account with hashed password."""
+        email = (email or '').strip().lower()
+        if not email or len(password) < 6:
+            return False
+
+        users_data = self._load_users()
+        for user in users_data.get('users', []):
+            if user.get('email') == email:
+                return False
+
+        users_data['users'].append({
+            'email': email,
+            'name': (name or email.split('@')[0]).strip(),
+            'password_hash': self._hash_password(password),
+            'created_at': datetime.now().isoformat(),
+        })
+        self._save_users(users_data)
+        return True
     
     def _init_session(self):
         """Initialize authentication session state"""
@@ -64,23 +100,26 @@ class AuthManager:
         return None
     
     def login_with_email(self, email: str, password: str) -> bool:
-        """Simple email/password login (demo mode)"""
-        # In production, verify against database with hashed passwords
-        hashed_password = self._hash_password(password)
-        
-        # TODO: Verify against database
-        # For now, just accept any email
-        if email and len(password) >= 6:
-            st.session_state[self.session_key] = {
-                'is_authenticated': True,
-                'user': {
-                    'email': email,
-                    'name': email.split('@')[0],
-                    'provider': 'email'
-                },
-                'session_token': secrets.token_urlsafe(32)
-            }
-            return True
+        """Email/password login against local persistent user store."""
+        email = (email or '').strip().lower()
+        if not email or len(password) < 6:
+            return False
+
+        users_data = self._load_users()
+        password_hash = self._hash_password(password)
+
+        for user in users_data.get('users', []):
+            if user.get('email') == email and user.get('password_hash') == password_hash:
+                st.session_state[self.session_key] = {
+                    'is_authenticated': True,
+                    'user': {
+                        'email': email,
+                        'name': user.get('name', email.split('@')[0]),
+                        'provider': 'email'
+                    },
+                    'session_token': secrets.token_urlsafe(32)
+                }
+                return True
         return False
     
     def login_with_oauth(self, provider: str):

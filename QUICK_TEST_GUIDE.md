@@ -133,6 +133,45 @@ streamlit run streamlit_app.py --server.address 0.0.0.0
 
 ---
 
+## ⚙️ Automated Device + Scale Checks
+
+### 1. Start backend locally
+```bash
+python -m uvicorn api:app --host 127.0.0.1 --port 8000
+```
+
+### 2. Start Streamlit app locally
+```bash
+python -m streamlit run streamlit_app.py --server.headless true --server.address 127.0.0.1 --server.port 8501
+```
+
+### 3. Run API load smoke test
+```bash
+python scripts/api_load_smoke.py --url http://127.0.0.1:8000 --requests 120 --concurrency 12
+```
+
+Outputs report:
+- `artifacts/api_load_report.json`
+
+### 4. Run cross-device viewport QA
+```bash
+python scripts/device_qa_runner.py --url http://127.0.0.1:8501 --paths / --output-dir artifacts/device_qa
+```
+
+Outputs reports/screenshots:
+- `artifacts/device_qa/device_qa_report.json`
+- `artifacts/device_qa/*.png`
+
+### 5. Optional environment variables
+Use these in production-like checks:
+```bash
+SOULSKILL_API_BASE_URL=http://127.0.0.1:8000
+SOULSKILL_API_TOKEN=your-test-token
+API_ALLOWED_ORIGINS=http://localhost:8501,https://yourdomain.com
+```
+
+---
+
 ## 🐛 Common Issues & Fixes
 
 ### Issue: "Module 'razorpay' not found"

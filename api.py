@@ -2,12 +2,17 @@
 FastAPI Backend for SoulSkill Resume Builder
 Provides REST API endpoints for resume operations
 """
-from fastapi import FastAPI, HTTPException, Depends, File, UploadFile
+from fastapi import FastAPI, HTTPException, Depends, File, UploadFile, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from starlette.middleware.gzip import GZipMiddleware
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List, Dict
 from datetime import datetime
+import hmac
+import hashlib
+import json
+import os
 import uvicorn
 
 # Import our modules
@@ -15,6 +20,7 @@ from database import get_db_manager
 from auth import AuthManager, SecurityManager
 from analytics import get_analytics_tracker
 from resume_parser import parse_uploaded_resume
+from payment_handler import PaymentHandler, SubscriptionManager, PRICING_PLANS
 
 app = FastAPI(
     title="SoulSkill Resume Builder API",
@@ -22,14 +28,23 @@ app = FastAPI(
     version="1.0.0"
 )
 
+
+def _get_allowed_origins() -> List[str]:
+    origins_env = os.getenv("API_ALLOWED_ORIGINS", "*")
+    origins = [origin.strip() for origin in origins_env.split(",") if origin.strip()]
+    return origins or ["*"]
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify exact origins
+    allow_origins=_get_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Compress larger payloads to reduce bandwidth and improve mobile performance.
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # Security
 security = HTTPBearer()
@@ -59,6 +74,19 @@ class UserLogin(BaseModel):
 class AnalyticsEvent(BaseModel):
     event_name: str
     properties: Optional[Dict] = None
+
+
+class PaymentOrderRequest(BaseModel):
+    plan_id: str
+    user_email: EmailStr
+
+
+class PaymentVerifyRequest(BaseModel):
+    plan_id: str
+    user_email: EmailStr
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
 
 
 # Health check
@@ -108,12 +136,17 @@ async def create_resume(resume: ResumeCreate, credentials: HTTPAuthorizationCred
 
 
 @app.get("/api/resumes/{user_email}", response_model=List[dict])
-async def get_user_resumes(user_email: str, credentials: HTTPAuthorizationCredentials = Depends(security)):
+async def get_user_resumes(
+    user_email: str,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+):
     """Get all resumes for a user"""
     db = get_db_manager()
-    
+
     resumes = db.get_user_resumes(user_email)
-    return resumes
+    return resumes[offset:offset + limit]
 
 
 @app.post("/api/resumes/parse")
@@ -187,6 +220,118 @@ async def enhance_content(content: dict, credentials: HTTPAuthorizationCredentia
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# Payment endpoints
+@app.post("/api/payments/order")
+async def create_payment_order(request: PaymentOrderRequest, credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Create payment order for selected plan."""
+    if request.plan_id not in PRICING_PLANS or request.plan_id == 'free':
+        raise HTTPException(status_code=400, detail="Invalid paid plan selected")
+
+    plan = PRICING_PLANS[request.plan_id]
+    amount = plan['price_monthly'] if request.plan_id == 'premium_monthly' else plan['price_yearly']
+
+    payment = PaymentHandler()
+    order = payment.create_order(
+        amount=amount,
+        notes={
+            'plan_id': request.plan_id,
+            'user_email': request.user_email,
+        },
+    )
+
+    if not order.get('success'):
+        raise HTTPException(status_code=503, detail=order.get('error', 'Unable to create payment order'))
+
+    return {
+        'success': True,
+        'order': order,
+        'plan_id': request.plan_id,
+    }
+
+
+@app.post("/api/payments/verify")
+async def verify_payment(request: PaymentVerifyRequest, credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Verify Razorpay payment signature and activate subscription."""
+    if request.plan_id not in PRICING_PLANS or request.plan_id == 'free':
+        raise HTTPException(status_code=400, detail="Invalid paid plan selected")
+
+    payment = PaymentHandler()
+    verified = payment.verify_payment(
+        request.razorpay_order_id,
+        request.razorpay_payment_id,
+        request.razorpay_signature,
+    )
+    if not verified:
+        raise HTTPException(status_code=400, detail="Payment signature verification failed")
+
+    db = get_db_manager()
+    subscription = SubscriptionManager(db)
+    duration = 1 if request.plan_id == 'premium_monthly' else 12
+    subscription.activate_subscription(
+        request.user_email,
+        request.plan_id,
+        request.razorpay_payment_id,
+        duration_months=duration,
+    )
+
+    return {
+        'success': True,
+        'message': 'Payment verified and subscription activated',
+    }
+
+
+@app.post("/api/payments/webhook")
+async def razorpay_webhook(request: Request):
+    """Process Razorpay webhook events with signature verification."""
+    webhook_secret = os.getenv('RAZORPAY_WEBHOOK_SECRET', '')
+    if not webhook_secret:
+        raise HTTPException(status_code=503, detail='Webhook secret not configured')
+
+    raw_body = await request.body()
+    signature = request.headers.get('x-razorpay-signature', '')
+    expected = hmac.new(
+        webhook_secret.encode('utf-8'),
+        raw_body,
+        hashlib.sha256,
+    ).hexdigest()
+
+    if not hmac.compare_digest(expected, signature):
+        raise HTTPException(status_code=401, detail='Invalid webhook signature')
+
+    payload = json.loads(raw_body.decode('utf-8'))
+    event = payload.get('event', '')
+
+    if event == 'payment.captured':
+        payment_entity = payload.get('payload', {}).get('payment', {}).get('entity', {})
+        notes = payment_entity.get('notes', {})
+        user_email = notes.get('user_email')
+        plan_id = notes.get('plan_id')
+
+        if user_email and plan_id in PRICING_PLANS and plan_id != 'free':
+            db = get_db_manager()
+            subscription = SubscriptionManager(db)
+            duration = 1 if plan_id == 'premium_monthly' else 12
+            subscription.activate_subscription(
+                user_email,
+                plan_id,
+                payment_entity.get('id', ''),
+                duration_months=duration,
+            )
+
+    return {'success': True, 'event': event}
+
+
+@app.get("/api/subscription/{user_email}")
+async def get_subscription(user_email: str, credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Get current subscription details for user."""
+    db = get_db_manager()
+    subscription = SubscriptionManager(db)
+    return {
+        'success': True,
+        'subscription': subscription.get_user_subscription(user_email),
+    }
 
 
 if __name__ == "__main__":

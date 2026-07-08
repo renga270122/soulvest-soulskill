@@ -116,9 +116,10 @@ def show_signin_signup_modal():
                         st.error("❌ Password must be at least 6 characters")
                     else:
                         if auth.login_with_email(email, password):
+                            user = auth.get_current_user() or {}
                             st.session_state.user_authenticated = True
                             st.session_state.user_email = email
-                            st.session_state.user_name = email.split('@')[0]
+                            st.session_state.user_name = user.get('name', email.split('@')[0])
                             st.session_state.show_auth_modal = False
                             st.success("✅ Signed in successfully!")
                             st.balloons()
@@ -229,11 +230,14 @@ def show_signin_signup_modal():
                     elif not agree_terms:
                         st.error("❌ Please agree to Terms of Service")
                     else:
-                        # Create account (in production, save to database)
-                        if auth.login_with_email(email, password):  # Auto-login after signup
+                        created = auth.create_account(name, email, password)
+                        if not created:
+                            st.error("❌ Account already exists or details are invalid")
+                        elif auth.login_with_email(email, password):
+                            user = auth.get_current_user() or {}
                             st.session_state.user_authenticated = True
                             st.session_state.user_email = email
-                            st.session_state.user_name = name
+                            st.session_state.user_name = user.get('name', name)
                             st.session_state.show_auth_modal = False
                             st.success("✅ Account created successfully!")
                             st.balloons()

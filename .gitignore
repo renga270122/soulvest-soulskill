@@ -45,6 +45,9 @@ Thumbs.db
 # Project specific
 resume_progress.json
 soulskill_progress.json
+soulskill_database.json
+soulskill_users.json
+artifacts/
 *.pdf
 *.html
 temp/

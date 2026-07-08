@@ -3,10 +3,17 @@ Payment Handler for SoulSkill Resume Builder
 Razorpay Integration with Subscription Management
 """
 import os
-import razorpay
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Tuple
 import json
+import uuid
+
+try:
+    import razorpay
+    RAZORPAY_AVAILABLE = True
+except Exception:
+    razorpay = None
+    RAZORPAY_AVAILABLE = False
 
 # Razorpay Configuration
 RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', 'rzp_test_YOUR_KEY_ID')
@@ -101,7 +108,9 @@ class PaymentHandler:
     
     def __init__(self):
         """Initialize Razorpay client"""
-        self.client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+        self.client = None
+        if RAZORPAY_AVAILABLE:
+            self.client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
     
     def create_order(self, amount: int, currency: str = 'INR', 
                      receipt: str = None, notes: Dict = None) -> Dict:
@@ -117,6 +126,12 @@ class PaymentHandler:
         Returns:
             Order details including order_id
         """
+        if not self.client:
+            return {
+                'success': False,
+                'error': 'Razorpay SDK unavailable in this environment'
+            }
+
         try:
             order_data = {
                 'amount': amount,
@@ -150,6 +165,9 @@ class PaymentHandler:
         Returns:
             True if verification successful
         """
+        if not self.client:
+            return False
+
         try:
             params_dict = {
                 'razorpay_order_id': razorpay_order_id,
@@ -158,7 +176,7 @@ class PaymentHandler:
             }
             self.client.utility.verify_payment_signature(params_dict)
             return True
-        except razorpay.errors.SignatureVerificationError:
+        except Exception:
             return False
     
     def create_subscription(self, plan_id: str, user_email: str, 
@@ -177,6 +195,9 @@ class PaymentHandler:
         plan = PRICING_PLANS.get(plan_id)
         if not plan:
             return {'success': False, 'error': 'Invalid plan'}
+
+        if not self.client:
+            return {'success': False, 'error': 'Razorpay SDK unavailable in this environment'}
         
         try:
             # For monthly subscription
@@ -237,6 +258,7 @@ class SubscriptionManager:
                 'plan': 'free',
                 'status': 'active',
                 'is_trial': False,
+                'has_used_trial': False,
                 'trial_ends_at': None,
                 'subscription_ends_at': None,
                 'features': PRICING_PLANS['free']['limits']
@@ -246,6 +268,7 @@ class SubscriptionManager:
             'plan': user_data.get('subscription_plan', 'free'),
             'status': user_data.get('subscription_status', 'active'),
             'is_trial': user_data.get('is_trial', False),
+            'has_used_trial': user_data.get('has_used_trial', False),
             'trial_ends_at': user_data.get('trial_ends_at'),
             'subscription_ends_at': user_data.get('subscription_ends_at'),
             'features': PRICING_PLANS[user_data.get('subscription_plan', 'free')]['limits']
@@ -320,6 +343,9 @@ class SubscriptionManager:
             Tuple of (has_access: bool, message: str)
         """
         subscription = self.get_user_subscription(user_email)
+
+        if subscription['status'] not in ('active', 'trial'):
+            return False, "Your subscription is not active. Please renew or choose a plan."
         
         # Check if subscription is active or in trial
         if subscription['status'] == 'trial':
@@ -372,6 +398,8 @@ class SubscriptionManager:
         limit = features.get(f'{usage_type}_per_month')
         if limit == 'unlimited':
             return True, -1  # -1 means unlimited
+        if limit is None:
+            return False, 0
         
         # Get current usage from database
         current_usage = self._get_usage_count(user_email, usage_type)
@@ -387,24 +415,127 @@ class SubscriptionManager:
     
     def _get_user_data(self, user_email: str) -> Optional[Dict]:
         """Get user data from database"""
-        # Implement based on your database structure
-        # This is a placeholder
+        db_type = getattr(self.db, 'db_type', 'json')
+
+        if db_type == 'postgres':
+            try:
+                cursor = self.db.connection.cursor()
+                cursor.execute(
+                    """SELECT email, subscription_plan, subscription_status, is_trial, has_used_trial,
+                              trial_ends_at, subscription_ends_at, payment_id, last_payment_date,
+                              downloads_this_month
+                       FROM users WHERE email = %s""",
+                    (user_email,)
+                )
+                row = cursor.fetchone()
+                cursor.close()
+                if not row:
+                    return None
+                return {
+                    'email': row[0],
+                    'subscription_plan': row[1],
+                    'subscription_status': row[2],
+                    'is_trial': row[3],
+                    'has_used_trial': row[4],
+                    'trial_ends_at': row[5].isoformat() if row[5] else None,
+                    'subscription_ends_at': row[6].isoformat() if row[6] else None,
+                    'payment_id': row[7],
+                    'last_payment_date': row[8].isoformat() if row[8] else None,
+                    'downloads_this_month': row[9] or 0,
+                }
+            except Exception:
+                return None
+
+        if db_type == 'mongodb':
+            try:
+                return self.db.users.find_one({'email': user_email})
+            except Exception:
+                return None
+
+        try:
+            with open(self.db.json_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            for user in data.get('users', []):
+                if user.get('email') == user_email:
+                    return user
+        except Exception:
+            return None
         return None
     
     def _update_user_subscription(self, user_email: str, data: Dict):
         """Update user subscription data in database"""
-        # Implement based on your database structure
-        pass
+        db_type = getattr(self.db, 'db_type', 'json')
+
+        if db_type == 'postgres':
+            cursor = self.db.connection.cursor()
+            cursor.execute("SELECT id FROM users WHERE email = %s", (user_email,))
+            existing = cursor.fetchone()
+            if not existing:
+                cursor.execute(
+                    "INSERT INTO users (email, name) VALUES (%s, %s)",
+                    (user_email, user_email.split('@')[0])
+                )
+            set_parts = []
+            values = []
+            for key, value in data.items():
+                set_parts.append(f"{key} = %s")
+                if key in ('trial_ends_at', 'subscription_ends_at', 'last_payment_date') and value:
+                    values.append(datetime.fromisoformat(value))
+                else:
+                    values.append(value)
+            values.append(user_email)
+            cursor.execute(
+                f"UPDATE users SET {', '.join(set_parts)} WHERE email = %s",
+                tuple(values),
+            )
+            self.db.connection.commit()
+            cursor.close()
+            return
+
+        if db_type == 'mongodb':
+            self.db.users.update_one(
+                {'email': user_email},
+                {'$set': {'email': user_email, **data}},
+                upsert=True,
+            )
+            return
+
+        with open(self.db.json_file, 'r', encoding='utf-8') as f:
+            db_data = json.load(f)
+
+        users = db_data.setdefault('users', [])
+        target_user = None
+        for user in users:
+            if user.get('email') == user_email:
+                target_user = user
+                break
+
+        if target_user is None:
+            target_user = {
+                'id': str(uuid.uuid4()),
+                'email': user_email,
+                'name': user_email.split('@')[0],
+                'created_at': datetime.now().isoformat(),
+            }
+            users.append(target_user)
+
+        target_user.update(data)
+        target_user['updated_at'] = datetime.now().isoformat()
+
+        with open(self.db.json_file, 'w', encoding='utf-8') as f:
+            json.dump(db_data, f, indent=2)
     
     def _get_usage_count(self, user_email: str, usage_type: str) -> int:
         """Get current usage count for the month"""
-        # Implement based on your database structure
-        return 0
+        user_data = self._get_user_data(user_email) or {}
+        key = f"{usage_type}_this_month"
+        return int(user_data.get(key, 0) or 0)
     
     def _increment_usage_count(self, user_email: str, usage_type: str):
         """Increment usage count"""
-        # Implement based on your database structure
-        pass
+        current = self._get_usage_count(user_email, usage_type)
+        key = f"{usage_type}_this_month"
+        self._update_user_subscription(user_email, {key: current + 1})
 
 
 def get_plan_price_display(plan_id: str) -> str:

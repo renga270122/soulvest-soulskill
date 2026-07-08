@@ -215,13 +215,13 @@ class AIResumeAssistant:
     def _get_score_recommendation(self, score: int) -> str:
         """Get recommendation based on ATS score"""
         if score >= 80:
-            return "Excellent! Your resume is highly ATS-compatible."
+            return "Excellent progress. Your resume is strongly ATS-compatible and ready for targeted applications."
         elif score >= 60:
-            return "Good match! Consider adding more relevant keywords."
+            return "Good momentum. Add a few more role-specific keywords to strengthen alignment."
         elif score >= 40:
-            return "Fair match. Add more job-specific keywords and skills."
+            return "Solid foundation. Expanding job-specific keywords and skills will improve your match quality."
         else:
-            return "Low match. Significantly revise to include job requirements."
+            return "You have a starting point. Let's align your resume more closely with the role requirements step by step."
     
     def _generate_fallback_summary(self, profile_data: Dict) -> str:
         """Generate basic summary without AI"""

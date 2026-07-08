@@ -1,6 +1,13 @@
 ﻿# Core Framework
 streamlit==1.53.1
 
+# API Backend
+fastapi==0.116.1
+uvicorn==0.35.0
+pydantic==2.11.7
+email-validator==2.2.0
+python-multipart==0.0.20
+
 # Payment Gateway
 razorpay==1.4.2
 
@@ -20,5 +27,11 @@ numpy<2.0
 # Additional Libraries
 requests==2.32.5
 
-# Optional backend & testing dependencies (commented out for Streamlit deployment)
+# Testing
+pytest==8.4.1
+httpx==0.28.1
+playwright==1.53.0
+pytest-playwright==0.7.0
+
+# Optional backend output dependency
 xhtml2pdf

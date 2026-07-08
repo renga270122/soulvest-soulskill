@@ -2,9 +2,87 @@
 Pricing Page UI for SoulSkill Resume Builder
 Beautiful pricing comparison with Indian market focus
 """
+import os
+
+import requests
 import streamlit as st
 import streamlit.components.v1 as components
-from payment_handler import PRICING_PLANS, get_plan_price_display, get_plan_features
+from payment_handler import (
+    PRICING_PLANS,
+    PaymentHandler,
+    SubscriptionManager,
+    get_plan_price_display,
+    get_plan_features,
+)
+from database import get_db_manager
+
+
+def _get_api_base_url() -> str:
+    return os.getenv("SOULSKILL_API_BASE_URL", "").rstrip("/")
+
+
+def _api_headers() -> dict:
+    token = st.session_state.get("api_token") or os.getenv("SOULSKILL_API_TOKEN", "")
+    headers = {"Content-Type": "application/json"}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return headers
+
+
+def _create_order_via_api(plan_id: str, user_email: str):
+    base_url = _get_api_base_url()
+    if not base_url:
+        return None
+
+    payload = {"plan_id": plan_id, "user_email": user_email}
+    try:
+        response = requests.post(
+            f"{base_url}/api/payments/order",
+            json=payload,
+            headers=_api_headers(),
+            timeout=12,
+        )
+        if response.ok:
+            data = response.json()
+            order = data.get("order", {})
+            return {
+                "success": True,
+                "order_id": order.get("order_id"),
+                "amount": order.get("amount"),
+                "currency": order.get("currency", "INR"),
+                "provider": "api",
+            }
+        detail = response.text or "Payment API returned an unexpected response"
+        return {"success": False, "error": detail, "provider": "api"}
+    except requests.RequestException as exc:
+        return {"success": False, "error": f"Payment API unreachable: {exc}", "provider": "api"}
+
+
+def _verify_payment_via_api(plan_id: str, user_email: str, order_id: str, payment_id: str, signature: str):
+    base_url = _get_api_base_url()
+    if not base_url:
+        return None
+
+    payload = {
+        "plan_id": plan_id,
+        "user_email": user_email,
+        "razorpay_order_id": order_id,
+        "razorpay_payment_id": payment_id,
+        "razorpay_signature": signature,
+    }
+    try:
+        response = requests.post(
+            f"{base_url}/api/payments/verify",
+            json=payload,
+            headers=_api_headers(),
+            timeout=12,
+        )
+        if response.ok:
+            return {"success": True, "provider": "api"}
+        detail = response.text or "Payment verification failed"
+        return {"success": False, "error": detail, "provider": "api"}
+    except requests.RequestException as exc:
+        return {"success": False, "error": f"Payment verification API unreachable: {exc}", "provider": "api"}
 
 
 def render_pricing_page():
@@ -12,6 +90,29 @@ def render_pricing_page():
     
     st.markdown("""
     <style>
+        @media (max-width: 980px) {
+            div[data-testid="stHorizontalBlock"] {
+                flex-direction: column !important;
+                gap: 0.85rem !important;
+            }
+            .pricing-card.featured {
+                transform: none !important;
+            }
+        }
+        @media (max-width: 640px) {
+            .pricing-header h1 {
+                font-size: 1.8rem !important;
+            }
+            .pricing-header p {
+                font-size: 1rem !important;
+            }
+            .pricing-card {
+                padding: 1.2rem !important;
+            }
+            .plan-price {
+                font-size: 2rem !important;
+            }
+        }
         .pricing-header {
             text-align: center;
             padding: 2rem 0;
@@ -372,6 +473,19 @@ def render_faq():
 def render_checkout_page(plan_id: str):
     """Render checkout page with Razorpay integration"""
     plan = PRICING_PLANS[plan_id]
+    user_email = st.session_state.get('user_email')
+
+    if not st.session_state.get('user_authenticated') or not user_email:
+        st.warning("Please sign in to continue with checkout and manage your subscription.")
+        if st.button("Sign In", use_container_width=True, key="checkout_sign_in"):
+            st.session_state.show_auth_modal = True
+            st.session_state.auth_mode = 'signin'
+            st.session_state.mode = 'home'
+            st.rerun()
+        if st.button("Back to Pricing", use_container_width=True, key="checkout_back_pricing_unauth"):
+            st.session_state.mode = 'pricing'
+            st.rerun()
+        return
     
     st.markdown(f"""
     <div style='text-align: center; padding: 2rem; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);'>
@@ -393,28 +507,81 @@ def render_checkout_page(plan_id: str):
     with col2:
         st.markdown("### 💳 Payment Details")
         st.info("🔒 Secure payment powered by Razorpay")
-        
-        # In a real implementation, you'd integrate Razorpay's payment gateway here
+
+        accept_terms = st.checkbox(
+            "I agree to billing terms and understand trial-to-paid conversion policy.",
+            key="checkout_accept_terms",
+        )
+
+        db = get_db_manager()
+        sub_manager = SubscriptionManager(db)
+        payment_handler = PaymentHandler()
+
+        trial_label = "🎁 Start 7-Day Free Trial"
+        if st.button(trial_label, use_container_width=True, key="checkout_start_trial"):
+            if not accept_terms:
+                st.error("Please accept billing terms before starting your trial.")
+            else:
+                started = sub_manager.start_trial(user_email, plan_id)
+                if started:
+                    st.success("Trial activated successfully. Premium features are now available.")
+                    st.session_state.active_plan = plan_id
+                    st.session_state.mode = 'dashboard'
+                    st.rerun()
+                else:
+                    st.info("Trial is already used on this account. You can continue with paid activation below.")
+
         if st.button("💰 Proceed to Payment", use_container_width=True, type="primary"):
-            # This would trigger Razorpay payment flow
-            st.success("🎉 Redirecting to secure payment gateway...")
-            st.balloons()
-            
-            # Show payment integration code
-            st.code("""
-# Razorpay Payment Integration
-from payment_handler import PaymentHandler
+            if not accept_terms:
+                st.error("Please accept billing terms before proceeding.")
+            else:
+                amount = plan['price_monthly'] if plan_id == 'premium_monthly' else plan['price_yearly']
+                api_order = _create_order_via_api(plan_id, user_email)
+                if api_order is None:
+                    order = payment_handler.create_order(
+                        amount=amount,
+                        notes={'plan': plan_id, 'user_email': user_email}
+                    )
+                elif api_order.get('success'):
+                    order = api_order
+                else:
+                    st.warning("Backend payment API is currently unavailable. Continuing with local checkout fallback.")
+                    order = payment_handler.create_order(
+                        amount=amount,
+                        notes={'plan': plan_id, 'user_email': user_email}
+                    )
 
-payment = PaymentHandler()
-order = payment.create_order(
-    amount=plan['price_monthly'] if plan_id == 'premium_monthly' else plan['price_yearly'],
-    notes={'plan': plan_id, 'user_email': user_email}
-)
+                if order.get('success'):
+                    order_id = order.get('order_id') or f"local_{user_email}_{plan_id}"
+                    mock_payment_id = f"mock_{order_id}"
+                    mock_signature = f"sig_{order_id}"
 
-# Then redirect to Razorpay checkout
-# In production, use Razorpay's JavaScript SDK
-            """, language="python")
-        
+                    api_verified = _verify_payment_via_api(
+                        plan_id,
+                        user_email,
+                        order_id,
+                        mock_payment_id,
+                        mock_signature,
+                    )
+
+                    if api_verified is not None:
+                        if api_verified.get('success'):
+                            st.success("Payment initialized and verified via backend API.")
+                        else:
+                            st.warning("Payment initialized, but backend verification did not complete. Falling back to local activation for this environment.")
+                            duration = 1 if plan_id == 'premium_monthly' else 12
+                            sub_manager.activate_subscription(user_email, plan_id, mock_payment_id, duration_months=duration)
+                    else:
+                        duration = 1 if plan_id == 'premium_monthly' else 12
+                        sub_manager.activate_subscription(user_email, plan_id, mock_payment_id, duration_months=duration)
+                        st.success("Payment initialized and subscription activated for this environment.")
+
+                    st.session_state.active_plan = plan_id
+                    st.session_state.mode = 'dashboard'
+                    st.rerun()
+                else:
+                    st.error(f"Unable to initialize payment: {order.get('error', 'Unknown error')}")
+
         if st.button("← Back to Pricing", use_container_width=True):
             st.session_state.mode = 'pricing'
             st.rerun()

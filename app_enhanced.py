@@ -51,6 +51,9 @@ from resume_parser import ResumeParser, parse_uploaded_resume
 from sidebar_content import render_enhanced_sidebar
 from theme_config import apply_custom_theme
 from auth_ui import show_auth_prompt_banner, show_signin_signup_modal, show_user_profile
+from database import get_db_manager
+from payment_handler import SubscriptionManager
+from career_readiness import calculate_career_readiness_score
 
 
 def _fallback_panel(message: str):
@@ -704,10 +707,12 @@ advanced_ai = st.session_state.advanced_ai
 # Initialize Session State
 def init_session_state():
     defaults = {
-        'mode': 'home',  # home, dashboard, builder, coverletter
+        'mode': 'home',
         'step': 1,  # 1: Template, 2: Fill Details, 3: Customize, 4: Download
         'current_resume_id': None,
         'resumes': {},  # Store multiple resumes
+        'career_journey_stage': 'Student',
+        'career_readiness_score': 72,
         'profile_type': None,
         'work_entries': [],
         'education_entries': [],
@@ -742,6 +747,46 @@ from auth import get_auth_manager, show_auth_sidebar
 
 # Initialize auth manager early (creates session state keys)
 auth_manager = get_auth_manager()
+
+db_manager = get_db_manager()
+subscription_manager = SubscriptionManager(db_manager)
+
+
+def get_user_subscription_snapshot() -> dict:
+    """Get subscription snapshot for the active user."""
+    user_email = st.session_state.get('user_email')
+    if not st.session_state.get('user_authenticated') or not user_email:
+        return {
+            'plan': 'free',
+            'status': 'active',
+            'is_trial': False,
+            'features': {
+                'premium_templates': False,
+                'ai_suggestions': 0,
+                'advanced_ats': False,
+            },
+        }
+    return subscription_manager.get_user_subscription(user_email)
+
+
+def ensure_feature_access(feature_key: str, feature_label: str) -> bool:
+    """Guard premium features with sign-in and subscription checks."""
+    if not st.session_state.get('user_authenticated') or not st.session_state.get('user_email'):
+        st.info(f"{feature_label} is available after sign-in. You can start on the Free plan and upgrade anytime.")
+        show_auth_prompt_banner()
+        return False
+
+    allowed, message = subscription_manager.check_feature_access(
+        st.session_state['user_email'],
+        feature_key,
+    )
+    if allowed:
+        return True
+
+    st.info(message)
+    from pricing_ui import show_upgrade_prompt
+    show_upgrade_prompt(feature_label)
+    return False
 
 render_enhanced_sidebar()
 
@@ -1196,110 +1241,236 @@ def get_sample_resume_data():
         'language_entries': []
     }
 
+
+def get_stage_context(stage: str):
+    stage_map = {
+        "Student": {
+            "readiness": 68,
+            "resume_score": 63,
+            "ats_score": 61,
+            "skill_growth": 58,
+            "eq_growth": 66,
+            "interview_readiness": 54,
+            "recommendation": "Build one project-impact story and align your resume summary to one target role.",
+            "activity": [
+                "Completed profile baseline",
+                "Added first role target",
+                "Started interview prep checklist",
+            ],
+        },
+        "Looking for a Job": {
+            "readiness": 74,
+            "resume_score": 72,
+            "ats_score": 70,
+            "skill_growth": 67,
+            "eq_growth": 71,
+            "interview_readiness": 69,
+            "recommendation": "Tune resume keywords for your top three roles and practice a concise opening pitch.",
+            "activity": [
+                "ATS optimization pass completed",
+                "Interview story bank created",
+                "Career mentor action plan generated",
+            ],
+        },
+        "Want a Promotion": {
+            "readiness": 79,
+            "resume_score": 75,
+            "ats_score": 73,
+            "skill_growth": 78,
+            "eq_growth": 77,
+            "interview_readiness": 74,
+            "recommendation": "Document measurable leadership outcomes and build a promotion-readiness narrative.",
+            "activity": [
+                "Leadership achievements updated",
+                "Promotion interview prompts unlocked",
+                "Career growth plan refreshed",
+            ],
+        },
+        "Career Switch": {
+            "readiness": 65,
+            "resume_score": 67,
+            "ats_score": 64,
+            "skill_growth": 62,
+            "eq_growth": 69,
+            "interview_readiness": 60,
+            "recommendation": "Translate transferable skills into role-specific outcomes and prioritize one upskilling path.",
+            "activity": [
+                "Transferable skills map drafted",
+                "Skill-gap checklist initialized",
+                "Mentor transition guidance saved",
+            ],
+        },
+        "Returning After a Break": {
+            "readiness": 62,
+            "resume_score": 64,
+            "ats_score": 60,
+            "skill_growth": 59,
+            "eq_growth": 73,
+            "interview_readiness": 58,
+            "recommendation": "Frame your break confidently and highlight recent learning, projects, or certifications.",
+            "activity": [
+                "Career break narrative drafted",
+                "Confidence coaching module started",
+                "Readiness score baseline captured",
+            ],
+        },
+        "Feeling Stuck": {
+            "readiness": 57,
+            "resume_score": 61,
+            "ats_score": 59,
+            "skill_growth": 55,
+            "eq_growth": 68,
+            "interview_readiness": 56,
+            "recommendation": "Pick one short-term target role and complete one high-impact career action this week.",
+            "activity": [
+                "Clarity prompts completed",
+                "Career mentor check-in scheduled",
+                "Weekly momentum tracker started",
+            ],
+        },
+    }
+    return stage_map.get(stage, stage_map["Student"])
+
 # MAIN APP NAVIGATION
 if st.session_state.mode == 'home':
     if st.session_state.get('show_auth_modal', False):
         show_signin_signup_modal()
         st.stop()
 
+    journey_options = [
+        "Student",
+        "Looking for a Job",
+        "Want a Promotion",
+        "Career Switch",
+        "Returning After a Break",
+        "Feeling Stuck",
+    ]
+
+    stage = st.session_state.get("career_journey_stage", "Student")
+    if stage not in journey_options:
+        stage = "Student"
+        st.session_state.career_journey_stage = stage
+    stage_context = get_stage_context(stage)
+    st.session_state.career_readiness_score = stage_context["readiness"]
+    subscription_snapshot = get_user_subscription_snapshot()
+    premium_unlocked = bool(subscription_snapshot.get('features', {}).get('premium_templates', False))
+    ai_mentor_unlocked = bool(subscription_snapshot.get('features', {}).get('ai_suggestions', 0))
+
     st.markdown("""
     <div class="platform-shell">
         <div class="platform-hero">
             <div style="display:flex; flex-wrap:wrap; justify-content:space-between; gap:1rem; align-items:center;">
                 <div style="max-width: 640px;">
-                    <div style="font-size:0.85rem; text-transform:uppercase; letter-spacing:0.18em; opacity:0.9; font-weight:700;">AI Career Growth Platform</div>
-                    <h1 style="font-size:2.2rem; margin:0.3rem 0;">Turn your next role into a guided career move.</h1>
-                    <p style="font-size:1.02rem; line-height:1.6; margin:0.55rem 0 0; opacity:0.95;">Build your story, sharpen readiness, and prepare for growth with a modern experience that still keeps your resume workflow intact.</p>
+                    <div style="font-size:0.85rem; text-transform:uppercase; letter-spacing:0.18em; opacity:0.9; font-weight:700;">SoulSkill 2.0</div>
+                    <h1 style="font-size:2.2rem; margin:0.3rem 0;">Your AI Career Growth Partner</h1>
+                    <p style="font-size:1.02rem; line-height:1.6; margin:0.55rem 0 0; opacity:0.95;">Navigate your career with confidence. Build ATS-friendly resumes, discover your strengths, improve emotional intelligence, prepare for interviews, and receive AI-powered career guidance.</p>
                 </div>
                 <div style="min-width: 260px;">
                     <div class="score-card">
                         <div>Career Readiness Score</div>
-                        <div class="score">82%</div>
-                        <div>Placeholder coaching signal</div>
+                        <div class="score">{score}%</div>
+                        <div>Dynamic placeholder based on your journey stage</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """.format(score=stage_context["readiness"]), unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
     col_a, col_b, col_c = st.columns([1.2, 1, 1])
     with col_a:
-        render_metric_card("Momentum", "4 growth moves", "Resume + coaching + interview prep")
+        render_metric_card("Current journey", stage, "Personalized guidance across modules")
     with col_b:
-        render_metric_card("Next milestone", "Senior Product role", "Targeted visibility across your toolkit")
+        render_metric_card("Resume score", f"{stage_context['resume_score']}%", "Strengthen story clarity and impact")
     with col_c:
-        render_metric_card("Active focus", "Resume builder", "Keep your core workflow front and center")
+        render_metric_card("ATS score", f"{stage_context['ats_score']}%", "Optimize targeting for role-specific keywords")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    st.markdown("### Start your next career chapter")
+    st.markdown("### Where are you in your career journey?")
+    selected_stage = st.radio(
+        "Choose your current stage to personalize SoulSkill",
+        options=journey_options,
+        index=journey_options.index(stage),
+        horizontal=True,
+    )
+    if selected_stage != st.session_state.career_journey_stage:
+        st.session_state.career_journey_stage = selected_stage
+        st.rerun()
+
+    st.info(
+        f"Today's recommendation: {stage_context['recommendation']}"
+    )
+
+    st.markdown("### Start your career journey")
+    if st.button("Start Your Career Journey", use_container_width=True, type="primary"):
+        st.session_state.mode = 'dashboard'
+        st.rerun()
+
+    st.markdown("### Explore by module")
     home_col1, home_col2 = st.columns(2)
     with home_col1:
-        if st.button("Build your resume", use_container_width=True, type="primary"):
+        if st.button("Career Toolkit", use_container_width=True):
+            st.session_state.mode = 'toolkit'
+            st.rerun()
+        if st.button("Career Growth", use_container_width=True):
+            st.session_state.mode = 'growth'
+            st.rerun()
+    with home_col2:
+        if st.button("Interview Prep", use_container_width=True):
+            st.session_state.mode = 'interview'
+            st.rerun()
+        if st.button("AI Career Mentor", use_container_width=True):
+            st.session_state.mode = 'mentor'
+            st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    st.markdown("### MVP modules")
+    mod1, mod2, mod3, mod4 = st.columns(4)
+    with mod1:
+        if render_module_card(
+            "AI Resume Builder",
+            "Create ATS-friendly resumes with strong role alignment.",
+            "🛠️",
+            "builder",
+            plan_badge="Free",
+        ):
             st.session_state.mode = 'builder'
             st.session_state.step = 1
             st.rerun()
-        if st.button("Open Career Toolkit", use_container_width=True):
-            st.session_state.mode = 'toolkit'
-            st.rerun()
-    with home_col2:
-        if st.button("View my journey", use_container_width=True):
-            st.session_state.mode = 'journey'
-            st.rerun()
-        if st.button("Open dashboard", use_container_width=True):
-            st.session_state.mode = 'dashboard'
-            st.rerun()
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    st.markdown("### Growth modules")
-    mod1, mod2, mod3, mod4 = st.columns(4)
-    with mod1:
-        st.markdown("""
-        <div class="module-card">
-            <div class="icon-pill">🧭</div>
-            <div class="title">Career Journey</div>
-            <div class="desc">Follow a guided path from assessment to momentum.</div>
-        </div>
-        """, unsafe_allow_html=True)
-        if st.button("Explore", key="mod_journey", use_container_width=True):
-            st.session_state.mode = 'journey'
-            st.rerun()
     with mod2:
-        st.markdown("""
-        <div class="module-card">
-            <div class="icon-pill">🛠️</div>
-            <div class="title">Career Toolkit</div>
-            <div class="desc">Keep your resume builder and growth resources together.</div>
-        </div>
-        """, unsafe_allow_html=True)
-        if st.button("Open", key="mod_toolkit", use_container_width=True):
-            st.session_state.mode = 'toolkit'
+        if render_module_card(
+            "Career Growth",
+            "Assess strengths, identify gaps, and track readiness.",
+            "📈",
+            "growth",
+            plan_badge="Free",
+        ):
+            st.session_state.mode = 'growth'
             st.rerun()
     with mod3:
-        st.markdown("""
-        <div class="module-card">
-            <div class="icon-pill">🎧</div>
-            <div class="title">Career Coach</div>
-            <div class="desc">Guidance and planning placeholders for your next move.</div>
-        </div>
-        """, unsafe_allow_html=True)
-        if st.button("Preview", key="mod_coach", use_container_width=True):
-            st.session_state.mode = 'coach'
+        if render_module_card(
+            "EQ Growth",
+            "Build self-awareness, communication, and confidence.",
+            "🧠",
+            "eq",
+            plan_badge="Free",
+        ):
+            st.session_state.mode = 'eq'
             st.rerun()
     with mod4:
-        st.markdown("""
-        <div class="module-card">
-            <div class="icon-pill">🗣️</div>
-            <div class="title">Interview Coach</div>
-            <div class="desc">Practice and sharpen your interview story with structure.</div>
-        </div>
-        """, unsafe_allow_html=True)
-        if st.button("Preview", key="mod_interview", use_container_width=True):
-            st.session_state.mode = 'interview'
+        if render_module_card(
+            "AI Career Mentor",
+            "Get actionable guidance for decisions, transitions, and growth.",
+            "🎯",
+            "mentor",
+            plan_badge="Premium",
+            locked=not ai_mentor_unlocked,
+        ):
+            st.session_state.mode = 'mentor'
             st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
@@ -1307,44 +1478,78 @@ if st.session_state.mode == 'home':
     st.stop()
 
 elif st.session_state.mode == 'dashboard':
+    stage = st.session_state.get("career_journey_stage", "Student")
+    stage_context = get_stage_context(stage)
+
     st.markdown("""
     <div class="platform-shell">
         <div class="platform-hero">
-            <h2 style="margin:0;">AI Career Growth Dashboard</h2>
-            <p style="margin:0.35rem 0 0; opacity:0.95;">A modern control center for your career momentum, readiness, and next best move.</p>
+            <h2 style="margin:0;">Career Dashboard</h2>
+            <p style="margin:0.35rem 0 0; opacity:0.95;">Your personalized command center for career readiness, skill growth, and focused next steps.</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
     left, right = st.columns([1.4, 0.95])
+
+    assessment_scores = st.session_state.get('assessment_scores', {
+        'clarity': 70,
+        'proof': 65,
+        'visibility': 60,
+        'confidence': 75,
+    })
+
+    planning_score = int((assessment_scores.get('clarity', 70) + assessment_scores.get('proof', 65)) / 2)
+    readiness_metrics = {
+        'resume_quality': stage_context['resume_score'],
+        'ats_compatibility': stage_context['ats_score'],
+        'technical_skills': stage_context['skill_growth'],
+        'soft_skills': int((stage_context['skill_growth'] + stage_context['eq_growth']) / 2),
+        'emotional_intelligence': stage_context['eq_growth'],
+        'interview_readiness': stage_context['interview_readiness'],
+        'career_planning': planning_score,
+    }
+    readiness_score, readiness_breakdown, readiness_insights = calculate_career_readiness_score(readiness_metrics)
+    st.session_state.career_readiness_score = readiness_score
+
     with left:
-        render_readiness_score(82)
+        render_readiness_score(readiness_score)
         st.markdown("""
         <div class="platform-card">
-            <h3>Career momentum</h3>
-            <p>Your profile is showing strong fundamentals. A polished toolkit and coaching plan will help you move from “ready” to “selected.”</p>
+            <h3>Today's AI recommendation</h3>
+            <p>{recommendation}</p>
+            <p style="margin-top:0.8rem;"><strong>{insight}</strong></p>
         </div>
-        """, unsafe_allow_html=True)
+        """.format(recommendation=stage_context["recommendation"], insight=readiness_insights['tone']), unsafe_allow_html=True)
     with right:
         st.markdown("""
         <div class="platform-card">
-            <h3>Next best action</h3>
+            <h3>Recent Activity</h3>
             <ul>
-                <li>Update your summary and skills</li>
-                <li>Practice storytelling for interviews</li>
-                <li>Review your resume for keyword alignment</li>
+                <li>{a1}</li>
+                <li>{a2}</li>
+                <li>{a3}</li>
             </ul>
         </div>
-        """, unsafe_allow_html=True)
+        """.format(a1=stage_context["activity"][0], a2=stage_context["activity"][1], a3=stage_context["activity"][2]), unsafe_allow_html=True)
 
-    metrics = st.columns(3)
+    metrics = st.columns(6)
     with metrics[0]:
-        render_metric_card("Resume completion", "76%", "Your core story is in place")
+        render_metric_card("Resume Score", f"{readiness_breakdown['resume_quality']}%", "Foundation quality")
     with metrics[1]:
-        render_metric_card("Coaching readiness", "3/4", "Interview and EQ guidance queued")
+        render_metric_card("ATS Score", f"{readiness_breakdown['ats_compatibility']}%", "Compatibility and targeting")
     with metrics[2]:
-        render_metric_card("Focus area", "Leadership", "Position your growth narrative")
+        render_metric_card("Skill Growth", f"{readiness_breakdown['technical_skills']}%", "Technical and role skills")
+    with metrics[3]:
+        render_metric_card("EQ Growth", f"{readiness_breakdown['emotional_intelligence']}%", "Communication and confidence")
+    with metrics[4]:
+        render_metric_card("Interview Readiness", f"{readiness_breakdown['interview_readiness']}%", "Story clarity and delivery")
+    with metrics[5]:
+        render_metric_card("Career Journey", stage, "Current personalization track")
+
+    st.caption(readiness_insights['strength'])
+    st.caption(readiness_insights['focus'])
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### Quick access")
@@ -1354,13 +1559,12 @@ elif st.session_state.mode == 'dashboard':
             st.session_state.mode = 'toolkit'
             st.rerun()
     with dash2:
-        if st.button("View journey", use_container_width=True):
-            st.session_state.mode = 'journey'
+        if st.button("Career growth", use_container_width=True):
+            st.session_state.mode = 'growth'
             st.rerun()
     with dash3:
-        if st.button("Resume builder", use_container_width=True):
-            st.session_state.mode = 'builder'
-            st.session_state.step = 1
+        if st.button("AI career mentor", use_container_width=True):
+            st.session_state.mode = 'mentor'
             st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
@@ -1380,24 +1584,65 @@ elif st.session_state.mode == 'journey':
 
 elif st.session_state.mode == 'toolkit':
     st.title("🛠️ Career Toolkit")
-    st.caption("Your resume builder stays intact while new career growth modules live alongside it.")
+    st.caption("Build and optimize your job-ready profile while keeping all resume workflows in one place.")
+    subscription_snapshot = get_user_subscription_snapshot()
+    premium_template_access = bool(subscription_snapshot.get('features', {}).get('premium_templates', False))
+    ai_mentor_access = bool(subscription_snapshot.get('features', {}).get('ai_suggestions', 0))
     toolkit_col1, toolkit_col2 = st.columns(2)
     with toolkit_col1:
         if st.button("Open Resume Builder", use_container_width=True, type="primary"):
             st.session_state.mode = 'builder'
             st.session_state.step = 1
             st.rerun()
-        render_placeholder_panel("Career Coach", "Get guided planning for role transitions and growth decisions.", "🎯", ["Career planning", "Role mapping", "Next steps"], "Preview Career Coach", "coach", "toolkit_coach")
-        render_placeholder_panel("Career Assessment", "Measure readiness and turn it into a structured growth plan.", "📈", ["Skill-gap cues", "Readiness snapshot", "Growth plan"], "Preview Assessment", "assessment", "toolkit_assessment")
+        render_placeholder_panel(
+            "ATS Resume Optimization",
+            "Analyze keyword alignment and improve ATS compatibility.",
+            "📊",
+            ["ATS checks", "Keyword coverage", "Improvement tips"],
+            "Open ATS Optimization",
+            "builder",
+            "toolkit_ats",
+            plan_badge="Free",
+        )
+        render_placeholder_panel(
+            "Cover Letter Generator",
+            "Create role-specific cover letters based on your profile.",
+            "✉️",
+            ["Targeted templates", "Role-focused tone", "Reusable drafts"],
+            "Open Cover Letter",
+            "coverletter",
+            "toolkit_coverletter",
+            plan_badge="Premium",
+            locked=not premium_template_access,
+        )
     with toolkit_col2:
-        render_placeholder_panel("Interview Coach", "Prepare your stories, confidence, and delivery for interviews.", "🗣️", ["Mock questions", "Feedback loops", "Delivery tips"], "Preview Interview Coach", "interview", "toolkit_interview")
-        render_placeholder_panel("EQ Growth", "Strengthen self-awareness, communication, and relationship growth.", "🧠", ["Reflection prompts", "Communication habits", "Growth checkpoints"], "Preview EQ Growth", "eq", "toolkit_eq")
-        render_placeholder_panel("Monetization", "Prepare a clear free vs. Pro path for future subscriptions.", "💳", ["Free vs. Pro", "Upgrade prompts", "Billing readiness"], "Preview Monetization", "monetization", "toolkit_monetization")
+        render_placeholder_panel(
+            "Interview Preparation",
+            "Practice answers, sharpen stories, and improve confidence.",
+            "🗣️",
+            ["Mock questions", "Answer frameworks", "Confidence coaching"],
+            "Open Interview Prep",
+            "interview",
+            "toolkit_interview",
+            plan_badge="Free",
+        )
+        render_placeholder_panel(
+            "AI Career Mentor",
+            "Ask career questions and receive actionable next steps.",
+            "🎯",
+            ["Career transitions", "Promotion strategy", "Decision support"],
+            "Open AI Career Mentor",
+            "mentor",
+            "toolkit_mentor",
+            plan_badge="Premium",
+            locked=not ai_mentor_access,
+        )
     st.stop()
 
-elif st.session_state.mode == 'coach':
-    st.title("🎯 Career Coach")
-    render_coaching_panel()
+elif st.session_state.mode in ('mentor', 'coach'):
+    st.title("🎯 AI Career Mentor")
+    if ensure_feature_access('ai_suggestions', 'AI Career Mentor'):
+        render_coaching_panel()
     st.markdown("<br>", unsafe_allow_html=True)
     if st.button("Back to toolkit", use_container_width=True):
         st.session_state.mode = 'toolkit'
@@ -1405,8 +1650,8 @@ elif st.session_state.mode == 'coach':
     st.stop()
 
 elif st.session_state.mode == 'interview':
-    st.title("🗣️ Interview Coach")
-    render_placeholder_panel("Interview Coach", "Practice your story, sharpen delivery, and build confidence before every conversation.", "🗣️", ["Practice prompts", "Answer frameworks", "Confidence coaching"], "Back to toolkit", "toolkit", "interview_page")
+    st.title("🗣️ Interview Preparation")
+    render_placeholder_panel("Interview Preparation", "Practice your story, sharpen delivery, and build confidence before every conversation.", "🗣️", ["Practice prompts", "Answer frameworks", "Confidence coaching"], "Back to toolkit", "toolkit", "interview_page")
     st.stop()
 
 elif st.session_state.mode == 'eq':
@@ -1418,18 +1663,86 @@ elif st.session_state.mode == 'eq':
         st.rerun()
     st.stop()
 
-elif st.session_state.mode == 'assessment':
+elif st.session_state.mode in ('growth', 'assessment'):
     st.title("📈 Career Assessment")
+    st.caption("Measure where you are today and identify practical next steps for growth.")
     render_assessment_panel()
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("### Skill Gap Analysis")
+    st.markdown(
+        """
+        <div class="platform-card">
+            <p>Your skill-gap snapshot will compare role requirements with your current profile and suggest learning priorities.</p>
+            <ul>
+                <li>Role-specific skills to strengthen</li>
+                <li>Recommended learning paths</li>
+                <li>Timeline-based growth milestones</li>
+            </ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     st.markdown("<br>", unsafe_allow_html=True)
     if st.button("Back to toolkit", use_container_width=True):
         st.session_state.mode = 'toolkit'
         st.rerun()
     st.stop()
 
-elif st.session_state.mode == 'monetization':
-    st.title("💳 Monetization")
-    render_monetization_panel()
+elif st.session_state.mode == 'resources':
+    st.title("📚 Resources")
+    st.markdown(
+        """
+        <div class="platform-card">
+            <h3>Career Resources</h3>
+            <p>Curated resources to support continuous growth and better career decisions.</p>
+            <ul>
+                <li>Resume and ATS best-practice guides</li>
+                <li>Interview and communication playbooks</li>
+                <li>Learning tracks for role-based upskilling</li>
+            </ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    if st.button("Go to Career Growth", use_container_width=True):
+        st.session_state.mode = 'growth'
+        st.rerun()
+    st.stop()
+
+elif st.session_state.mode == 'profile':
+    st.title("👤 Profile")
+    if st.session_state.get('user_authenticated'):
+        show_user_profile()
+    else:
+        show_auth_prompt_banner()
+        if st.button("Sign In to Manage Profile", use_container_width=True):
+            st.session_state.show_auth_modal = True
+            st.session_state.auth_mode = 'signin'
+            st.rerun()
+    st.stop()
+
+elif st.session_state.mode == 'saved_resumes':
+    st.title("📄 Saved Resumes")
+    if not st.session_state.get('user_authenticated') or not st.session_state.get('user_email'):
+        st.info("Sign in to view and manage your saved resumes across sessions.")
+        show_auth_prompt_banner()
+        st.stop()
+
+    resumes = db_manager.get_user_resumes(st.session_state.get('user_email'))
+    if not resumes:
+        st.info("You are all set to create your first resume. Once saved, it will appear here.")
+    else:
+        st.success(f"You have {len(resumes)} saved resume(s).")
+        for idx, resume in enumerate(resumes, 1):
+            with st.expander(f"Resume {idx}"):
+                st.write(f"ID: {resume.get('id')}")
+                st.write(f"Updated: {resume.get('updated_at', 'N/A')}")
+                data = resume.get('data', {})
+                st.write(f"Name: {data.get('full_name', 'N/A')}")
+                st.write(f"Target Role: {data.get('job_title_target', 'N/A')}")
+    if st.button("Back to Dashboard", use_container_width=True):
+        st.session_state.mode = 'dashboard'
+        st.rerun()
     st.stop()
 
 elif st.session_state.mode == 'builder':
@@ -1541,6 +1854,8 @@ elif st.session_state.mode == 'builder':
                                use_container_width=True,
                                disabled=selected,
                                type="primary" if selected else "secondary"):
+                        if template_id in PREMIUM_TEMPLATES and not ensure_feature_access('premium_templates', 'Premium Templates'):
+                            st.stop()
                         st.session_state['selected_template'] = template_id
                         st.session_state['template'] = template_id
                         st.rerun()
@@ -1648,7 +1963,7 @@ elif st.session_state.mode == 'builder':
                                         st.caption("Add your skills below to see matches")
                                 
                                 with col2:
-                                    st.markdown("**⚠️ Missing Skills to Add:**")
+                                    st.markdown("**🌱 Skills to Strengthen Next:**")
                                     if 'TECHNICAL_SKILLS:' in analysis_text:
                                         missing = [s for s in jd_tech_skills if s not in tech_skills_match]
                                         for skill in missing[:5]:
@@ -1658,7 +1973,7 @@ elif st.session_state.mode == 'builder':
                                 st.session_state.jd_tech_skills = jd_tech_skills if 'TECHNICAL_SKILLS:' in analysis_text else []
                                 
                             except Exception as e:
-                                st.error(f"Analysis failed: {str(e)}")
+                                st.warning(f"We couldn't complete analysis this time. Please try again. Details: {str(e)}")
                         else:
                             st.warning("AI features require Google API key in secrets.toml")
             
@@ -1684,7 +1999,7 @@ elif st.session_state.mode == 'builder':
                                 st.success("✅ Resume information extracted! Fields auto-filled.")
                                 st.rerun()
                         except Exception as e:
-                            st.error(f"Error extracting resume: {str(e)}")
+                            st.warning(f"We couldn't read this file yet. Please try a different file or format. Details: {str(e)}")
             
             # Personal Information
             st.markdown("### 👤 Personal Information")
@@ -2079,6 +2394,8 @@ elif st.session_state.mode == 'builder':
                     is_selected = current_template == template_id
                     button_label = f"{'✓ ' if is_selected else ''}{template_config.get('icon', '📄')}"
                     if st.button(button_label, key=f"template_switch_{template_id}", use_container_width=True):
+                        if template_id in PREMIUM_TEMPLATES and not ensure_feature_access('premium_templates', 'Premium Templates'):
+                            st.stop()
                         st.session_state.selected_template = template_id
                         st.session_state.template = template_id
                         st.rerun()
@@ -2175,7 +2492,7 @@ elif st.session_state.mode == 'builder':
                         - **Neutral expression**: Friendly, confident smile
                         - **Passport-size dimensions** if required (Germany/France: 2x2 inches)
                         
-                        **❌ DON'T:**
+                        **🚫 AVOID:**
                         - Selfies or casual photos
                         - Sunglasses, hats, or distracting accessories
                         - Group photos or cropped party pictures
@@ -2185,8 +2502,8 @@ elif st.session_state.mode == 'builder':
                         - Full body shots or posed fashion photos
                         
                         **⚠️ ATS Warning:**
-                        - **75% of resumes** with photos are auto-rejected by ATS in US/UK/India
-                        - Photos can **confuse parsing algorithms** and cause formatting errors
+                        - Photo-heavy resumes are more likely to face ATS parsing friction in US/UK/India workflows
+                        - Photos can **confuse parsing algorithms** and create formatting inconsistencies
                         - May introduce **unconscious bias** based on appearance, age, gender, or ethnicity
                         
                         **💡 Better Alternative:**
@@ -2317,9 +2634,9 @@ elif st.session_state.mode == 'builder':
                     if format_check['score'] >= 80:
                         st.success("✅ Excellent! Your resume is highly ATS-compatible")
                     elif format_check['score'] >= 60:
-                        st.warning("⚠️ Good, but could be improved")
+                        st.warning("⚠️ Good progress. A few updates can improve ATS performance.")
                     else:
-                        st.error("❌ Needs improvement for ATS systems")
+                        st.info("💡 Solid starting point. Let's improve alignment for ATS systems.")
                     
                     if format_check.get('recommendations'):
                         st.markdown("**Recommendations:**")
@@ -2380,7 +2697,7 @@ elif st.session_state.mode == 'builder':
                 ats_pass = []
                 
                 if st.session_state.get('show_photo'):
-                    ats_issues.append("❌ **Photo included**: Remove photo for better ATS compatibility (except Germany/France)")
+                    ats_issues.append("💡 **Photo included**: Consider removing the photo for stronger ATS compatibility (except Germany/France)")
                 else:
                     ats_pass.append("✅ No photo - ATS friendly")
                 
@@ -2412,7 +2729,7 @@ elif st.session_state.mode == 'builder':
                 if all_present:
                     ats_pass.append("✅ All standard sections present")
                 else:
-                    ats_issues.append("❌ **Missing sections**: Ensure Summary, Skills, and Experience are filled")
+                    ats_issues.append("💡 **Sections to complete**: Add Summary, Skills, and Experience for stronger screening performance")
                 
                 total_checks = len(ats_pass) + len(ats_warnings) + len(ats_issues)
                 ats_score = int((len(ats_pass) / total_checks * 100)) if total_checks > 0 else 0
@@ -2422,10 +2739,10 @@ elif st.session_state.mode == 'builder':
                     st.markdown("**Excellent!** Your resume is well-optimized for ATS systems.")
                 elif ats_score >= 60:
                     st.warning(f"### ⚠️ ATS Score: {ats_score}%")
-                    st.markdown("**Good**, but there's room for improvement.")
+                    st.markdown("**Great foundation.** A few targeted improvements can increase match quality.")
                 else:
-                    st.error(f"### ❌ ATS Score: {ats_score}%")
-                    st.markdown("**Needs attention** - address issues below to improve.")
+                    st.info(f"### 💡 ATS Score: {ats_score}%")
+                    st.markdown("**You have a solid base.** Address the guidance below to strengthen your ATS performance.")
                 
                 col1, col2 = st.columns(2)
                 with col1:
@@ -2439,7 +2756,7 @@ elif st.session_state.mode == 'builder':
                         for item in ats_warnings:
                             st.markdown(item)
                     if ats_issues:
-                        st.markdown("**❌ Issues:**")
+                        st.markdown("**💡 Priority fixes:**")
                         for item in ats_issues:
                             st.markdown(item)
                 
@@ -2514,14 +2831,14 @@ elif st.session_state.mode == 'builder':
                             )
                             st.caption("✓ Pure Python compilation (No server binaries needed)")
                         else:
-                            st.button("📑 PDF Parsing Error", disabled=True, use_container_width=True)
-                            st.caption("⚠️ Layout parsing limitation")
+                            st.button("📑 PDF Not Ready Yet", disabled=True, use_container_width=True)
+                            st.caption("Try DOCX/HTML export while we improve PDF parsing.")
                     except Exception as e:
-                        st.button("📑 PDF Error", disabled=True, use_container_width=True)
-                        st.caption(f"⚠️ Generation failed: {str(e)}")
+                        st.button("📑 PDF Temporarily Unavailable", disabled=True, use_container_width=True)
+                        st.caption(f"Please try again in a moment. Details: {str(e)}")
                 else:
                     st.button("📑 PDF (Install xhtml2pdf)", disabled=True, use_container_width=True)
-                    st.caption("⚠️ Add xhtml2pdf to requirements.txt")
+                    st.caption("Install xhtml2pdf to enable PDF export in this environment.")
             
             with col3:
                 try:
@@ -2703,7 +3020,7 @@ WORK EXPERIENCE
                         elif score >= 50:
                             st.warning(f"👍 Good! ATS Score: {score}/100")
                         else:
-                            st.error(f"⚠️ Needs Work: ATS Score: {score}/100")
+                            st.info(f"💡 Growth opportunity: ATS Score: {score}/100")
                         
                         st.metric("Keyword Match", f"{ats_result.get('keyword_match', 0)}%")
                         st.metric("Matched Keywords", f"{ats_result.get('matched_keywords', 0)}/{ats_result.get('total_job_keywords', 0)}")
@@ -2711,7 +3028,7 @@ WORK EXPERIENCE
                         if ats_result.get('missing_keywords'):
                             st.markdown("**Missing Keywords:**")
                             for kw in ats_result['missing_keywords'][:5]:
-                                st.caption(f"❌ {kw}")
+                                st.caption(f"💡 {kw}")
                 else:
                     st.info("Paste a job description to analyze")
             
@@ -2744,6 +3061,9 @@ WORK EXPERIENCE
                 st.rerun()
 
 elif st.session_state.mode == 'coverletter':
+    if not ensure_feature_access('premium_templates', 'Cover Letter Generator'):
+        st.stop()
+
     st.markdown("""
     <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); border-radius: 12px; border: 1px solid rgba(236, 72, 153, 0.3); margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(236, 72, 153, 0.15);'>
         <div style='font-size: 1.1rem; color: #831843; font-weight: 700; font-style: italic;'>💫 "Visualize yourself already in your dream role. Feel the joy, the confidence, the success. You are worthy of abundance!"</div>
@@ -2900,7 +3220,7 @@ The letter should be compelling, specific, and highlight relevant experience. Ke
                                 st.success("✅ Cover letter generated!")
                                 st.rerun()
                             except Exception as e:
-                                st.error(f"AI generation failed: {str(e)}")
+                                st.warning(f"We couldn't generate the cover letter this time. Please try again. Details: {str(e)}")
                     else:
                         st.warning("Please enter company name and position first")
             
@@ -3045,9 +3365,9 @@ The letter should be compelling, specific, and highlight relevant experience. Ke
                             key="download_cl_pdf"
                         )
                     else:
-                        st.button("📑 PDF Formatting Error", disabled=True, use_container_width=True)
+                        st.button("📑 PDF Not Ready Yet", disabled=True, use_container_width=True)
                 except Exception as e:
-                    st.button("📑 PDF Generation Failed", disabled=True, use_container_width=True)
+                    st.button("📑 PDF Not Available Right Now", disabled=True, use_container_width=True)
             else:
                 st.button("📑 PDF (Unavailable)", disabled=True, use_container_width=True)
     

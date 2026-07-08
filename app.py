@@ -164,6 +164,41 @@ st.markdown("""
         .main {padding: 0.5rem;}
         h1 {font-size: 1.8rem;}
     }
+    
+    /* Dark Mode Styles */
+    [data-theme="dark"] .main {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        color: #e0e0e0;
+    }
+    [data-theme="dark"] .stButton>button {
+        background: linear-gradient(90deg, #0f3460 0%, #533483 100%);
+    }
+    [data-theme="dark"] .feature-card {
+        background: #1e1e2e;
+        color: #e0e0e0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        border-left-color: #0f3460;
+    }
+    [data-theme="dark"] .tip-box {
+        background: #2a2a1a;
+        border-left-color: #666600;
+        color: #e0e0e0;
+    }
+    [data-theme="dark"] .metric-card {
+        background: linear-gradient(135deg, #0f3460 0%, #533483 100%);
+    }
+    [data-theme="dark"] .stTextInput {
+        background-color: #1e1e2e;
+        color: #e0e0e0;
+    }
+    [data-theme="dark"] .stTextArea {
+        background-color: #1e1e2e;
+        color: #e0e0e0;
+    }
+    [data-theme="dark"] .stSelectbox {
+        background-color: #1e1e2e;
+        color: #e0e0e0;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -219,7 +254,8 @@ def init_session_state():
         'ai_enabled': ai_assistant.enabled,
         'progress_checked': False,
         'show_restore': False,
-        'last_saved_time': ''
+        'last_saved_time': '',
+        'theme': 'light'  # Dark mode support: 'light' or 'dark'
     }
     for key, value in defaults.items():
         if key not in st.session_state:
