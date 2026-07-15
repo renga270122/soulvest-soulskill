@@ -1,6 +1,6 @@
 [server]
 headless = true
-enableCORS = false
+enableCORS = true
 port = 8501
 
 [theme]
@@ -10,6 +10,14 @@ backgroundColor = "#FFF8F0"      # Gentle cream
 secondaryBackgroundColor = "#F0F0F0"
 textColor = "#333333"
 font = "sans serif"
+
+[theme.sidebar]
+primaryColor = "#FFFFFF"
+backgroundColor = "#1E3A8A"
+secondaryBackgroundColor = "#2563EB"
+textColor = "#FFFFFF"
+borderColor = "#93C5FD"
+showWidgetBorder = true
 
 [browser]
 gatherUsageStats = false

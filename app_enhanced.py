@@ -1199,6 +1199,33 @@ def get_template_preview_html(template_config, template_id):
     """
     return preview_html
 
+
+def get_all_template_catalog():
+    """Return a merged template catalog covering every supported template."""
+    catalog = {
+        **TEMPLATES,
+        **INDIAN_TEMPLATES,
+        **US_TEMPLATES,
+        **UK_TEMPLATES,
+        **CANADA_TEMPLATES,
+        **AUSTRALIA_TEMPLATES,
+        **GERMANY_TEMPLATES,
+        **FRANCE_TEMPLATES,
+        **UAE_TEMPLATES,
+        **SINGAPORE_TEMPLATES,
+    }
+    return catalog
+
+
+def get_safe_template_config(template_id: str | None, fallback_catalog: dict | None = None):
+    """Resolve a template config safely, falling back to the first available template."""
+    catalog = fallback_catalog or get_all_template_catalog()
+    if not catalog:
+        return None, None
+
+    safe_template_id = template_id if template_id in catalog else next(iter(catalog))
+    return catalog[safe_template_id], safe_template_id
+
 def get_sample_resume_data():
     """Get sample resume data for template preview"""
     return {
@@ -1776,30 +1803,24 @@ elif st.session_state.mode == 'builder':
         st.caption("💡 Click any template to see full preview, then select to use it")
         
         # Combine templates based on country filter
-        all_templates = {**TEMPLATES}
-        
-        if country_filter == "All Countries":
-            all_templates.update({**INDIAN_TEMPLATES, **US_TEMPLATES, **UK_TEMPLATES, 
-                                 **CANADA_TEMPLATES, **AUSTRALIA_TEMPLATES, **GERMANY_TEMPLATES,
-                                 **FRANCE_TEMPLATES, **UAE_TEMPLATES, **SINGAPORE_TEMPLATES})
-        elif country_filter == "India 🇮🇳":
-            all_templates.update({**INDIAN_TEMPLATES})
-        elif country_filter == "USA 🇺🇸":
-            all_templates.update({**US_TEMPLATES})
-        elif country_filter == "UK 🇬🇧":
-            all_templates.update({**UK_TEMPLATES})
-        elif country_filter == "Canada 🇨🇦":
-            all_templates.update({**CANADA_TEMPLATES})
-        elif country_filter == "Australia 🇦🇺":
-            all_templates.update({**AUSTRALIA_TEMPLATES})
-        elif country_filter == "Germany 🇩🇪":
-            all_templates.update({**GERMANY_TEMPLATES})
-        elif country_filter == "France 🇫🇷":
-            all_templates.update({**FRANCE_TEMPLATES})
-        elif country_filter == "UAE 🇦🇪":
-            all_templates.update({**UAE_TEMPLATES})
-        elif country_filter == "Singapore 🇸🇬":
-            all_templates.update({**SINGAPORE_TEMPLATES})
+        all_templates = get_all_template_catalog()
+        if country_filter != "All Countries":
+            country_groups = {
+                "India 🇮🇳": INDIAN_TEMPLATES,
+                "USA 🇺🇸": US_TEMPLATES,
+                "UK 🇬🇧": UK_TEMPLATES,
+                "Canada 🇨🇦": CANADA_TEMPLATES,
+                "Australia 🇦🇺": AUSTRALIA_TEMPLATES,
+                "Germany 🇩🇪": GERMANY_TEMPLATES,
+                "France 🇫🇷": FRANCE_TEMPLATES,
+                "UAE 🇦🇪": UAE_TEMPLATES,
+                "Singapore 🇸🇬": SINGAPORE_TEMPLATES,
+            }
+            all_templates = {**TEMPLATES, **country_groups.get(country_filter, {})}
+
+        if not all_templates:
+            st.error("No templates are available for the current filter. Please choose a different filter.")
+            st.stop()
         
         # Display templates in grid with previews
         templates_list = list(all_templates.items())
@@ -2383,10 +2404,8 @@ elif st.session_state.mode == 'builder':
             st.markdown("### 🎨 Change Template")
             st.caption("Switch templates anytime with one click!")
             
-            all_templates = {**TEMPLATES, **INDIAN_TEMPLATES, **US_TEMPLATES, **UK_TEMPLATES, 
-                           **CANADA_TEMPLATES, **AUSTRALIA_TEMPLATES, **GERMANY_TEMPLATES,
-                           **FRANCE_TEMPLATES, **UAE_TEMPLATES, **SINGAPORE_TEMPLATES}
-            current_template = st.session_state.get('selected_template', list(all_templates.keys())[0])
+            all_templates = get_all_template_catalog()
+            _, current_template = get_safe_template_config(st.session_state.get('selected_template'), all_templates)
             
             template_cols = st.columns(4)
             for idx, (template_id, template_config) in enumerate(list(all_templates.items())[:8]):
@@ -2622,8 +2641,10 @@ elif st.session_state.mode == 'builder':
             if st.button("🔍 Check ATS Score", key="ats_preview_btn", use_container_width=True):
                 with st.spinner("Calculating ATS score..."):
                     # Generate resume HTML
-                    all_templates = {**TEMPLATES, **INDIAN_TEMPLATES}
-                    template_config = all_templates[st.session_state.get('selected_template', list(all_templates.keys())[0])]
+                    template_config, _ = get_safe_template_config(st.session_state.get('selected_template'))
+                    if template_config is None:
+                        st.error("No resume template is available right now.")
+                        st.stop()
                     resume_html = generate_resume_html(st.session_state, template_config)
                     
                     # Check format compatibility
@@ -2647,8 +2668,10 @@ elif st.session_state.mode == 'builder':
             st.markdown("### 👁️ Live Preview")
             
             try:
-                all_templates = {**TEMPLATES, **INDIAN_TEMPLATES}
-                template_config = all_templates[st.session_state.get('selected_template', list(all_templates.keys())[0])]
+                template_config, _ = get_safe_template_config(st.session_state.get('selected_template'))
+                if template_config is None:
+                    st.error("No resume template is available right now.")
+                    st.stop()
                 
                 if st.session_state.get('color_theme'):
                     theme = color_themes.get(st.session_state.color_theme, color_themes['blue'])
@@ -2763,10 +2786,10 @@ elif st.session_state.mode == 'builder':
                 st.info("💡 **Remember**: ATS systems look for keywords, clean formatting, and standard sections. Keep it simple!")
             
             # Generate final resume
-            all_templates = {**TEMPLATES, **INDIAN_TEMPLATES, **US_TEMPLATES, **UK_TEMPLATES, 
-                           **CANADA_TEMPLATES, **AUSTRALIA_TEMPLATES, **GERMANY_TEMPLATES,
-                           **FRANCE_TEMPLATES, **UAE_TEMPLATES, **SINGAPORE_TEMPLATES}
-            template_config = all_templates[st.session_state.get('selected_template', list(all_templates.keys())[0])]
+            template_config, _ = get_safe_template_config(st.session_state.get('selected_template'))
+            if template_config is None:
+                st.error("No resume template is available right now.")
+                st.stop()
             resume_html = generate_resume_html(st.session_state, template_config)
             
             with st.expander("👁️ Preview Resume", expanded=True):
