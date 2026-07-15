@@ -1,5 +1,5 @@
-# app_enhanced.py - Soulvest AI Resume Builder - ResumeGemini Enhanced Version
-# Simplified 4-Step Process • Content Library • Live Preview • Multi-Resume Management
+# app_enhanced.py - Soulvest AI Career Growth Platform - Modular Career Companion
+# Simplified 4-Step Process • Career Toolkit • Live Preview • Multi-Resume Management
 import base64
 from datetime import datetime
 import json
@@ -121,7 +121,7 @@ except ImportError:
 
 # Page Configuration
 st.set_page_config(
-    page_title="Soulvest AI Resume Builder - Build in 5 Minutes",
+    page_title="Soulvest AI Career Growth Platform - Build with Confidence",
     page_icon="✨",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -165,7 +165,7 @@ st.markdown("""
 <div class='navbar-container' style='display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%); border-radius: 0; margin: -1rem -1rem 1rem -1rem; box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);'>
     <div>
         <div class='navbar-logo' style='font-size: 1.5rem; font-weight: 900; color: white; margin: 0; text-shadow: 0 0 10px rgba(168, 85, 247, 0.8);'>✨ SoulSkill</div>
-        <div style='font-size: 0.75rem; color: rgba(255,255,255,0.9); font-style: italic; margin-top: 0.2rem; text-shadow: 0 0 5px rgba(168, 85, 247, 0.6);'>🌟 Manifest Your Dream Job with Law of Attraction</div>
+        <div style='font-size: 0.75rem; color: rgba(255,255,255,0.9); font-style: italic; margin-top: 0.2rem; text-shadow: 0 0 5px rgba(168, 85, 247, 0.6);'>🌟 Your AI career companion for growth, confidence, and readiness</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -1590,7 +1590,7 @@ elif st.session_state.mode == 'toolkit':
     ai_mentor_access = bool(subscription_snapshot.get('features', {}).get('ai_suggestions', 0))
     toolkit_col1, toolkit_col2 = st.columns(2)
     with toolkit_col1:
-        if st.button("Open Resume Builder", use_container_width=True, type="primary"):
+        if st.button("Open Career Toolkit", use_container_width=True, type="primary"):
             st.session_state.mode = 'builder'
             st.session_state.step = 1
             st.rerun()
@@ -3513,7 +3513,7 @@ st.markdown("---")
 st.markdown("""
 <div style='text-align: center; padding: 2rem 1rem; background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%); border-radius: 15px; margin-top: 2rem;'>
     <p style='font-size: 1.2rem; font-weight: 700; color: #2d3748; margin-bottom: 0.5rem;'>
-        <strong>✨ Soulvest AI Resume Builder</strong> - Build Your Resume in 5 Minutes
+        <strong>✨ Soulvest AI Career Growth Platform</strong> - Build with confidence
     </p>
     <p style='font-size: 1rem; font-weight: 600; color: #4a5568; margin-bottom: 1rem;'>
         <strong>© 2026 Soulvest.ai • 100% Free Forever • No Credit Card Required</strong>
