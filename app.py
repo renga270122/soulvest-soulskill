@@ -1,4 +1,4 @@
-# app.py - Soulvest AI Resume Builder - Enterprise-Grade Resume Creation
+# app.py - Soulvest AI Career Growth Platform - Enterprise-Grade Career Development
 # Advanced AI • Premium Templates • ATS Optimization • Complete Career Toolkit
 import streamlit as st
 import base64
@@ -40,7 +40,7 @@ except:
 
 # Page Configuration
 st.set_page_config(
-    page_title="Soulvest AI Resume Builder - Enterprise-Grade Career Platform",
+    page_title="Soulvest AI Career Growth Platform - Enterprise-Grade Career Development",
     page_icon="✨",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -350,7 +350,7 @@ with st.sidebar:
                     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);'>
             <h1 style='margin: 0; font-size: 2rem;'>✨</h1>
             <h2 style='margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: 700;'>SOULVEST</h2>
-            <p style='margin: 0.3rem 0 0 0; font-size: 0.8rem; opacity: 0.9;'>AI Resume Builder</p>
+            <p style='margin: 0.3rem 0 0 0; font-size: 0.8rem; opacity: 0.9;'>Career Growth Platform</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -359,7 +359,7 @@ with st.sidebar:
     
     # Show restore progress option
     if st.session_state.get('show_restore', False):
-        with st.expander("💾 Resume Saved Progress", expanded=True):
+        with st.expander("💾 Career Progress Saved", expanded=True):
             last_saved = st.session_state.get('last_saved_time', '')
             try:
                 saved_time = datetime.fromisoformat(last_saved)
@@ -557,7 +557,7 @@ if st.session_state.step == 0:
     st.markdown("""
     <div class='welcome-banner'>
         <h1 style='font-size: 3.5rem; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);'>✨ SOULVEST</h1>
-        <p style='font-size: 1.8rem; margin: 1rem 0 0.5rem 0; font-weight: 600;'>Enterprise AI Resume Builder</p>
+        <p style='font-size: 1.8rem; margin: 1rem 0 0.5rem 0; font-weight: 600;'>Enterprise AI Career Growth Platform</p>
         <p style='font-size: 1.2rem; margin: 0; opacity: 0.95;'>Where Career Dreams Become Reality</p>
     </div>
     """, unsafe_allow_html=True)
@@ -1937,7 +1937,7 @@ elif st.session_state.step == 11:
         if st.button("⬅️ Back to Preview"):
             prev_step()
     with col2:
-        if st.button("🏠 Start New Resume"):
+        if st.button("🏠 Start New Journey"):
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
             st.rerun()
@@ -1946,7 +1946,7 @@ elif st.session_state.step == 11:
 st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #666; padding: 20px;'>
-    <p><strong>✨ Soulvest.ai</strong> - Enterprise-Grade AI-Powered Resume Builder</p>
+    <p><strong>✨ Soulvest.ai</strong> - Enterprise-Grade AI-Powered Career Growth Platform</p>
     <p>🌍 Built for Global Job Seekers | 📧 Support: support@soulvest.ai</p>
     <p style='font-size: 0.9rem;'>© 2026 Soulvest.ai. All rights reserved.</p>
 </div>
