@@ -8,6 +8,8 @@ from typing import List, Optional, Dict, Any
 import json
 from datetime import datetime
 import os
+from io import BytesIO
+from resume_job_service import analyze_resume_for_job, parse_resume_text
 
 # Import existing modules
 from ai_assistant import AIResumeAssistant, ATSOptimizer
@@ -306,6 +308,91 @@ async def save_resume(resume: ResumeData):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============ RESUME IMPORT AND JOB FIT ============
+
+class JobFitRequest(BaseModel):
+    resume: Dict[str, Any]
+    job_description: str
+    target_role: Optional[str] = None
+
+
+@app.post("/api/resume/parse")
+async def parse_resume_upload(file: UploadFile = File(...)):
+    """Extract selectable text from a PDF, DOCX or TXT resume without storing it."""
+    filename = (file.filename or "").strip()
+    extension = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+    if extension not in {"pdf", "docx", "txt"}:
+        raise HTTPException(status_code=415, detail="Upload a PDF, DOCX or TXT resume.")
+
+    content = await file.read(5 * 1024 * 1024 + 1)
+    await file.close()
+    if len(content) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Resume file must be 5 MB or smaller.")
+    if not content:
+        raise HTTPException(status_code=400, detail="The selected resume file is empty.")
+
+    try:
+        if extension == "pdf":
+            try:
+                from pypdf import PdfReader
+            except ImportError:
+                from PyPDF2 import PdfReader
+            reader = PdfReader(BytesIO(content))
+            if reader.is_encrypted:
+                try:
+                    reader.decrypt("")
+                except Exception:
+                    raise HTTPException(status_code=422, detail="This PDF is password protected. Upload an unlocked copy.")
+            extracted = "\n".join(page.extract_text() or "" for page in reader.pages)
+        elif extension == "docx":
+            from docx import Document
+            document = Document(BytesIO(content))
+            paragraphs = [paragraph.text for paragraph in document.paragraphs if paragraph.text.strip()]
+            table_text = [
+                " | ".join(cell.text.strip() for cell in row.cells if cell.text.strip())
+                for table in document.tables for row in table.rows
+            ]
+            extracted = "\n".join(paragraphs + table_text)
+        else:
+            extracted = content.decode("utf-8-sig")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=422, detail="We could not read this file. Try a text-based PDF, DOCX or TXT file.")
+
+    if not extracted.strip():
+        raise HTTPException(
+            status_code=422,
+            detail="No selectable text was found. This may be a scanned PDF; paste the resume text or use an OCR-ready copy.",
+        )
+
+    try:
+        parsed = parse_resume_text(extracted)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error))
+    return {
+        "status": "success",
+        "filename": filename,
+        "resume": parsed,
+        "review_required": True,
+        "message": "Review the extracted fields and correct anything that was interpreted incorrectly.",
+    }
+
+
+@app.post("/api/resume/job-fit")
+async def analyze_resume_job_fit(request: JobFitRequest):
+    """Compare a resume with a target job and return fact-preserving tailoring guidance."""
+    try:
+        result = analyze_resume_for_job(
+            request.resume,
+            request.job_description,
+            request.target_role or "",
+        )
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error))
+    return {"status": "success", **result}
 
 # ============ ROOT ============
 

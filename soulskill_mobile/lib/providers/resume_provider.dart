@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -83,6 +84,47 @@ class ResumeProvider extends ChangeNotifier {
       _isImproving = false;
       notifyListeners();
     }
+  }
+
+
+  Future<Map<String, dynamic>> analyzeJobFit({
+    required String jobDescription,
+    required String targetRole,
+  }) {
+    return _apiClient.analyzeResumeForJob(
+      resume: _resume,
+      jobDescription: jobDescription,
+      targetRole: targetRole,
+    );
+  }
+
+  Future<Map<String, dynamic>> importResumeFile({
+    required Uint8List bytes,
+    required String fileName,
+  }) {
+    return _apiClient.parseResumeFile(bytes: bytes, fileName: fileName);
+  }
+
+  Future<void> applyTailoredResume(Map<String, dynamic> tailored) async {
+    final rawSkills = tailored['skills'];
+    final skills = rawSkills is List
+        ? rawSkills.map((value) => value.toString().trim()).where((value) => value.isNotEmpty).join(', ')
+        : _resume.skills;
+    update(
+      _resume.copyWith(
+        targetRole: (tailored['target_role'] as String?)?.trim().isNotEmpty == true
+            ? (tailored['target_role'] as String).trim()
+            : _resume.targetRole,
+        professionalSummary: (tailored['professional_summary'] as String?)?.trim().isNotEmpty == true
+            ? (tailored['professional_summary'] as String).trim()
+            : _resume.professionalSummary,
+        experienceDescription: (tailored['experience_description'] as String?)?.trim().isNotEmpty == true
+            ? (tailored['experience_description'] as String).trim()
+            : _resume.experienceDescription,
+        skills: skills,
+      ),
+    );
+    await saveNow();
   }
 
   @override

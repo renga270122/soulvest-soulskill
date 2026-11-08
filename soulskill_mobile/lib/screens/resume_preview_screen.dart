@@ -1,18 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 
 import '../models/resume_model.dart';
 import '../providers/resume_provider.dart';
+import '../services/resume_pdf_service.dart';
 
 class ResumePreviewScreen extends StatelessWidget {
   const ResumePreviewScreen({super.key});
+
+  Future<void> _exportPdf(BuildContext context, ResumeModel resume) async {
+    try {
+      await Printing.layoutPdf(
+        onLayout: (format) => ResumePdfService.create(resume),
+      );
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('PDF export failed: ' + error.toString())),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<ResumeProvider>(
       builder: (context, provider, _) {
         return Scaffold(
-          appBar: AppBar(title: const Text('Resume preview')),
+          appBar: AppBar(
+            title: const Text('Resume preview'),
+            actions: [
+              IconButton(
+                tooltip: 'Export PDF',
+                onPressed: () => _exportPdf(context, provider.resume),
+                icon: const Icon(Icons.download_rounded),
+              ),
+              const SizedBox(width: 6),
+            ],
+          ),
           body: ListView(
             padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
             children: [
@@ -27,7 +52,7 @@ class ResumePreviewScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                'Preview only — PDF export and template selection will be added after the mobile foundation is validated.',
+                'Review every detail before exporting. This single-column PDF is designed to remain easy to read and parse.',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),

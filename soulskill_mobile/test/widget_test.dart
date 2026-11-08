@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'package:soulskill_mobile/providers/resume_provider.dart';
 import 'package:soulskill_mobile/main.dart';
+import 'package:soulskill_mobile/screens/job_targeting_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -76,4 +79,22 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Affirmations for your journey'), findsOneWidget);
   });
+
+  testWidgets('shows the resume-to-interview job targeting workflow',
+      (tester) async {
+    await tester.pumpWidget(
+      ChangeNotifierProvider(
+        create: (_) => ResumeProvider()..load(),
+        child: const MaterialApp(home: JobTargetingScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Resume to Interview'), findsOneWidget);
+    expect(find.text('Import PDF, DOCX or TXT resume'), findsOneWidget);
+    expect(find.text('Target role'), findsOneWidget);
+    expect(find.text('Job description'), findsOneWidget);
+    expect(find.text('Analyze my job fit'), findsOneWidget);
+  });
+
 }
