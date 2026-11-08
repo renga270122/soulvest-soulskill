@@ -5,7 +5,7 @@ const RUNTIME_CACHE = CACHE_PREFIX + 'runtime-v1';
 const SHELL_FILES = [
   './', './index.html', './manifest.json', './favicon.png',
   './icons/Icon-192.png', './icons/Icon-512.png',
-  './icons/Icon-maskable-192.png', './icons/Icon-maskable-512.png'
+  './icons/Icon-maskable-192.png', './icons/Icon-512.svg', './icons/Icon-maskable-512.svg'
 ];
 const STATIC_FILE = /\.(?:js|mjs|css|json|wasm|bin|dat|png|jpe?g|svg|webp|ico|woff2?|ttf|otf)$/i;
 self.addEventListener('install', (event) => {

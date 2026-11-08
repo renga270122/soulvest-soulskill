@@ -66,7 +66,9 @@ jobs:
           test -s build/web/manifest.json
           test -s build/web/sw.js
           test -s build/web/icons/Icon-192.png
-          test -s build/web/icons/Icon-512.png
+          test -s build/web/icons/Icon-maskable-192.png
+          test -s build/web/icons/Icon-maskable-512.svg
+          test -s build/web/icons/Icon-512.svg
       - name: Upload browser PWA preview
         uses: actions/upload-artifact@v4
         with:
