@@ -100,7 +100,7 @@ class _ResumeDocument extends StatelessWidget {
 }
 
 class _PreviewSection extends StatelessWidget {
-  const _PreviewSection({required this.title, this.heading, required this.body});
+  const _PreviewSection({super.key, required this.title, this.heading, required this.body});
 
   final String title;
   final String? heading;
