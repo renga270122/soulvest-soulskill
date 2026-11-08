@@ -6,28 +6,89 @@ import json
 import re
 from typing import Dict, List, Optional
 
-# We'll use Google Gemini API (free tier) instead of OpenAI
+# Resume assistance uses the current Google GenAI SDK.
 try:
-    import google.generativeai as genai
+    from google import genai
     GEMINI_AVAILABLE = True
 except ImportError:
+    genai = None
     GEMINI_AVAILABLE = False
+
+
+class _GeminiModelAdapter:
+    """Keep existing assistant methods independent of the provider SDK."""
+
+    def __init__(self, client, model_name: str):
+        self._client = client
+        self._model_name = model_name
+
+    def generate_content(self, prompt: str):
+        return self._client.models.generate_content(
+            model=self._model_name,
+            contents=prompt,
+        )
+
 
 class AIResumeAssistant:
     """AI-powered resume assistant for content generation and optimization"""
     
     def __init__(self, api_key: Optional[str] = None):
-        self.api_key = api_key or os.getenv('GOOGLE_API_KEY')
-        self.enabled = False  # Default to False
-        
+        self.api_key = (
+            api_key
+            or os.getenv("GOOGLE_API_KEY")
+            or os.getenv("GEMINI_API_KEY")
+        )
+        self.model_name = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
+        self.enabled = False
+        self.model = None
+
         try:
             if self.api_key and GEMINI_AVAILABLE:
-                genai.configure(api_key=self.api_key)
-                self.model = genai.GenerativeModel('gemini-pro')
+                client = genai.Client(api_key=self.api_key)
+                self.model = _GeminiModelAdapter(client, self.model_name)
                 self.enabled = True
         except Exception:
+            # Do not log credentials or provider exception details here.
             self.enabled = False
     
+    def improve_professional_summary(
+        self,
+        summary: str,
+        target_role: str = "",
+    ) -> str:
+        """Rewrite a supplied summary without inventing candidate facts."""
+        if not summary or not summary.strip():
+            raise ValueError("A professional summary is required.")
+        if not self.enabled or self.model is None:
+            raise RuntimeError(
+                "AI writing is not configured. Set GOOGLE_API_KEY or GEMINI_API_KEY."
+            )
+
+        prompt = f"""
+        Improve the candidate's existing professional summary for a resume.
+
+        Target role: {target_role.strip() or "Not specified"}
+
+        Original candidate-provided summary:
+        {summary.strip()}
+
+        Requirements:
+        - Preserve the meaning and all factual details in the original.
+        - Do not invent employers, degrees, certifications, skills, years of
+          experience, tools, project outcomes, percentages or other metrics.
+        - Do not infer qualifications from the target role.
+        - Improve clarity, grammar, readability and professional tone.
+        - Keep the result concise (2-4 sentences).
+        - Use relevant wording naturally; do not keyword-stuff.
+        - Return only the revised summary, without headings or explanations.
+        """
+
+        response = self.model.generate_content(prompt)
+        improved = (getattr(response, "text", None) or "").strip()
+        if not improved:
+            raise RuntimeError("The AI provider returned an empty response.")
+        return improved
+
     def generate_professional_summary(self, profile_data: Dict) -> str:
         """Generate AI-powered professional summary"""
         if not self.enabled:

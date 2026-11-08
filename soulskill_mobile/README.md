@@ -36,21 +36,43 @@ from the repository root.
 
 ## Run locally
 
-Terminal 1 — start the existing mobile API:
+Terminal 1 — start the FastAPI service from the repository root:
 
-    python api_server.py
+    python -m uvicorn api_server:app --reload --host 127.0.0.1 --port 8000
 
-Terminal 2 — run Flutter (Android emulator):
+Terminal 2 — run Flutter in Chrome:
 
     cd soulskill_mobile
     flutter pub get
+    flutter run -d chrome
+
+The browser build defaults to http://127.0.0.1:8000. The development API allows localhost/127.0.0.1 origins on dynamic ports.
+
+For the Android emulator:
+
     flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
 
-For a physical Android device, use your development computer's LAN IP, for example:
+For a physical Android device, bind the API to your trusted LAN interface (or 0.0.0.0 for local development) and use your development computer's LAN IP:
 
     flutter run --dart-define=API_BASE_URL=http://192.168.1.20:8000
 
-The phone and computer must be on the same trusted network, and the API server must be reachable from the device. Do not use a LAN HTTP URL in production.
+The phone and computer must be on the same trusted network and the firewall must allow the API port. Native Flutter requests are not subject to browser CORS. Do not use a LAN HTTP URL in production.
+
+For a production web build, provide the HTTPS API origin explicitly:
+
+    flutter build web --release --dart-define=API_BASE_URL=https://api.example.com
+
+Set SOULSKILL_ENV=production and configure SOULSKILL_CORS_ORIGINS with exact trusted browser origins (comma-separated, scheme and host, no path), for example https://app.example.com,https://www.example.com. Production API startup fails if no trusted CORS origin or explicit origin regex is configured.
+
+## AI summary service
+
+The AI summary endpoint runs on the Python server. Configure the provider key in the server environment before starting Uvicorn. In PowerShell:
+
+    $env:GOOGLE_API_KEY = "your-server-side-Gemini-key"
+    $env:GEMINI_MODEL = "gemini-3.8-flash"
+    python -m uvicorn api_server:app --reload --host 127.0.0.1 --port 8000
+
+You can use GEMINI_API_KEY instead of GOOGLE_API_KEY. The model defaults to gemini-3.8-flash when GEMINI_MODEL is not set. Never put an AI provider key in Flutter source, a Dart define, the browser build, or a committed .env file. When no server-side key is configured, the AI endpoint returns HTTP 503 with a setup message.
 
 ## Quality checks
 

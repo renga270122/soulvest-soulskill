@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 
 # Import existing modules
@@ -24,14 +24,50 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Enable CORS for mobile app
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your app domain
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+def _build_cors_settings(environ=None):
+    """Build a restrictive CORS policy from environment configuration."""
+    settings = os.environ if environ is None else environ
+    environment = settings.get("SOULSKILL_ENV", "development").strip().lower()
+    allowed_origins = [
+        origin.strip().rstrip("/")
+        for origin in settings.get("SOULSKILL_CORS_ORIGINS", "").split(",")
+        if origin.strip()
+    ]
+    allowed_origin_regex = (
+        settings.get("SOULSKILL_CORS_ORIGIN_REGEX", "").strip() or None
+    )
+
+    is_production = environment in {"production", "prod"}
+    if is_production and not allowed_origins and not allowed_origin_regex:
+        raise RuntimeError(
+            "Production requires SOULSKILL_CORS_ORIGINS or "
+            "SOULSKILL_CORS_ORIGIN_REGEX to be configured."
+        )
+
+    # Permit dynamic Flutter development-server ports, but only on loopback.
+    if not is_production and not allowed_origins and not allowed_origin_regex:
+        allowed_origin_regex = r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
+
+    return {
+        "allow_origins": allowed_origins,
+        "allow_origin_regex": allowed_origin_regex,
+        # The app uses authorization headers; cross-site cookies are not enabled.
+        "allow_credentials": False,
+        "allow_methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        "allow_headers": [
+            "Authorization",
+            "Content-Type",
+            "Idempotency-Key",
+            "X-Request-ID",
+        ],
+        "expose_headers": ["X-Request-ID"],
+    }
+
+
+# Browser clients require an explicit origin policy. Native mobile clients do not
+# use browser CORS, but share the same API service.
+app.add_middleware(CORSMiddleware, **_build_cors_settings())
+
 
 # ============ DATA MODELS ============
 
@@ -69,7 +105,7 @@ async def health_check():
     return {
         "status": "healthy",
         "version": "1.0.0",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now(timezone.utc).isoformat()
     }
 
 # ============ JOB ROLES & EXAMPLES ============
@@ -127,64 +163,112 @@ async def get_industries():
 
 @app.post("/api/ai/improve-summary")
 async def improve_summary(request: Dict[str, str]):
-    """Improve professional summary using AI"""
+    """Improve a candidate-provided summary while preserving its facts."""
+    summary = (request.get("summary") or "").strip()
+    role = (request.get("role") or "").strip()
+
+    if not summary:
+        raise HTTPException(status_code=400, detail="Summary is required.")
+
+    assistant = AIResumeAssistant()
+    if not assistant.enabled:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "AI writing is not configured. Set GOOGLE_API_KEY or "
+                "GEMINI_API_KEY on the API server."
+            ),
+        )
+
     try:
-        summary = request.get("summary", "")
-        role = request.get("role", "")
-        
-        if not summary:
-            raise HTTPException(status_code=400, detail="Summary is required")
-        
-        assistant = AIResumeAssistant()
-        improved = assistant.improve_professional_summary(summary)
-        
-        return {
-            "status": "success",
-            "original": summary,
-            "improved": improved
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        improved = assistant.improve_professional_summary(
+            summary=summary,
+            target_role=role,
+        )
+    except Exception as exc:
+        # Keep provider internals and candidate data out of client error messages.
+        raise HTTPException(
+            status_code=502,
+            detail="The AI provider could not complete this request. Please try again.",
+        ) from exc
+
+    return {
+        "status": "success",
+        "original": summary,
+        "improved": improved,
+    }
+
 
 @app.post("/api/ai/improve-experience")
 async def improve_experience(request: Dict[str, str]):
-    """Improve work experience description using AI"""
+    """Improve work experience using the assistant's current method contract."""
+    description = (request.get("description") or "").strip()
+    role = (request.get("role") or "").strip()
+    company = (request.get("company") or "").strip()
+
+    if not description:
+        raise HTTPException(status_code=400, detail="Description is required.")
+
+    assistant = AIResumeAssistant()
+    if not assistant.enabled:
+        raise HTTPException(
+            status_code=503,
+            detail="AI writing is not configured on the API server.",
+        )
+
     try:
-        description = request.get("description", "")
-        if not description:
-            raise HTTPException(status_code=400, detail="Description is required")
-        
-        assistant = AIResumeAssistant()
-        improved = assistant.improve_work_experience(description)
-        
-        return {
-            "status": "success",
-            "original": description,
-            "improved": improved
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        improved = assistant.enhance_work_description(
+            role=role,
+            company=company,
+            description=description,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502,
+            detail="The AI provider could not complete this request. Please try again.",
+        ) from exc
+
+    return {
+        "status": "success",
+        "original": description,
+        "improved": improved,
+    }
+
 
 @app.post("/api/ai/suggest-skills")
 async def suggest_skills(request: Dict[str, str]):
-    """Suggest skills for a job role"""
+    """Suggest skills using the assistant's current method contract."""
+    role = (request.get("role") or "").strip()
+    industry = (request.get("industry") or "").strip()
+    existing_skills = (request.get("existing_skills") or "").strip()
+
+    if not role:
+        raise HTTPException(status_code=400, detail="Role is required.")
+
+    assistant = AIResumeAssistant()
+    if not assistant.enabled:
+        raise HTTPException(
+            status_code=503,
+            detail="AI writing is not configured on the API server.",
+        )
+
     try:
-        role = request.get("role", "")
-        existing_skills = request.get("existing_skills", "").split(",")
-        
-        if not role:
-            raise HTTPException(status_code=400, detail="Role is required")
-        
-        assistant = AIResumeAssistant()
-        suggestions = assistant.suggest_skills(role, existing_skills)
-        
-        return {
-            "status": "success",
-            "role": role,
-            "suggestions": suggestions
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        suggestions = assistant.suggest_skills(
+            job_title=role,
+            industry=industry,
+            current_skills=existing_skills,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502,
+            detail="The AI provider could not complete this request. Please try again.",
+        ) from exc
+
+    return {
+        "status": "success",
+        "role": role,
+        "suggestions": suggestions,
+    }
 
 # ============ ATS OPTIMIZATION ============
 
@@ -201,7 +285,7 @@ async def check_ats(request: ATSCheckRequest):
         return {
             "status": "success",
             "score": score,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -293,7 +377,7 @@ async def save_resume(resume: ResumeData):
     """Save resume to local storage (filename will be user_id in production)"""
     try:
         resume_data = resume.dict()
-        filename = f"resume_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        filename = f"resume_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.json"
         
         # In production, save to database with user_id
         with open(filename, 'w') as f:
