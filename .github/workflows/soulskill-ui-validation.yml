@@ -1,0 +1,75 @@
+name: SoulSkill Flutter UI Validation
+
+on:
+  push:
+    branches:
+      - "feature/soulskill-global-dashboard-experience"
+    paths:
+      - "soulskill_mobile/**"
+      - "scripts/bootstrap_android.sh"
+      - ".github/workflows/soulskill-ui-validation.yml"
+  pull_request:
+    branches:
+      - "feature/**"
+    paths:
+      - "soulskill_mobile/**"
+      - "scripts/bootstrap_android.sh"
+      - ".github/workflows/soulskill-ui-validation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  flutter-ui:
+    name: Analyze, test and build Flutter app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: "3.47.9"
+          cache: true
+
+      - name: Install Flutter dependencies
+        working-directory: soulskill_mobile
+        run: flutter pub get
+
+      - name: Analyze Flutter source
+        working-directory: soulskill_mobile
+        run: flutter analyze --no-pub
+
+      - name: Run Flutter widget and unit tests
+        working-directory: soulskill_mobile
+        run: flutter test --no-pub
+
+      - name: Generate web platform files
+        working-directory: soulskill_mobile
+        run: flutter create --platforms=web .
+
+      - name: Build responsive browser app
+        working-directory: soulskill_mobile
+        run: flutter build web --release
+
+      - name: Upload browser preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: soulskill-global-dashboard-web
+          path: soulskill_mobile/build/web/
+          if-no-files-found: error
+
+      - name: Generate Android host project
+        run: bash ./scripts/bootstrap_android.sh
+
+      - name: Build debug APK
+        working-directory: soulskill_mobile
+        run: flutter build apk --debug
+
+      - name: Upload Android preview APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: soulskill-global-dashboard-debug-apk
+          path: soulskill_mobile/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
