@@ -322,7 +322,7 @@ class _DesktopSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 244,
+      width: 270,
       padding: const EdgeInsets.fromLTRB(17, 24, 15, 18),
       decoration: const BoxDecoration(
         color: Colors.white,
