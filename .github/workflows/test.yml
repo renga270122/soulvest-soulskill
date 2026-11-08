@@ -64,6 +64,15 @@ jobs:
           name: soulskill-debug-apk
           path: soulskill_mobile/build/app/outputs/flutter-apk/app-debug.apk
           if-no-files-found: error
+      - name: Build browser preview
+        working-directory: soulskill_mobile
+        run: flutter build web --release
+      - name: Upload browser preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: soulskill-browser-preview
+          path: soulskill_mobile/build/web/
+          if-no-files-found: error
 
 
   e2e-tests:
