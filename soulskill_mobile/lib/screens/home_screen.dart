@@ -1670,7 +1670,7 @@ class _SoulMindView extends StatelessWidget {
           ),
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               _Eyebrow(
                 icon: Icons.wb_twilight_rounded,
                 label: 'TODAY’S AFFIRMATION',
