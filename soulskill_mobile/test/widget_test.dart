@@ -34,6 +34,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('TODAY’S AFFIRMATION'), findsOneWidget);
+    await tester.drag(find.byType(ListView).last, const Offset(0, -600));
+    await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Begin a 2-minute reflection'));
     await tester.pumpAndSettle();
     expect(find.text('Begin a 2-minute reflection'), findsOneWidget);
