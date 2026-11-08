@@ -35,7 +35,7 @@ void main() {
     await tester.tap(find.text('SoulMind').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('Today’s affirmation'), findsOneWidget);
+    expect(find.text('TODAY’S AFFIRMATION'), findsOneWidget);
     expect(find.text('Begin a 2-minute reflection'), findsOneWidget);
 
     await tester.tap(find.text('Begin a 2-minute reflection'));
