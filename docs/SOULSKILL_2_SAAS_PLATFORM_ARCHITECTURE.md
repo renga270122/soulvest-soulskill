@@ -5,7 +5,7 @@
 **Repository branch:** \`product/soulskill-2-platform-foundation\`  
 **Architecture style:** Modular monolith, multi-tenant SaaS, API-first, AI-provider independent  
 **Primary clients:** Flutter Android app and responsive PWA  
-**Initial market:** India, designed for international expansion
+**Audience:** Global B2C audience; phased country-by-country market activation
 
 ---
 
@@ -313,7 +313,7 @@ Model:
 - trials, refunds, grace periods and expiry;
 - AI credit ledger and usage events.
 
-Start with the payment provider that best supports the initial India launch, behind a payment abstraction. Add international payment providers when expanding to more markets. Verify payment webhooks server-side and make event handling idempotent.
+Use a market-aware payment abstraction from the beginning. Select one provider for the first launch market and add regional providers only when needed. Support country-specific payment methods, currency, tax/invoicing requirements, refunds and subscription rules. Verify payment webhooks server-side and make event handling idempotent.
 
 Recruiter SaaS can later use seats, job volume, API usage and integration tiers. Avoid setting final price points until cost and willingness-to-pay are tested.
 
@@ -599,7 +599,7 @@ Create golden test sets for fresher, experienced, career-switching and academic 
 | Orchestration | LangGraph for complex stateful workflows | Explicit state, checkpoints and approvals |
 | MCP | Official MCP SDK / specification-compatible server | Agent ecosystem integration |
 | Async jobs | Worker + queue abstraction | Reliable document and AI processing |
-| Payments | Payment adapter; India provider first | Local launch, future provider options |
+| Payments | Market-aware payment adapter | Provider and payment methods selected per enabled market |
 | CI/CD | GitHub Actions | Existing repository workflow |
 | Monitoring | OpenTelemetry + error monitoring | Operations and AI workflow visibility |
 | Design | Figma + FigJam | Shared design source of truth |
@@ -663,7 +663,7 @@ Do not add a vector database, dedicated search cluster, microservices platform o
 - Customer-specific retention and isolation options.
 - SSO / enterprise provisioning as needed.
 - Security audits, operational playbooks and disaster recovery.
-- International pricing and localization.
+- Global localization, market enablement and region-aware data processing.
 
 ---
 
@@ -718,3 +718,136 @@ Do not implement all agents, MCP, recruiter workflows and billing at once. Estab
 | ADR-010 | Provider-independent LLM gateway with one primary provider initially | Proposed |
 
 **Approval note:** These are recommended architectural decisions for review, not implemented infrastructure. Do not treat the presence of this document as evidence that authentication, billing, RLS, MCP, RAG or integrations are already deployed.
+
+
+---
+
+## 20. Global audience, localization and market enablement
+
+SoulSkill is designed for a global audience. A country can be enabled commercially only after product localization, payment support, operational support, privacy review and data-processing readiness are complete. Do not encode India-only assumptions in UI, profile schema, billing, time, document or AI logic.
+
+### 20.1 Separate concepts that must never be conflated
+
+Store these independently:
+- Country of residence: user-provided or verified only when genuinely required.
+- Launch market: server-configured commercial/terms/eligibility configuration applied to an account.
+- Locale: language and formatting preference, using BCP 47 / CLDR identifiers.
+- Time zone: IANA time-zone identifier, e.g. Asia/Kolkata or Europe/London.
+- Currency: ISO 4217 code for a price or transaction.
+- Data region: configured storage/processing region selected by policy and vendor capability.
+
+A language does not imply a country; a country does not imply a currency; a user's location does not automatically determine the governing contract, processing region or payment method.
+
+### 20.2 Internationalization requirements
+
+- Use Unicode end-to-end and test non-Latin scripts, combining characters and long names.
+- Use BCP 47 language tags and Unicode CLDR for locale-aware labels, dates, numbers, currencies and pluralization.
+- Keep translation strings separate from code and support runtime locale selection.
+- Use locale-aware formatting libraries rather than hard-coded separators, month names or currency symbols.
+- Store instants in UTC; store IANA time-zone identifiers for user preferences and recurring local schedules.
+- Store the currency code with every monetary amount. Do not infer currency from locale or IP address.
+- Store amounts in the currency's correct minor unit; do not assume every currency uses two decimal places.
+- Avoid assumptions that names have first/last-name pairs, addresses have state/postcode fields, or phone numbers use one national format.
+- Normalize phone input using international numbering practices while preserving the user's original display form where useful.
+- Design for right-to-left layouts even if the initial released languages are left-to-right.
+- Ensure PDF/DOCX fonts and shaping work for all languages that are advertised as supported.
+- Keep user-authored profile facts in their original language; translate only when requested and preserve both source and translated versions.
+
+Unicode CLDR 49 is current as of this plan's preparation date and includes locale identifiers, date/time/time-zone, currency and number formatting data. Use stable standards and an updatable library rather than implementing locale rules manually. References:
+- https://www.unicode.org/reports/tr35/
+- https://www.unicode.org/reports/tr35/49/tr35-numbers.html
+- https://www.unicode.org/reports/tr35/49/tr35-dates.html
+- https://blog.unicode.org/2026/10/unicode-cldr-49-released.html
+
+### 20.3 Market configuration
+
+Create a server-side market_profiles configuration with:
+- market code and enabled status;
+- supported locales;
+- default locale and time-zone behavior;
+- supported currencies and price catalog;
+- payment provider and payment methods;
+- tax/invoice configuration;
+- legal terms and privacy notice versions;
+- support contact and languages;
+- document template availability;
+- AI model/provider restrictions and data-processing configuration;
+- eligibility restrictions and feature flags;
+- rollout phase and operational owner.
+
+Feature availability is determined by authenticated server-side market configuration and entitlements. Do not allow a client to select a cheaper market/currency to bypass billing rules.
+
+### 20.4 Phased global launch
+
+The product architecture is global from day one, but commercial availability is enabled market by market.
+
+A market readiness gate includes:
+1. Legal and privacy review for that market and relevant user categories.
+2. Payment method, tax, invoice, refund and subscription handling.
+3. Localized product language and customer support.
+4. Resume/document template and language/font validation.
+5. AI provider terms, data-processing terms and region compatibility.
+6. Hosting, storage, backup and cross-border transfer review.
+7. App-store and consumer-protection requirements.
+8. Incident/support capability and operational ownership.
+
+Start with a controlled pilot in the founder's reachable market while preparing one additional international market for validation. The pilot market is a rollout decision, not a product architecture constraint.
+
+### 20.5 Region-aware data processing
+
+- Add explicit data residency/processing region metadata to workspaces or data partitions only where required by legal or product commitments.
+- Keep routing and storage-region choice in server configuration; never let a client select a privileged data region.
+- Design migrations and file storage paths to support future regional partitioning.
+- Maintain a subprocessor inventory covering auth, hosting, database, object storage, AI, email, analytics, monitoring and support.
+- Record data categories, purpose, retention, location and international-transfer mechanism for each processor.
+- Do not promise local residency until the full processing path and backup path have been verified.
+- Use data minimization before transmitting personal information to LLM providers.
+
+### 20.6 Accessibility and inclusive UX
+
+Target WCAG 2.2 AA for the responsive web experience and apply equivalent accessibility principles to native app screens:
+- keyboard-operable workflows;
+- visible focus and screen-reader semantics;
+- text scaling and reflow;
+- sufficient contrast and non-color status indicators;
+- accessible validation and error announcements;
+- captions/transcripts for audio/video content;
+- reduced-motion preference;
+- clear, plain-language AI and privacy explanations.
+
+WCAG 2.2 is a W3C Recommendation and includes requirements relevant to desktop and mobile web experiences: https://www.w3.org/TR/wcag/
+
+### 20.7 Global legal and privacy readiness
+
+Maintain a jurisdiction applicability register. Do not assume one universal consent banner or one privacy policy covers every law.
+
+Initial legal review map (not legal advice and not exhaustive):
+- EU/EEA GDPR and international transfer requirements;
+- UK GDPR and UK transfer requirements;
+- California CCPA/CPRA where statutory applicability thresholds and conditions are met;
+- Brazil LGPD and ANPD international-transfer rules where applicable;
+- India DPDP Act and Rules according to their commencement and applicability;
+- additional national/state privacy and consumer-protection rules in enabled markets.
+
+For EU/EEA users, GDPR can apply to a non-EU organization offering goods/services to people in the EU or monitoring their behavior. International transfers from the EEA require an applicable transfer mechanism/safeguard. California's CCPA/CPRA rights and obligations must be assessed against statutory applicability. Brazil's ANPD regulates international transfers. Maintain counsel-reviewed notices, rights workflows, retention and vendor contracts per enabled market.
+
+Authoritative references:
+- European Commission — GDPR application: https://commission.europa.eu/law/law-topic/data-protection/information-business-and-organisations/application-gdpr_en
+- European Commission — individual rights: https://commission.europa.eu/law/law-topic/data-protection/information-individuals_en
+- European Commission — international transfers: https://commission.europa.eu/law/law-topic/data-protection/international-dimension-data-protection/rules-international-data-transfers_en
+- UK ICO — international transfer guidance (updated January 2026): https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/international-transfers/a-guide-to-international-transfers/
+- California DOJ — CCPA: https://www.oag.ca.gov/privacy/ccpa
+- Brazil ANPD — international transfers: https://www.gov.br/anpd/pt-br/assuntos/assuntos-internacionais/transferencia-internacional-de-dados
+- MeitY — India DPDP Rules 2025 and enforcement timeline: https://www.meity.gov.in/documents/act-and-policies/digital-personal-data-protection-rules-2025-gDOxUjMtQWa
+
+### 20.8 Global architecture decision record updates
+
+| ID | Decision | Status |
+|---|---|---|
+| ADR-011 | Global product data model; phased market enablement | Proposed |
+| ADR-012 | Separate locale, country, market, currency and data region | Proposed |
+| ADR-013 | UTC storage plus IANA time zones and CLDR presentation | Proposed |
+| ADR-014 | Currency code stored with each amount; minor units are currency-aware | Proposed |
+| ADR-015 | WCAG 2.2 AA target for responsive web experience | Proposed |
+| ADR-016 | Jurisdiction-specific privacy and transfer readiness before each market launch | Proposed |
+| ADR-017 | Market-aware payment/provider configuration | Proposed |
