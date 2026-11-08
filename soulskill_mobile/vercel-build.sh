@@ -20,6 +20,8 @@ if [[ ! -x "${FLUTTER_HOME}/bin/flutter" ]]; then
 fi
 
 export PATH="${FLUTTER_HOME}/bin:${PATH}"
+# Flutter SDK contains a Git checkout; Vercel extracts it under a different owner.
+git config --global --add safe.directory "${FLUTTER_HOME}"
 flutter --version
 flutter config --no-analytics
 flutter pub get
