@@ -38,7 +38,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt pytest
       - name: Test API CORS configuration
-        run: pytest tests/test_api_cors_config.py -q
+        run: pytest tests -q
 
   flutter-checks:
     name: Flutter analyze and tests
