@@ -45,6 +45,32 @@ jobs:
         file: ./coverage.xml
         fail_ci_if_error: false
 
+  flutter-mobile:
+    name: Flutter mobile static checks
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: stable
+        cache: true
+        cache-dependency-path: soulskill_mobile/pubspec.yaml
+
+    - name: Install Flutter dependencies
+      working-directory: soulskill_mobile
+      run: flutter pub get
+
+    - name: Analyze Flutter source
+      working-directory: soulskill_mobile
+      run: flutter analyze --no-pub
+
+    - name: Run Flutter widget tests
+      working-directory: soulskill_mobile
+      run: flutter test --no-pub
+
   e2e-tests:
     name: End-to-End Tests
     runs-on: ubuntu-latest
@@ -71,7 +97,7 @@ jobs:
     
     - name: Upload test screenshots on failure
       if: failure()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: playwright-screenshots
         path: test-results/
@@ -83,7 +109,7 @@ jobs:
     steps:
     - name: Check if app is accessible
       run: |
-        response=$(curl -s -o /dev/null -w "%{http_code}" https://soulvest-soulskill-rwwrmxhx5mmuak37j9ap6z.streamlit.app/)
+        response=$(curl -L -s -o /dev/null -w "%{http_code}" https://soulvest-soulskill-rwwrmxhx5mmuak37j9ap6z.streamlit.app/)
         if [ $response -eq 200 ]; then
           echo "✅ App is live and accessible"
         else
