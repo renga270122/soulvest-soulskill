@@ -54,7 +54,7 @@ jobs:
         working-directory: soulskill_mobile
         run: flutter test --no-pub
       - name: Generate Android host project
-        run: ./scripts/bootstrap_android.sh
+        run: bash ./scripts/bootstrap_android.sh
       - name: Build debug APK
         working-directory: soulskill_mobile
         run: flutter build apk --debug
