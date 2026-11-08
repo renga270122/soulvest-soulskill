@@ -39,8 +39,7 @@ class ApiClient {
       throw ApiException(
         detail?.isNotEmpty == true
             ? detail!
-            : 'AI service request failed ('
-                + response.statusCode.toString() + ').',
+            : 'AI service request failed (${response.statusCode}).',
       );
     }
 
