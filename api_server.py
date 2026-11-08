@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 
 # Import existing modules
@@ -105,7 +105,7 @@ async def health_check():
     return {
         "status": "healthy",
         "version": "1.0.0",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now(timezone.utc).isoformat()
     }
 
 # ============ JOB ROLES & EXAMPLES ============
@@ -285,7 +285,7 @@ async def check_ats(request: ATSCheckRequest):
         return {
             "status": "success",
             "score": score,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -377,7 +377,7 @@ async def save_resume(resume: ResumeData):
     """Save resume to local storage (filename will be user_id in production)"""
     try:
         resume_data = resume.dict()
-        filename = f"resume_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        filename = f"resume_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.json"
         
         # In production, save to database with user_id
         with open(filename, 'w') as f:
