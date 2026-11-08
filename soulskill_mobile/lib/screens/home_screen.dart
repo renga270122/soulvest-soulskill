@@ -85,7 +85,7 @@ class HomeScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF6558D3).withOpacity(0.18),
+                        color: const Color.fromRGBO(101, 88, 211, 0.18),
                         blurRadius: 22,
                         offset: const Offset(0, 10),
                       ),
@@ -94,8 +94,8 @@ class HomeScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: const [
+                      const Row(
+                        children: [
                           Expanded(
                             child: Text(
                               'YOUR RESUME WORKSPACE',
@@ -112,7 +112,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 15),
                       Text(
-                        progress == 0 ? 'Start with your story.' : progress.toString() + '% complete',
+                        progress == 0 ? 'Start with your story.' : '$progress% complete',
                         style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w800),
                       ),
                       const SizedBox(height: 7),
@@ -128,7 +128,7 @@ class HomeScreen extends StatelessWidget {
                         child: LinearProgressIndicator(
                           value: progress / 100,
                           minHeight: 7,
-                          backgroundColor: Colors.white.withOpacity(0.24),
+                          backgroundColor: const Color.fromRGBO(255, 255, 255, 0.24),
                           valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       ),
