@@ -333,7 +333,7 @@ class _DesktopSidebar extends StatelessWidget {
         children: [
           const Padding(
             padding: EdgeInsets.only(left: 8, bottom: 32),
-            child: _BrandLockup(),
+            child: _BrandLockup(compact: true),
           ),
           const _SidebarLabel('WORKSPACE'),
           _SidebarItem(
