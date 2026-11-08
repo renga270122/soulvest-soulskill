@@ -62,9 +62,7 @@ class ApiClient {
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
       final detail = payload['detail']?.toString();
-      final fallback = 'AI service request failed (' +
-          response.statusCode.toString() +
-          ').';
+      final fallback = 'AI service request failed (${response.statusCode}).';
       throw ApiException(detail?.isNotEmpty == true ? detail! : fallback);
     }
 
