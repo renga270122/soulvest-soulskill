@@ -1,3 +1,8 @@
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 from resume_job_service import analyze_resume_for_job, parse_resume_text
 
 
