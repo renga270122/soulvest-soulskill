@@ -1,6 +1,6 @@
-# SoulSkill 2.0 — India B2C SaaS: Detailed Architecture & Implementation Plan
+# SoulSkill 2.0 — Global B2C SaaS: Detailed Architecture & Implementation Plan
 
-**Decision:** B2C-first launch, India-first market  
+**Decision:** B2C-first global product; phased market activation; no India-only product assumptions  
 **Architecture direction:** Multi-tenant-ready modular monolith, API-first, AI-provider independent  
 **Clients:** Flutter Android + responsive PWA  
 **Existing baseline:** Flutter Resume Studio + Python/FastAPI API  
@@ -13,7 +13,7 @@
 
 ## 1. Executive implementation decision
 
-Build a secure B2C career and admissions product first. Prepare the data model and API boundaries for future organization tenants and recruiter products, but do not put recruiter workflows into the first release.
+Build a globally usable B2C career and admissions product first. Prepare the data model and API boundaries for future organization tenants and recruiter products, while enabling commercial availability market by market after readiness checks. Do not put recruiter workflows into the first release.
 
 ### Confirmed product positioning
 
@@ -130,7 +130,7 @@ These are initial pricing hypotheses to validate with interviews, conversion exp
 - Give a clear reason when the user reaches a quota.
 - Allow cancellation and show renewal terms transparently.
 - Consider student eligibility as a policy/configuration decision, not a reason to collect unnecessary personal data.
-- Store price amounts as integer minor units (paise), currency as ISO code, and price version history.
+- Store price amounts as integer currency minor units with an ISO 4217 currency code, using each currency's correct minor-unit rules and preserving price-version history.
 
 ### Entitlement engine
 
@@ -233,9 +233,9 @@ Start with:
 
 The API and worker share source modules; they do not need to become separate microservices.
 
-### India hosting and data path
+### Global hosting, data residency and cross-border processing
 
-Evaluate available India-region hosting and backup options before provisioning production. Select the region that meets latency, service availability, contractual and data-processing requirements. Review the entire data path—not just the database—including LLM providers, analytics, email, monitoring, storage and backups. Do not claim India-only data residency unless every relevant path has been verified.
+Design a region-aware deployment model. Select the first production region based on latency, vendor availability, contractual terms, privacy/legal requirements and operational capability. Maintain an inventory of all subprocessors and data paths: authentication, API hosting, database, object storage, document parsing, LLM providers, email, analytics, monitoring, support and backups. Add explicit residency/processing-region metadata only where required by a legal or product commitment. Do not claim local or region-exclusive residency unless the full processing and backup path has been verified. A single initial region is acceptable for a controlled pilot; keep interfaces and migration practices ready for later regional partitioning.
 
 ---
 
@@ -460,7 +460,7 @@ The first release can use a personal workspace per user and a future-ready membe
 - UTC timestamps.
 - Foreign keys and check constraints.
 - Index all ownership and RLS filter columns.
-- Money stored as integer paise with ISO currency.
+- Money stored as integer currency minor units with ISO 4217 currency code; never assume two decimal places.
 - Soft-delete only where product/legal retention requires it; otherwise schedule verified erasure.
 - Immutable versions for generated documents and match reports.
 - JSONB only for structured, schema-validated document sections—not as a substitute for all relational data.
@@ -688,12 +688,12 @@ Start with a small worker and a queue abstraction. Add a managed queue or Redis/
 
 ---
 
-## 12. Billing and India payment integration
+## 12. Billing and global payment architecture
 
 Use a provider adapter so the business layer is independent of one payment gateway.
 
 Provider evaluation should include:
-- Indian cards, UPI and supported recurring mandates;
+- Market-specific cards, bank transfers, wallets, UPI or recurring mandates where available;
 - one-time payments for Career Restart;
 - subscription renewals and cancellation;
 - refund and dispute workflows;
@@ -701,7 +701,7 @@ Provider evaluation should include:
 - settlement, tax and invoice requirements;
 - fees and merchant onboarding.
 
-The existing repository already has Razorpay in requirements, so evaluate it as the first integration candidate; do not assume it is configured or approved for live use.
+The existing repository includes Razorpay, so evaluate it for the India market. Evaluate additional global providers only when a target market requires them. Do not assume any provider is configured, approved for live use or available to the business in every country.
 
 ### Payment workflow
 
@@ -719,9 +719,9 @@ Never grant paid features based only on a client-side success callback.
 
 ---
 
-## 13. India privacy, safety and legal readiness
+## 13. Global privacy, safety and legal readiness
 
-Legal review is required before public launch. The Digital Personal Data Protection Act/Rules have phased commencement; do not assume every requirement started on the notification date. Use the official Gazette and MeitY materials to map current effective dates and applicable requirements with Indian counsel.
+Obtain jurisdiction-specific legal review before enabling each market. A global app may be subject to privacy, consumer, advertising, accessibility, employment and data-transfer laws outside its place of incorporation. Keep a market applicability register and map legal bases, notice, rights, retention, processors, transfers and incident obligations with qualified counsel. Do not assume one global consent mechanism or one privacy policy is sufficient.
 
 Engineering controls:
 - Plain-language privacy notice with specific purposes.
@@ -1100,7 +1100,7 @@ Timelines should be estimated only after confirming available engineering hours 
 | Vector search | Full-text first, pgvector when validated |
 | Payment | Evaluate Razorpay first, behind provider adapter |
 | Figma | Figma source of truth; editable file requires workspace connection |
-| Launch cohort | Small invited India-based pilot before public availability |
+| Launch cohort | Small invited pilot in the first operationally ready market(s); India is a practical candidate, not a product limit |
 
 ---
 
@@ -1118,4 +1118,4 @@ The implementation choices should be revisited against current vendor documentat
 - MeitY DPDP Rules 2025: https://www.meity.gov.in/documents/act-and-policies/digital-personal-data-protection-rules-2025-gDOxUjMtQWa
 - Government summary of DPDP phased rollout: https://www.pib.gov.in/PressReleasePage.aspx?PRID=2190014&lang=2&reg=3
 
-**End state:** A trusted, affordable B2C career SaaS with secure personal workspaces, evidence-backed AI, explainable job matching and a portable career profile. Recruiter SaaS, ATS integrations, MCP and more advanced multi-agent workflows are later growth phases built on the same carefully designed foundation.
+**End state:** A trusted, affordable global B2C career SaaS with secure personal workspaces, localized experiences, evidence-backed AI, explainable job matching and a portable career profile. Recruiter SaaS, ATS integrations, MCP and more advanced multi-agent workflows are later growth phases built on the same carefully designed foundation.
