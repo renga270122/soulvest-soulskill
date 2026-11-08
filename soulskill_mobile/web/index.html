@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<base href="$FLUTTER_BASE_HREF">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Your career transition companion.">
+<meta name="theme-color" content="#5B4BCE">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SoulSkill">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/Icon-192.png">
+<link rel="icon" type="image/png" href="favicon.png">
+<title>SoulSkill — Your career transition companion</title>
+<style>
+html,body{margin:0;min-width:320px;min-height:100%;background:#FBFAFF}
+#soulskill-loading{position:fixed;inset:0;display:grid;place-items:center;z-index:1;background:#FBFAFF;color:#30286F;font:14px system-ui}
+.loading-content{text-align:center;padding:24px}
+.brand-mark{width:58px;height:58px;margin:0 auto 14px;border-radius:18px;display:grid;place-items:center;color:white;font-size:30px;background:linear-gradient(145deg,#7667F2,#4332AC)}
+#install-soulskill{position:fixed;right:18px;bottom:18px;z-index:10000;border:0;border-radius:999px;padding:12px 17px;color:#fff;background:#5142C5;font:650 14px system-ui;cursor:pointer}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div id="soulskill-loading" role="status" aria-live="polite">
+<div class="loading-content"><div class="brand-mark">✦</div><strong>SoulSkill</strong><p>Your next chapter starts with a clearer story.</p></div>
+</div>
+<button id="install-soulskill" type="button" hidden>Install SoulSkill</button>
+<script>
+(() => {
+const installButton=document.getElementById('install-soulskill');
+let installPrompt=null;
+window.addEventListener('beforeinstallprompt',(event)=>{event.preventDefault();installPrompt=event;installButton.hidden=false;});
+installButton.addEventListener('click',async()=>{if(!installPrompt)return;try{await installPrompt.prompt();await installPrompt.userChoice;}finally{installPrompt=null;installButton.hidden=true;}});
+window.addEventListener('appinstalled',()=>{installPrompt=null;installButton.hidden=true;});
+window.addEventListener('load',()=>{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js',{scope:'./',updateViaCache:'none'}).catch((error)=>console.warn('SoulSkill offline support unavailable.',error));});
+window.addEventListener('flutter-first-frame',()=>{document.getElementById('soulskill-loading')?.remove();});
+})();
+</script>
+<script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
