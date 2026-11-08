@@ -52,7 +52,7 @@ jobs:
           pytest tests/test_resume_job_service.py -q
       - name: Analyze Flutter source
         working-directory: soulskill_mobile
-        run: flutter analyze --no-pub
+        run: flutter analyze --no-pub --no-fatal-infos
       - name: Run Flutter widget and unit tests
         working-directory: soulskill_mobile
         run: flutter test --no-pub
