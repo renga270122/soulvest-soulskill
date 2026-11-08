@@ -12,6 +12,9 @@ python-multipart==0.0.20
 razorpay==1.4.2
 
 # AI Features
+# Current SDK for the Flutter Resume Studio AI API
+google-genai==3.0.0
+# Retained temporarily for legacy modules scheduled for migration
 google-generativeai==0.3.2
 
 # Export & Document Processing
