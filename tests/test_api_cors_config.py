@@ -44,10 +44,10 @@ def test_explicit_origin_regex_can_be_used_for_production():
     settings = _build_cors_settings(
         {
             "SOULSKILL_ENV": "production",
-            "SOULSKILL_CORS_ORIGIN_REGEX": r"^https://([a-z0-9-]+\\.)?soulskill\\.example$",
+            "SOULSKILL_CORS_ORIGIN_REGEX": r"^https://([a-z0-9-]+[.])?soulskill[.]example$",
         }
     )
 
     assert settings["allow_origin_regex"] == (
-        r"^https://([a-z0-9-]+\\.)?soulskill\\.example$"
+        r"^https://([a-z0-9-]+[.])?soulskill[.]example$"
     )
