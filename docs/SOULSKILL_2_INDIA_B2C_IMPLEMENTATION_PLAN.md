@@ -1119,3 +1119,211 @@ The implementation choices should be revisited against current vendor documentat
 - Government summary of DPDP phased rollout: https://www.pib.gov.in/PressReleasePage.aspx?PRID=2190014&lang=2&reg=3
 
 **End state:** A trusted, affordable global B2C career SaaS with secure personal workspaces, localized experiences, evidence-backed AI, explainable job matching and a portable career profile. Recruiter SaaS, ATS integrations, MCP and more advanced multi-agent workflows are later growth phases built on the same carefully designed foundation.
+
+
+---
+
+## 20. Global product and localization architecture
+
+Global is the product audience and technical design target. Commercial launch is phased. Do not hard-code any one country's assumptions into data, screens, billing, AI prompts or document generation.
+
+### 20.1 Keep country, market, locale, currency and time zone separate
+
+Store these concepts independently:
+- Country of residence: optional and collected only when required.
+- Market code: server-configured commercial availability, contract, pricing and feature policy.
+- Locale: BCP 47 language tag, such as en-US, en-GB, en-IN or hi-IN.
+- Time zone: IANA identifier, such as America/Los_Angeles, Europe/London or Asia/Kolkata.
+- Currency: ISO 4217 code attached to each price and transaction.
+- Data region: server-controlled processing/storage assignment where required by legal or contractual commitments.
+
+Language does not imply country; country does not imply currency; IP geolocation does not establish identity, tax residence, legal basis, market eligibility or payment entitlement.
+
+### 20.2 Internationalization standards
+
+- Use UTF-8/Unicode through database, APIs, search, exports and analytics metadata.
+- Use BCP 47 language tags and a maintained CLDR-backed localization library.
+- Keep UI translations separate from user-authored resume/profile content.
+- Localize dates, numbers, currencies, measurements, pluralization and sorting.
+- Store timestamps as UTC instants; store the user's IANA time zone for display and recurring reminders.
+- Store each monetary amount as an integer currency minor-unit value plus explicit currency code. Do not assume every currency has two decimal places.
+- Use international phone-number handling; preserve the original user-entered display where useful.
+- Avoid fixed assumptions about first/last names, address fields, postal codes, education systems or employer formats.
+- Test diacritics, long names, non-Latin scripts, font fallback and right-to-left layouts.
+- Ensure generated PDF/DOCX files use fonts with the required glyph coverage and text shaping.
+- Support target-market resume conventions through explicit templates: A4/Letter, section ordering, personal-data expectations, photo rules and date formats. Never assume one universal resume layout.
+- The first UI language may be English, but translation extraction and locale switching should be built in from the beginning. Add professionally reviewed translations market by market.
+
+Unicode CLDR 49 was released in October 2026 and provides locale data/rules for language identifiers, currency and number formats, dates and time zones:
+- https://www.unicode.org/reports/tr35/
+- https://www.unicode.org/reports/tr35/49/tr35-numbers.html
+- https://www.unicode.org/reports/tr35/49/tr35-dates.html
+- https://blog.unicode.org/2026/10/unicode-cldr-49-released.html
+
+### 20.3 Market profiles
+
+Create server-side market configuration records with:
+- market code and launch state;
+- supported/default locales;
+- supported currencies and localized price catalog;
+- payment provider and methods;
+- tax/invoice and refund display requirements;
+- applicable terms and privacy notice versions;
+- support language/contact route;
+- resume/document template variants;
+- enabled features and AI provider restrictions;
+- data-processing region and transfer configuration;
+- age eligibility and feature restrictions;
+- launch owner and last legal/operational review.
+
+Market status values should include planned, internal_test, pilot, enabled and suspended. The backend decides market eligibility; clients cannot switch market to bypass pricing, tax or legal controls.
+
+### 20.4 Global payment and commercial model
+
+- Keep plan features separate from localized price points.
+- Support market/currency-specific prices and preserve price history.
+- Store currency-specific minor units; format using locale data.
+- Display renewal interval, tax treatment, renewal amount, cancellation and refund terms clearly.
+- Support one-time packages and subscriptions independently.
+- Select payment provider by market, merchant eligibility and local method coverage.
+- Handle refunds, disputes, subscription cancellation, retries and grace periods.
+- Verify and process provider webhooks idempotently.
+- Reconcile entitlement state against provider state.
+- Review mobile app-store payment rules before enabling purchases in each app-store market.
+
+The first pilot may use an India payment provider because the existing repository includes Razorpay. That is a first-market decision only; it must not be hard-coded into domain services or the global plan model.
+
+### 20.5 Global privacy and data-transfer readiness
+
+Maintain a jurisdiction applicability register and end-to-end data-flow map. Legal review should consider, where applicable:
+- EU/EEA GDPR and its territorial scope, data subject rights and international transfers;
+- UK GDPR and UK international-transfer rules;
+- California CCPA/CPRA where statutory applicability conditions are met;
+- Brazil LGPD and ANPD international-transfer rules;
+- India DPDP Act and Rules based on phased commencement and applicability;
+- other privacy, consumer, employment, children’s data and AI laws in enabled markets.
+
+Implementation artifacts:
+1. Data inventory and source-to-destination data-flow map.
+2. Subprocessor register covering authentication, hosting, storage, AI, email, analytics, monitoring, support and backups.
+3. Purpose, legal-basis, retention and deletion register.
+4. Market-specific privacy notices and user-rights workflows.
+5. Cross-border transfer assessments and contractual safeguards where required.
+6. Account export, correction and erasure workflows with identity checks and legal-retention exceptions.
+7. Security incident response and notification playbook.
+8. AI/human-review assessment before any high-impact recruiting/admissions decisions.
+
+Official starting references (not legal advice; confirm applicability with qualified counsel):
+- EU GDPR application: https://commission.europa.eu/law/law-topic/data-protection/information-business-and-organisations/application-gdpr_en
+- EU individual rights: https://commission.europa.eu/law/law-topic/data-protection/information-individuals_en
+- EU international transfers: https://commission.europa.eu/law/law-topic/data-protection/international-dimension-data-protection/rules-international-data-transfers_en
+- UK ICO international transfers, updated January 2026: https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/international-transfers/a-guide-to-international-transfers/
+- California DOJ CCPA information, updated August 2026: https://www.oag.ca.gov/privacy/ccpa
+- Brazil ANPD international transfers: https://www.gov.br/anpd/pt-br/assuntos/assuntos-internacionais/transferencia-internacional-de-dados
+- India MeitY DPDP Rules and enforcement timeline: https://www.meity.gov.in/documents/act-and-policies/digital-personal-data-protection-rules-2025-gDOxUjMtQWa
+
+The European Commission explains that GDPR can apply to non-EU businesses offering services to people in the EU or monitoring their behavior. EEA transfers need an applicable transfer mechanism/safeguard. California CCPA/CPRA obligations depend on statutory scope and thresholds. Brazil ANPD publishes rules on international transfers. Build controls to support applicable obligations; do not claim blanket compliance merely because the architecture includes privacy features.
+
+### 20.6 Global accessibility target
+
+Target WCAG 2.2 AA for responsive web experiences and equivalent accessibility principles on Android:
+- keyboard operability and visible focus;
+- screen-reader labels and semantic navigation;
+- scalable text and responsive reflow;
+- sufficient contrast and no color-only status indications;
+- accessible validation and error announcements;
+- captions/transcripts for audio;
+- reduced-motion support;
+- plain-language explanations of AI outputs, automated suggestions and privacy controls.
+
+WCAG 2.2 is a W3C Recommendation: https://www.w3.org/TR/wcag/
+
+### 20.7 Market launch checklist
+
+Enable a market only when:
+- product language and support are ready;
+- resume/document templates are reviewed for local conventions;
+- payment, tax, invoicing, refund and subscription flows are tested;
+- terms and privacy notices are reviewed by counsel;
+- vendor availability and AI processor terms are validated;
+- storage region and cross-border transfers are documented;
+- accessibility and right-to-left needs are tested where relevant;
+- support and incident response have an operational owner;
+- store distribution requirements are satisfied.
+
+### 20.8 Globalization work tickets
+
+**GLOB-001 — Locale and market foundation**
+- Add locale, country, time zone, market and data-region concepts as separate fields.
+- Add server-side market profile configuration.
+- Add currency/date/number formatting utilities.
+- Acceptance: changing locale does not silently alter currency, market or account access.
+
+**GLOB-002 — Internationalized Flutter UX**
+- Extract hard-coded text into translation resources.
+- Add locale selection and fallback behavior.
+- Test long labels, Unicode, non-Latin scripts and RTL layouts.
+- Acceptance: onboarding and resume screens render correctly with expanded text and supported scripts.
+
+**GLOB-003 — Currency-aware billing model**
+- Add market-specific localized price catalog.
+- Store amount as currency minor units plus explicit currency.
+- Acceptance: INR, USD, EUR and a zero-decimal currency can be represented without schema changes.
+
+**GLOB-004 — Market-specific privacy/support controls**
+- Version privacy notices and terms by market.
+- Register subprocessors and data-processing regions.
+- Add localized support routing.
+- Acceptance: a market cannot be enabled until required legal/operational checks are approved.
+
+**GLOB-005 — Document conventions**
+- Support A4/Letter page profiles.
+- Localized dates and international contact fields.
+- Unicode font and text-shaping tests.
+- Acceptance: PDF/DOCX exports pass visual and text extraction tests for every language claimed as supported.
+
+### 20.9 Global readiness acceptance criteria
+
+- Country, market, locale, currency, time zone and data region are stored independently.
+- Monetary display is locale-aware; stored amounts retain explicit currency codes.
+- UTC timestamps display correctly across time zones and daylight-saving changes.
+- Names, addresses and contact details do not assume one national pattern.
+- At least one non-Latin sample profile renders in Android, web, PDF and DOCX.
+- Long translated labels do not overflow primary screens.
+- UI copy can be translated without changing application logic.
+- RTL support is not advertised until it is tested.
+- Market plan/payment/legal configuration is server-driven.
+- Subprocessor and international transfer maps exist for every enabled market.
+- Privacy rights and deletion workflows are tested in staging.
+- Accessibility checks include keyboard, screen reader, contrast and text scaling.
+
+### 20.10 Global launch roadmap update
+
+| Phase | Scope | Release outcome |
+|---|---|---|
+| 0 | Baseline, API configuration, global design tokens | Stable foundation |
+| 1 | Auth, personal workspace, locale/market fields and profile | Secure B2C identity |
+| 2 | Resume Studio, versioning, document storage/export | Candidate product |
+| 3 | LLM gateway, evidence-aware AI, ATS | Career intelligence |
+| 4 | Applications, SoulCoach and SoulMind | Retention and user value |
+| 5 | Pricing, entitlements and first market payment provider | Paid B2C pilot |
+| 6 | Legal, privacy, security, support and store checks | First public market |
+| 7 | Additional locale, payment and legal enablement | Global expansion |
+| 8 | Recruiter SaaS, partner APIs, ATS connectors and MCP | Platform ecosystem |
+
+The first operational pilot can be in India if it is the most practical cohort, but India is not a product or data-model constraint.
+
+### 20.11 Global architecture decisions
+
+| ID | Decision | Status |
+|---|---|---|
+| G-001 | Global B2C product; phased market activation | Proposed |
+| G-002 | B2C first; recruiter SaaS later | Confirmed |
+| G-003 | Country, market, locale, currency, time zone and data region are distinct | Proposed |
+| G-004 | Unicode/CLDR-backed formatting and BCP 47 locales | Proposed |
+| G-005 | UTC persistence and IANA time-zone identifiers | Proposed |
+| G-006 | Currency-aware minor-unit money storage | Proposed |
+| G-007 | Market-specific plans, providers, taxes and legal notices | Proposed |
+| G-008 | Jurisdiction-specific privacy and cross-border assessment per market | Proposed |
+| G-009 | WCAG 2.2 AA as responsive web accessibility target | Proposed |
+| G-010 | No universal compliance or residency claims without validation | Proposed |
