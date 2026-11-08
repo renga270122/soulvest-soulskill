@@ -79,10 +79,11 @@ class _ResumeEditorScreenState extends State<ResumeEditorScreen> {
   }
 
   Future<void> _improveSummary() async {
+    final provider = context.read<ResumeProvider>();
     try {
-      await context.read<ResumeProvider>().improveSummary();
+      await provider.improveSummary();
       if (!mounted) return;
-      _summary.text = context.read<ResumeProvider>().resume.professionalSummary;
+      _summary.text = provider.resume.professionalSummary;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('AI suggestion added to your draft. Please review it.')),
       );
@@ -191,7 +192,7 @@ class _ResumeEditorScreenState extends State<ResumeEditorScreen> {
                     ),
                   ),
                   Text(
-                    provider.resume.completionPercent.toString() + '%',
+                    '${provider.resume.completionPercent}%',
                     style: const TextStyle(color: Color(0xFF5149A0), fontWeight: FontWeight.w800),
                   ),
                 ],
