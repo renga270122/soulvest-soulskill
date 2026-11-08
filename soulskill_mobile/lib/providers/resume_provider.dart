@@ -16,6 +16,7 @@ class ResumeProvider extends ChangeNotifier {
   bool _isImproving = false;
   Timer? _saveTimer;
   String? _saveError;
+  final ApiClient _apiClient = ApiClient();
 
   ResumeModel get resume => _resume;
   bool get isLoaded => _isLoaded;
@@ -72,7 +73,7 @@ class ResumeProvider extends ChangeNotifier {
     _isImproving = true;
     notifyListeners();
     try {
-      final improved = await ApiClient().improveProfessionalSummary(
+      final improved = await _apiClient.improveProfessionalSummary(
         summary: summary,
         role: _resume.targetRole,
       );
@@ -87,6 +88,7 @@ class ResumeProvider extends ChangeNotifier {
   @override
   void dispose() {
     _saveTimer?.cancel();
+    _apiClient.close();
     super.dispose();
   }
 }
