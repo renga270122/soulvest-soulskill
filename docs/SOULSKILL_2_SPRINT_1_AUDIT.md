@@ -17,6 +17,8 @@ Therefore, do not begin the visual redesign by assuming the Flutter app is intac
 - Default branch: `main`; repository is public.
 - Only one branch was returned by the branch search: `main`.
 - `soulskill_mobile/` has 13 tracked entries; no `lib/` or `android/` source tree.
+
+- GitHub path-specific commit history queries for `soulskill_mobile/lib/main.dart` and `soulskill_mobile/android/app/src/main/AndroidManifest.xml` returned no commits. The branch search returned only `main`; no tracked Flutter source was found in the searched repository history. Recovery therefore likely requires a local workspace, backup, or external artifact.
 - `soulskill_mobile/pubspec.yaml` declares Flutter, `http`, `shared_preferences`, and `provider`; Dart SDK constraint is `>=3.1.0 <4.0.0`.
 - `soulskill_mobile/test/widget_test.dart` imports `package:soulskill_mobile/main.dart`, but the corresponding source is absent from the current branch.
 - `soulskill_mobile/build_error.log` records prior compile errors in `lib/screens/resume_form_page.dart`: `onChanged` was supplied to `InputDecoration` rather than a text field, plus a malformed collection-if/null-coalescing expression requiring correction.
