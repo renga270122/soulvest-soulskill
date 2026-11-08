@@ -1577,8 +1577,8 @@ class _SoulCoachView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        _SurfaceCard(
-          color: const Color(0xFFF5F3FF),
+        const _SurfaceCard(
+          color: Color(0xFFF5F3FF),
           child: const Text(
             'SoulCoach is designed to support your decisions, not make career choices for you. Review recommendations and keep your own judgment at the center.',
             style: TextStyle(
@@ -1668,16 +1668,16 @@ class _SoulMindView extends StatelessWidget {
             ),
             borderRadius: BorderRadius.circular(23),
           ),
-          child: Column(
+          child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _Eyebrow(
+              _Eyebrow(
                 icon: Icons.wb_twilight_rounded,
                 label: 'TODAY’S AFFIRMATION',
                 color: SoulSkillTheme.violet,
               ),
-              const SizedBox(height: 18),
-              const Text(
+              SizedBox(height: 18),
+              Text(
                 'I am allowed to grow at my own pace. Every honest step I take is progress.',
                 style: TextStyle(
                   color: SoulSkillTheme.ink,
@@ -1687,8 +1687,8 @@ class _SoulMindView extends StatelessWidget {
                   letterSpacing: -0.4,
                 ),
               ),
-              const SizedBox(height: 13),
-              const Text(
+              SizedBox(height: 13),
+              Text(
                 'Take a breath. Read it slowly, and keep the words that feel helpful to you.',
                 style: TextStyle(
                   color: Color(0xFF716B91),
@@ -1815,7 +1815,7 @@ class _ReflectionPracticeSheetState extends State<_ReflectionPracticeSheet> {
             ),
             const SizedBox(height: 18),
             Text(
-              'Step ' + (_step + 1).toString() + ' of ' + _steps.length.toString(),
+              'Step ${_step + 1} of ${_steps.length}',
               style: const TextStyle(
                 color: SoulSkillTheme.muted,
                 fontSize: 11,
