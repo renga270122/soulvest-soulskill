@@ -19,4 +19,14 @@ trap 'rm -rf "$TEMP_DIR"' EXIT
 
 flutter create --platforms=android --org ai.soulvest --project-name soulskill_mobile "$TEMP_DIR/soulskill_mobile"
 cp -a "$TEMP_DIR/soulskill_mobile/android" "$MOBILE_DIR/android"
-echo "Android host project generated without overwriting Dart source. Review Android networking settings before testing."
+
+# Permit local HTTP only in debug builds. Release builds must use HTTPS.
+mkdir -p "$MOBILE_DIR/android/app/src/debug"
+cat > "$MOBILE_DIR/android/app/src/debug/AndroidManifest.xml" <<'MANIFEST'
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:usesCleartextTraffic="true" />
+</manifest>
+MANIFEST
+
+echo "Android host project generated without overwriting Dart source."
+echo "Debug builds permit local HTTP for emulator/LAN development; release builds must use HTTPS."
