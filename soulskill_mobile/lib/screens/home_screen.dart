@@ -206,6 +206,7 @@ class HomeScreen extends StatelessWidget {
 
 class _ActionTile extends StatelessWidget {
   const _ActionTile({
+    super.key,
     required this.icon,
     required this.title,
     required this.subtitle,
