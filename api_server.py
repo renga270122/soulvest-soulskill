@@ -24,14 +24,50 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Enable CORS for mobile app
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your app domain
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+def _build_cors_settings(environ=None):
+    """Build a restrictive CORS policy from environment configuration."""
+    settings = os.environ if environ is None else environ
+    environment = settings.get("SOULSKILL_ENV", "development").strip().lower()
+    allowed_origins = [
+        origin.strip().rstrip("/")
+        for origin in settings.get("SOULSKILL_CORS_ORIGINS", "").split(",")
+        if origin.strip()
+    ]
+    allowed_origin_regex = (
+        settings.get("SOULSKILL_CORS_ORIGIN_REGEX", "").strip() or None
+    )
+
+    is_production = environment in {"production", "prod"}
+    if is_production and not allowed_origins and not allowed_origin_regex:
+        raise RuntimeError(
+            "Production requires SOULSKILL_CORS_ORIGINS or "
+            "SOULSKILL_CORS_ORIGIN_REGEX to be configured."
+        )
+
+    # Permit dynamic Flutter development-server ports, but only on loopback.
+    if not is_production and not allowed_origins and not allowed_origin_regex:
+        allowed_origin_regex = r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
+
+    return {
+        "allow_origins": allowed_origins,
+        "allow_origin_regex": allowed_origin_regex,
+        # The app uses authorization headers; cross-site cookies are not enabled.
+        "allow_credentials": False,
+        "allow_methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        "allow_headers": [
+            "Authorization",
+            "Content-Type",
+            "Idempotency-Key",
+            "X-Request-ID",
+        ],
+        "expose_headers": ["X-Request-ID"],
+    }
+
+
+# Browser clients require an explicit origin policy. Native mobile clients do not
+# use browser CORS, but share the same API service.
+app.add_middleware(CORSMiddleware, **_build_cors_settings())
+
 
 # ============ DATA MODELS ============
 
