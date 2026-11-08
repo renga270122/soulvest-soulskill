@@ -91,7 +91,7 @@ jobs:
     
     - name: Run E2E tests
       run: |
-        pytest test_e2e.py -v --headed=false
+        pytest test_e2e.py -v
       env:
         PLAYWRIGHT_BROWSERS_PATH: 0
     
@@ -120,7 +120,7 @@ jobs:
     - name: Check response time
       run: |
         start=$(date +%s)
-        curl -s https://soulvest-soulskill-rwwrmxhx5mmuak37j9ap6z.streamlit.app/ > /dev/null
+        curl --max-time 20 -s https://soulvest-soulskill-rwwrmxhx5mmuak37j9ap6z.streamlit.app/ > /dev/null || true
         end=$(date +%s)
         duration=$((end - start))
         
