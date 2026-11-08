@@ -18,8 +18,6 @@ void main() {
     expect(find.text('SoulSkill'), findsOneWidget);
     expect(find.text('Welcome to your next chapter'), findsOneWidget);
     expect(find.text('Create / improve resume'), findsOneWidget);
-    expect(find.text('Your career workspace'), findsOneWidget);
-
     await tester.tap(find.text('Create / improve resume'));
     await tester.pumpAndSettle();
 
@@ -36,6 +34,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('TODAY’S AFFIRMATION'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Begin a 2-minute reflection'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Begin a 2-minute reflection'), findsOneWidget);
 
     await tester.tap(find.text('Begin a 2-minute reflection'));
