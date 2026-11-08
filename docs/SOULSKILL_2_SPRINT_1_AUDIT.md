@@ -26,7 +26,7 @@ Therefore, do not begin the visual redesign by assuming the Flutter app is intac
 - Root `requirements.txt` includes Streamlit, FastAPI, Uvicorn, Pydantic, AI/document and data packages. `soulskill_mobile/api_requirements.txt` also exists and should be compared before deployment.
 - Root `database.py` supports JSON fallback plus optional PostgreSQL/MongoDB. It silently falls back to local JSON when DB setup fails. This is not a safe production persistence strategy.
 - Root `auth.py` imports Streamlit and relies on `st.session_state`, so it is not a reusable stateless authentication service for a Flutter API. It uses a static default password salt if an environment variable is absent.
-- Root `.github/workflows/test.yml` references `test_app.py` and `test_e2e.py`; its E2E job expects Playwright. The workflow has not been executed as part of this read-only GitHub audit.
+- Root `.github/workflows/test.yml` references `test_app.py` and `test_e2e.py`; its E2E job expects Playwright. The PR validation run (GitHub Actions run `42479210550`) was triggered after this audit commit. During inspection, the E2E job failed to initialize because the workflow references deprecated `actions/upload-artifact@v3`; the live-app check failed because the endpoint returned HTTP `303` while the script accepts only `200`. At the time of this document update, unit-test dependency installation and Lighthouse were still running, so their outcomes are not yet known.
 
 ## Sprint 1 goal
 
