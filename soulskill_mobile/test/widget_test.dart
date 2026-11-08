@@ -34,11 +34,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('TODAY’S AFFIRMATION'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Begin a 2-minute reflection'),
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await tester.ensureVisible(find.text('Begin a 2-minute reflection'));
+    await tester.pumpAndSettle();
     expect(find.text('Begin a 2-minute reflection'), findsOneWidget);
 
     await tester.tap(find.text('Begin a 2-minute reflection'));
