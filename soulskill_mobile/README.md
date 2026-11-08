@@ -26,7 +26,7 @@ The current repository has no tracked android/ directory. Generate the native An
     cd soulskill_mobile
     flutter create --platforms=android --org ai.soulvest --project-name soulskill_mobile .
 
-This creates the platform-specific Android project around the tracked Dart application source. Review generated Android files before committing them. The Android manifest may need cleartext traffic enabled for local HTTP development only; production deployments must use HTTPS.
+This creates the platform-specific Android project around the tracked Dart application source. Review generated Android files before committing them. The bootstrap script adds cleartext HTTP permission to the debug manifest only for emulator/LAN development. Release builds must use HTTPS.
 
 Alternatively run:
 
