@@ -81,8 +81,8 @@ class _ResumeEditorScreenState extends State<ResumeEditorScreen> {
   Future<void> _improveSummary() async {
     try {
       await context.read<ResumeProvider>().improveSummary();
-      _summary.text = context.read<ResumeProvider>().resume.professionalSummary;
       if (!mounted) return;
+      _summary.text = context.read<ResumeProvider>().resume.professionalSummary;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('AI suggestion added to your draft. Please review it.')),
       );
