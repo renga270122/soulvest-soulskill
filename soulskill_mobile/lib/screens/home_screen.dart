@@ -1579,7 +1579,7 @@ class _SoulCoachView extends StatelessWidget {
         const SizedBox(height: 16),
         const _SurfaceCard(
           color: Color(0xFFF5F3FF),
-          child: const Text(
+          child: Text(
             'SoulCoach is designed to support your decisions, not make career choices for you. Review recommendations and keep your own judgment at the center.',
             style: TextStyle(
               color: Color(0xFF615985),
@@ -1670,7 +1670,7 @@ class _SoulMindView extends StatelessWidget {
           ),
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            children: const [
               _Eyebrow(
                 icon: Icons.wb_twilight_rounded,
                 label: 'TODAY’S AFFIRMATION',
