@@ -323,9 +323,9 @@ class _DesktopSidebar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 244,
-      color: Colors.white,
       padding: const EdgeInsets.fromLTRB(17, 24, 15, 18),
       decoration: const BoxDecoration(
+        color: Colors.white,
         border: Border(right: BorderSide(color: SoulSkillTheme.border)),
       ),
       child: Column(
