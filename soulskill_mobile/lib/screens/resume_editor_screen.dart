@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/resume_provider.dart';
 import 'resume_preview_screen.dart';
+import 'job_targeting_screen.dart';
 
 class ResumeEditorScreen extends StatefulWidget {
   const ResumeEditorScreen({super.key});
@@ -155,6 +156,16 @@ class _ResumeEditorScreenState extends State<ResumeEditorScreen> {
       appBar: AppBar(
         title: const Text('Resume Studio'),
         actions: [
+          IconButton(
+            tooltip: 'Tailor to a job',
+            onPressed: () {
+              _syncDraft();
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const JobTargetingScreen()),
+              );
+            },
+            icon: const Icon(Icons.track_changes_rounded),
+          ),
           IconButton(
             tooltip: 'Preview resume',
             onPressed: () {
