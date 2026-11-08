@@ -64,6 +64,16 @@ For a production web build, provide the HTTPS API origin explicitly:
 
 Set SOULSKILL_ENV=production and configure SOULSKILL_CORS_ORIGINS with exact trusted browser origins (comma-separated, scheme and host, no path), for example https://app.example.com,https://www.example.com. Production API startup fails if no trusted CORS origin or explicit origin regex is configured.
 
+## AI summary service
+
+The AI summary endpoint runs on the Python server. Configure the provider key in the server environment before starting Uvicorn. In PowerShell:
+
+    $env:GOOGLE_API_KEY = "your-server-side-Gemini-key"
+    $env:GEMINI_MODEL = "gemini-3.8-flash"
+    python -m uvicorn api_server:app --reload --host 127.0.0.1 --port 8000
+
+You can use GEMINI_API_KEY instead of GOOGLE_API_KEY. The model defaults to gemini-3.8-flash when GEMINI_MODEL is not set. Never put an AI provider key in Flutter source, a Dart define, the browser build, or a committed .env file. When no server-side key is configured, the AI endpoint returns HTTP 503 with a setup message.
+
 ## Quality checks
 
     cd soulskill_mobile
