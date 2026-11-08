@@ -83,7 +83,7 @@ class HomeScreen extends StatelessWidget {
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                         color: const Color.fromRGBO(101, 88, 211, 0.18),
                         blurRadius: 22,
@@ -206,7 +206,6 @@ class HomeScreen extends StatelessWidget {
 
 class _ActionTile extends StatelessWidget {
   const _ActionTile({
-    super.key,
     required this.icon,
     required this.title,
     required this.subtitle,
