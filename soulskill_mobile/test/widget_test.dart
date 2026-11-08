@@ -70,7 +70,7 @@ void main() {
     expect(find.text('Career Studio'), findsOneWidget);
     expect(find.text('A global career workspace'), findsOneWidget);
 
-    await tester.tap(find.text('SoulMind'));
+    await tester.tap(find.text('SoulMind').first);
     await tester.pumpAndSettle();
     expect(find.text('Affirmations for your journey'), findsOneWidget);
   });
