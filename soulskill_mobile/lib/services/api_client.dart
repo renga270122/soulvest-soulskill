@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
@@ -48,6 +49,22 @@ class ApiClient {
       throw const ApiException('The AI service did not return improved content.');
     }
     return improved;
+  }
+
+  Future<Map<String, dynamic>> parseResume({required String fileName, required Uint8List bytes}) async {
+    final request = http.MultipartRequest('POST', Uri.parse('\$baseUrl/api/resumes/parse'))
+      ..files.add(http.MultipartFile.fromBytes('file', bytes, filename: fileName));
+    final streamed = await _client.send(request).timeout(const Duration(seconds: 60));
+    final response = await http.Response.fromStream(streamed);
+    Map<String, dynamic> payload;
+    try { payload = jsonDecode(response.body) as Map<String, dynamic>; }
+    on FormatException { throw const ApiException('The parser returned an unreadable response.'); }
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw ApiException(payload['detail']?.toString() ?? 'Resume parsing failed (\${response.statusCode}).');
+    }
+    final data = payload['data'];
+    if (data is! Map) throw const ApiException('No resume details were extracted from this file.');
+    return data.map((key, value) => MapEntry(key.toString(), value));
   }
 
   void close() => _client.close();
