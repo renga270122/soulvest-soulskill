@@ -19,6 +19,30 @@ void main() {
       expect(resume.effectiveEducationEntries.first['institution'], 'Example University');
     });
 
+    test('maps parser response fields into editable resume sections', () {
+      final resume = ResumeModel.fromParsedJson({
+        'full_name': 'Taylor Reed',
+        'email': 'taylor@example.com',
+        'city': 'Bengaluru',
+        'tech_skills': 'Dart, Flutter',
+        'work_entries': [
+          {'title': 'Engineer', 'company': 'Acme', 'responsibilities': 'Built apps'}
+        ],
+        'education_entries': [
+          {'degree': 'B.E.', 'institution': 'University', 'year': '2012'}
+        ],
+        'projects': [
+          {'name': 'Mobile app', 'description': 'Built a PWA', 'technologies': 'Flutter'}
+        ],
+        'certifications': 'Cloud Basics, Secure Coding',
+      });
+      expect(resume.fullName, 'Taylor Reed');
+      expect(resume.effectiveWorkExperiences.first['description'], 'Built apps');
+      expect(resume.effectiveEducationEntries.first['degree'], 'B.E.');
+      expect(resume.projects.single['name'], 'Mobile app');
+      expect(resume.certifications, hasLength(2));
+    });
+
     test('round trips projects and certifications through local JSON', () {
       const resume = ResumeModel(
         projects: [
