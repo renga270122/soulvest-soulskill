@@ -107,6 +107,37 @@ class ResumeModel {
     )).toList();
   }
 
+  factory ResumeModel.fromParsedJson(Map<String, dynamic> json) {
+    final work = _entries(json['work_entries']).map((entry) => {
+      'title': entry['title'] ?? '', 'company': entry['company'] ?? '',
+      'description': entry['responsibilities'] ?? entry['description'] ?? '',
+      'start_date': entry['start_date'] ?? '', 'end_date': entry['end_date'] ?? '',
+    }).toList();
+    final education = _entries(json['education_entries']).map((entry) => {
+      'degree': entry['degree'] ?? '', 'institution': entry['institution'] ?? '',
+      'description': entry['year'] ?? entry['description'] ?? '',
+    }).toList();
+    final firstWork = work.isNotEmpty ? work.first : <String, String>{};
+    final firstEducation = education.isNotEmpty ? education.first : <String, String>{};
+    final rawCertifications = json['certifications'];
+    final certificationList = rawCertifications is List
+        ? rawCertifications.map((value) => {'name': value.toString(), 'issuer': '', 'date': ''}).toList()
+        : (rawCertifications is String && rawCertifications.trim().isNotEmpty
+            ? rawCertifications.split(',').map((value) => {'name': value.trim(), 'issuer': '', 'date': ''}).where((value) => value['name']!.isNotEmpty).toList()
+            : <Map<String, String>>[]);
+    return ResumeModel(
+      fullName: _string(json, 'full_name'), email: _string(json, 'email'),
+      phone: _string(json, 'phone'), location: _string(json, 'city'),
+      professionalSummary: _string(json, 'summary'),
+      experienceRole: firstWork['title'] ?? '', company: firstWork['company'] ?? '',
+      experienceDescription: firstWork['description'] ?? '',
+      degree: firstEducation['degree'] ?? '', institution: firstEducation['institution'] ?? '',
+      educationDetails: firstEducation['description'] ?? '',
+      workExperiences: work, educationEntries: education,
+      certifications: certificationList, skills: _string(json, 'tech_skills'),
+    );
+  }
+
   factory ResumeModel.fromJson(Map<String, dynamic> json) {
     return ResumeModel(
       fullName: _string(json, 'fullName'), targetRole: _string(json, 'targetRole'),
