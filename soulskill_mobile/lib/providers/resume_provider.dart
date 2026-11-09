@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -62,6 +63,16 @@ class ResumeProvider extends ChangeNotifier {
       _isSaving = false;
       notifyListeners();
     }
+  }
+
+  Future<ResumeModel> parseResume({required String fileName, required Uint8List bytes}) async {
+    final parsed = await _apiClient.parseResume(fileName: fileName, bytes: bytes);
+    return ResumeModel.fromParsedJson(parsed);
+  }
+
+  Future<void> importResume(ResumeModel imported) async {
+    update(imported);
+    await saveNow();
   }
 
   Future<void> improveSummary() async {
