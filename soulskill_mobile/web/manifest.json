@@ -6,17 +6,11 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "display_override": [
-    "standalone",
-    "minimal-ui"
-  ],
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "any",
   "background_color": "#FBFAFF",
   "theme_color": "#5B4BCE",
-  "categories": [
-    "education",
-    "productivity"
-  ],
+  "categories": ["education", "productivity"],
   "prefer_related_applications": false,
   "icons": [
     {
