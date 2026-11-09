@@ -53,8 +53,8 @@ class _JobTargetingScreenState extends State<JobTargetingScreen> {
       if (picked == null || picked.files.isEmpty) return;
 
       final file = picked.files.single;
-      if (file.size > 5 * 1024 * 1024) {
-        _showMessage('Choose a resume smaller than 5 MB.');
+      if (file.size > 4 * 1024 * 1024) {
+        _showMessage('Choose a resume smaller than 4 MB.');
         return;
       }
       final bytes = file.bytes;
