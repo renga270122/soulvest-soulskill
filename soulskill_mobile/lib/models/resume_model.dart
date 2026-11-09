@@ -14,6 +14,8 @@ class ResumeModel {
     this.educationDetails = '',
     this.workExperiences = const [],
     this.educationEntries = const [],
+    this.projects = const [],
+    this.certifications = const [],
     this.skills = '',
     this.updatedAt = '',
   });
@@ -24,6 +26,8 @@ class ResumeModel {
   final String degree, institution, educationDetails;
   final List<Map<String, String>> workExperiences;
   final List<Map<String, String>> educationEntries;
+  final List<Map<String, String>> projects;
+  final List<Map<String, String>> certifications;
   final String skills, updatedAt;
 
   List<Map<String, String>> get effectiveWorkExperiences =>
@@ -59,6 +63,8 @@ class ResumeModel {
     String? institution, String? educationDetails,
     List<Map<String, String>>? workExperiences,
     List<Map<String, String>>? educationEntries,
+    List<Map<String, String>>? projects,
+    List<Map<String, String>>? certifications,
     String? skills, String? updatedAt,
   }) => ResumeModel(
     fullName: fullName ?? this.fullName, targetRole: targetRole ?? this.targetRole,
@@ -72,6 +78,8 @@ class ResumeModel {
     educationDetails: educationDetails ?? this.educationDetails,
     workExperiences: workExperiences ?? this.workExperiences,
     educationEntries: educationEntries ?? this.educationEntries,
+    projects: projects ?? this.projects,
+    certifications: certifications ?? this.certifications,
     skills: skills ?? this.skills, updatedAt: updatedAt ?? this.updatedAt,
   );
 
@@ -84,6 +92,8 @@ class ResumeModel {
     'institution': institution, 'educationDetails': educationDetails,
     'workExperiences': effectiveWorkExperiences,
     'educationEntries': effectiveEducationEntries,
+    'projects': projects,
+    'certifications': certifications,
     'skills': skills, 'updatedAt': updatedAt,
   };
 
@@ -109,6 +119,8 @@ class ResumeModel {
       educationDetails: _string(json, 'educationDetails'),
       workExperiences: _entries(json['workExperiences']),
       educationEntries: _entries(json['educationEntries']),
+      projects: _entries(json['projects']),
+      certifications: _entries(json['certifications']),
       skills: _string(json, 'skills'), updatedAt: _string(json, 'updatedAt'),
     );
   }
@@ -124,8 +136,8 @@ class ResumeModel {
       'degree': e['degree'] ?? '', 'institution': e['institution'] ?? '',
       'description': e['description'] ?? '',
     }).toList(),
-    'skills': skillList, 'projects': <Map<String, String>>[],
-    'certifications': <String>[], 'industry': targetRole,
+    'skills': skillList, 'projects': projects,
+    'certifications': certifications, 'industry': targetRole,
     'template_style': 'modern',
   };
 }
