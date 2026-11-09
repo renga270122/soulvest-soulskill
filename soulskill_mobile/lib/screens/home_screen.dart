@@ -609,6 +609,8 @@ class _DashboardView extends StatelessWidget {
               onOpenSoulMind: onOpenSoulMind,
               wide: wide,
             ),
+            const SizedBox(height: 14),
+            _DailyWisdomCard(onOpenSoulMind: onOpenSoulMind),
             const SizedBox(height: 18),
             _ProgressSummary(
               progress: progress,
@@ -1810,9 +1812,18 @@ class _SoulMindView extends StatelessWidget {
   final VoidCallback onClearCheckIn;
 
   static const _affirmations = <String>[
-    'My worth is not defined by a job title or an interview outcome.',
+    'My worth is not defined by a job title, salary or interview outcome.',
     'I can learn, adapt and communicate the value I bring.',
-    'I allow myself to take the next step at a steady pace.',
+    'I am allowed to pause, breathe and begin again.',
+    'A setback is part of my story, not the whole story.',
+    'I can ask for help without feeling that I have failed.',
+    'I bring experience, perspective and strengths that matter.',
+    'I do not need to compare my timeline with someone else’s.',
+    'I can take one useful step today, even if the whole path is unclear.',
+    'I deserve respect, including from myself.',
+    'I am more than my current employment status.',
+    'I can respond to uncertainty with curiosity instead of self-criticism.',
+    'Progress can be quiet, slow and still meaningful.',
   ];
 
   Future<void> _startPractice(BuildContext context) async {
@@ -1936,6 +1947,16 @@ class _SoulMindView extends StatelessWidget {
             ),
           ),
         ),
+        const SizedBox(height: 22),
+        Text('Emotional intelligence reminders',
+            style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 6),
+        Text(
+          'Small reminders for how we understand ourselves and connect with others.',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 11),
+        const _WisdomQuoteList(),
         const SizedBox(height: 16),
         _SurfaceCard(
           child: Column(
@@ -1977,6 +1998,132 @@ class _SoulMindView extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _DailyWisdomCard extends StatelessWidget {
+  const _DailyWisdomCard({required this.onOpenSoulMind});
+
+  final VoidCallback onOpenSoulMind;
+
+  static const _thoughts = <String>[
+    'Your employment status can change. Your worth does not.',
+    'You do not have to pretend to be okay to deserve support.',
+    'A kind conversation can be the first step toward a new direction.',
+    'You are allowed to be a work in progress and still be proud of yourself.',
+    'Asking for help is a skill, not a weakness.',
+    'You can hold uncertainty and hope at the same time.',
+    'Your next chapter does not need to look like anyone else’s.',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final day = DateTime.now().difference(DateTime(2025, 1, 1)).inDays;
+    final thought = _thoughts[day.abs() % _thoughts.length];
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF8EC),
+        borderRadius: BorderRadius.circular(19),
+        border: Border.all(color: const Color(0xFFF2E5CC)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.wb_sunny_outlined,
+              color: Color(0xFFB7791F), size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('A NOTE FOR TODAY',
+                    style: TextStyle(
+                      color: Color(0xFF9A681D),
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1,
+                    )),
+                const SizedBox(height: 7),
+                Text(thought,
+                    style: const TextStyle(
+                      color: SoulSkillTheme.ink,
+                      fontSize: 15,
+                      height: 1.4,
+                      fontWeight: FontWeight.w700,
+                    )),
+                const SizedBox(height: 5),
+                const Text('An original SoulSkill reflection',
+                    style: TextStyle(
+                      color: SoulSkillTheme.muted,
+                      fontSize: 10,
+                    )),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: onOpenSoulMind,
+                    child: const Text('A little more encouragement'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WisdomQuoteList extends StatelessWidget {
+  const _WisdomQuoteList();
+
+  static const _quotes = <(String, String)>[
+    ('Notice what you feel before deciding what to do with it.',
+        'Self-awareness'),
+    ('You can listen to understand without agreeing with everything.',
+        'Empathy'),
+    ('A pause between a feeling and a response can change a conversation.',
+        'Self-regulation'),
+    ('Boundaries can be kind, clear and respectful at the same time.',
+        'Healthy relationships'),
+    ('You can celebrate someone else’s progress without making your own smaller.',
+        'Social awareness'),
+    ('Curiosity often opens a door that judgment closes.',
+        'Empathy'),
+    ('Being strong does not mean carrying everything alone.',
+        'Self-awareness'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: _quotes.map((quote) => Padding(
+        padding: const EdgeInsets.only(bottom: 9),
+        child: _SurfaceCard(
+          color: const Color(0xFFF8F7FF),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('“${quote.$1}”',
+                  style: const TextStyle(
+                    color: SoulSkillTheme.ink,
+                    fontSize: 13,
+                    height: 1.45,
+                    fontWeight: FontWeight.w600,
+                  )),
+              const SizedBox(height: 8),
+              Text(quote.$2.toUpperCase(),
+                  style: const TextStyle(
+                    color: SoulSkillTheme.violet,
+                    fontSize: 9,
+                    letterSpacing: 0.8,
+                    fontWeight: FontWeight.w800,
+                  )),
+            ],
+          ),
+        ),
+      )).toList(),
     );
   }
 }
