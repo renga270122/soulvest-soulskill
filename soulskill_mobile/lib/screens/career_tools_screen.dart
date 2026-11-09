@@ -28,6 +28,9 @@ class _CareerToolsScreenState extends State<CareerToolsScreen> {
   bool _analyzed = false;
   List<String> _matched = [];
   List<String> _missing = [];
+  List<String> _priorityMatched = [];
+  List<String> _priorityMissing = [];
+  int _coveragePercent = 0;
 
   static const _trackerKey = 'soulskill.application.tracker.v1';
   static const _questions = [
@@ -84,6 +87,15 @@ class _CareerToolsScreenState extends State<CareerToolsScreen> {
       .toSet()
       .toList();
 
+  static const _prioritySkills = {
+    'c', 'c++', 'c#', 'python', 'java', 'javascript', 'typescript', 'dart',
+    'flutter', 'android', 'ios', 'sql', 'git', 'linux', 'embedded', 'rtos',
+    'docker', 'kubernetes', 'aws', 'azure', 'gcp', 'react', 'node.js',
+    'fastapi', 'django', 'machine learning', 'tensorflow', 'pytorch',
+    'communication', 'leadership', 'testing', 'automation', 'debugging',
+    'architecture', 'agile', 'scrum', 'security', 'performance'
+  };
+
   static const _stopWords = {
     'the','and','for','with','you','your','are','our','this','that','will',
     'from','have','has','was','were','who','what','when','where','how','can',
@@ -107,9 +119,17 @@ class _CareerToolsScreenState extends State<CareerToolsScreen> {
       resume.company, resume.experienceDescription, resume.skills,
       resume.degree, resume.institution, resume.educationDetails
     ].join(' ')).toSet();
+    final matched = jd.where(evidence.contains).toList()..sort();
+    final missing = jd.where((word) => !evidence.contains(word)).toList()..sort();
+    final priorityTerms = jd.where(_prioritySkills.contains).toSet().toList()..sort();
+    final priorityMatched = priorityTerms.where(evidence.contains).toList();
+    final priorityMissing = priorityTerms.where((word) => !evidence.contains(word)).toList();
     setState(() {
-      _matched = jd.where(evidence.contains).toList()..sort();
-      _missing = jd.where((word) => !evidence.contains(word)).toList()..sort();
+      _matched = matched;
+      _missing = missing;
+      _priorityMatched = priorityMatched;
+      _priorityMissing = priorityMissing;
+      _coveragePercent = jd.isEmpty ? 0 : ((matched.length / jd.length) * 100).round();
       _analyzed = true;
     });
   }
@@ -212,11 +232,27 @@ class _CareerToolsScreenState extends State<CareerToolsScreen> {
       if (_analyzed) ...[
         const SizedBox(height: 12),
         _panel(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('Keyword evidence review',
+          const Text('Your job-fit snapshot',
               style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 13),
+          Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+            Text('$_coveragePercent%', style: const TextStyle(fontSize: 34, height: 1, fontWeight: FontWeight.w900, color: Color(0xFF6558D3))),
+            const SizedBox(width: 9),
+            const Expanded(child: Padding(padding: EdgeInsets.only(bottom: 3), child: Text('keyword coverage in your current resume', style: TextStyle(color: Color(0xFF77728D), fontSize: 12)))),
+          ]),
+          const SizedBox(height: 10),
+          ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(value: _coveragePercent / 100, minHeight: 9, backgroundColor: Color(0xFFECEAF7), color: Color(0xFF6558D3))),
+          const SizedBox(height: 8),
+          Text('${_matched.length} of ${_matched.length + _missing.length} distinct terms found', style: const TextStyle(color: Color(0xFF77728D), fontSize: 12)),
+          const SizedBox(height: 18),
+          const Text('Priority skill terms', style: TextStyle(fontWeight: FontWeight.w800)),
           const SizedBox(height: 5),
-          Text('${_matched.length} of ${_matched.length + _missing.length} distinct job terms found in your current resume text.',
-              style: const TextStyle(color: Color(0xFF77728D), fontSize: 12)),
+          Text('${_priorityMatched.length} found · ${_priorityMissing.length} need review', style: const TextStyle(color: Color(0xFF77728D), fontSize: 12)),
+          const SizedBox(height: 8),
+          _chips(_priorityMatched, const Color(0xFF287A59)),
+          const SizedBox(height: 8),
+          _chips(_priorityMissing, const Color(0xFF9A641B)),
+          const SizedBox(height: 16),
           const SizedBox(height: 15),
           const Text('Found in your resume', style: TextStyle(fontWeight: FontWeight.w700, color: Color(0xFF287A59))),
           const SizedBox(height: 7),
@@ -226,8 +262,8 @@ class _CareerToolsScreenState extends State<CareerToolsScreen> {
           const SizedBox(height: 7),
           _chips(_missing, const Color(0xFF9A641B)),
           const SizedBox(height: 12),
-          const Text('This is a simple local keyword comparison, not an ATS score or AI assessment. Add a missing term only when it accurately describes your experience.',
-              style: TextStyle(fontSize: 11, color: Color(0xFF77728D), height: 1.4)),
+          const Text('How to read this: coverage is the share of distinct job-description keywords found in your resume text. It is not an ATS score, hiring probability or AI assessment. A keyword match does not prove expertise. Add a term only when it accurately reflects your experience, and review important missing terms manually.',
+              style: TextStyle(fontSize: 11, color: Color(0xFF77728D), height: 1.45)),
         ])),
       ],
     ]);
