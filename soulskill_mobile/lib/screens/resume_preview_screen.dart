@@ -72,18 +72,20 @@ class _ResumeDocument extends StatelessWidget {
         const Divider(color: Color(0xFF6558D3), thickness: 1.2),
         if (resume.professionalSummary.isNotEmpty)
           _PreviewSection(title: 'PROFESSIONAL SUMMARY', body: resume.professionalSummary),
-        if (resume.experienceRole.isNotEmpty || resume.company.isNotEmpty || resume.experienceDescription.isNotEmpty)
-          _PreviewSection(
+        if (resume.effectiveWorkExperiences.isNotEmpty)
+          ...resume.effectiveWorkExperiences.map((entry) => _PreviewSection(
             title: 'EXPERIENCE',
-            heading: [resume.experienceRole, resume.company].where((value) => value.isNotEmpty).join('  |  '),
-            body: resume.experienceDescription,
-          ),
-        if (resume.degree.isNotEmpty || resume.institution.isNotEmpty || resume.educationDetails.isNotEmpty)
-          _PreviewSection(
+            heading: [entry['title'] ?? '', entry['company'] ?? '']
+                .where((value) => value.isNotEmpty).join('  |  '),
+            body: entry['description'] ?? '',
+          )),
+        if (resume.effectiveEducationEntries.isNotEmpty)
+          ...resume.effectiveEducationEntries.map((entry) => _PreviewSection(
             title: 'EDUCATION',
-            heading: [resume.degree, resume.institution].where((value) => value.isNotEmpty).join('  |  '),
-            body: resume.educationDetails,
-          ),
+            heading: [entry['degree'] ?? '', entry['institution'] ?? '']
+                .where((value) => value.isNotEmpty).join('  |  '),
+            body: entry['description'] ?? '',
+          )),
         if (resume.skillList.isNotEmpty)
           _PreviewSection(title: 'SKILLS', body: resume.skillList.join('  •  ')),
         if (resume.completionPercent == 0)
