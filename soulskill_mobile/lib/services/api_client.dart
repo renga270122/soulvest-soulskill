@@ -26,15 +26,20 @@ class ApiClient {
   Future<String> improveProfessionalSummary({
     required String summary,
     required String role,
+    required String experience,
+    required List<String> skills,
   }) async {
     final uri = Uri.parse(baseUrl + '/api/ai/improve-summary');
-    final response = await _client
-        .post(
-          uri,
-          headers: const {'Content-Type': 'application/json'},
-          body: jsonEncode({'summary': summary, 'role': role}),
-        )
-        .timeout(const Duration(seconds: 35));
+    final response = await _client.post(
+      uri,
+      headers: const {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'summary': summary,
+        'role': role,
+        'experience': experience,
+        'skills': skills,
+      }),
+    ).timeout(const Duration(seconds: 35));
 
     Map<String, dynamic> payload;
     try {
@@ -47,17 +52,11 @@ class ApiClient {
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
       final detail = payload['detail']?.toString();
-      throw ApiException(
-        detail?.isNotEmpty == true
-            ? detail!
-            : 'AI service request failed (' + response.statusCode.toString() + ').',
-      );
+      throw ApiException(detail?.isNotEmpty == true ? detail! : 'AI service request failed (' + response.statusCode.toString() + ').');
     }
 
     final improved = payload['improved']?.toString().trim() ?? '';
-    if (improved.isEmpty) {
-      throw const ApiException('The AI service did not return improved content.');
-    }
+    if (improved.isEmpty) throw const ApiException('The improvement service returned no content.');
     return improved;
   }
 
