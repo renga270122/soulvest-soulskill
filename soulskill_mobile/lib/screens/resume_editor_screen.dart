@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../models/resume_model.dart';
 import '../providers/resume_provider.dart';
 import 'resume_preview_screen.dart';
 
@@ -149,6 +151,98 @@ class _ResumeEditorScreenState extends State<ResumeEditorScreen> {
     );
   }
 
+  Future<void> _importResume() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom, allowedExtensions: ['pdf', 'docx', 'txt'], withData: true,
+      );
+      if (result == null || result.files.isEmpty) return;
+      final file = result.files.single;
+      final bytes = file.bytes;
+      if (bytes == null || bytes.isEmpty) throw Exception('The selected file could not be read.');
+      final parsed = await context.read<ResumeProvider>().parseResume(fileName: file.name, bytes: bytes);
+      if (!mounted) return;
+      final workCount = parsed.effectiveWorkExperiences.length;
+      final educationCount = parsed.effectiveEducationEntries.length;
+      final accepted = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Review extracted resume details'),
+          content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(parsed.fullName.isEmpty ? 'Name not detected' : parsed.fullName,
+              style: const TextStyle(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 8),
+            Text(parsed.email.isEmpty ? 'Email not detected' : parsed.email),
+            const SizedBox(height: 12),
+            Text('\$workCount work experience entries'),
+            Text('\$educationCount education entries'),
+            Text('${parsed.skillList.length} skills'),
+            Text('${parsed.certifications.length} certifications'),
+            const SizedBox(height: 12),
+            const Text('Importing replaces the current resume draft on this device. Review all extracted details after import.',
+              style: TextStyle(fontSize: 12, color: Colors.black54)),
+          ]),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')),
+            FilledButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Import details')),
+          ],
+        ),
+      );
+      if (accepted != true || !mounted) return;
+      _applyImportedResume(parsed);
+      await context.read<ResumeProvider>().importResume(parsed);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Resume details imported. Review and correct the extracted fields.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not import resume: \$error')));
+    }
+  }
+
+  void _applyImportedResume(ResumeModel resume) {
+    for (final group in [..._extraExperiences, ..._extraEducations, ..._projects, ..._certifications]) {
+      for (final controller in group) { controller.dispose(); }
+    }
+    _extraExperiences.clear();
+    _extraEducations.clear();
+    _projects.clear();
+    _certifications.clear();
+    _name.text = resume.fullName;
+    _role.text = resume.targetRole;
+    _email.text = resume.email;
+    _phone.text = resume.phone;
+    _location.text = resume.location;
+    _summary.text = resume.professionalSummary;
+    final work = resume.effectiveWorkExperiences;
+    _experienceRole.text = work.isEmpty ? '' : work.first['title'] ?? '';
+    _company.text = work.isEmpty ? '' : work.first['company'] ?? '';
+    _experience.text = work.isEmpty ? '' : work.first['description'] ?? '';
+    final education = resume.effectiveEducationEntries;
+    _degree.text = education.isEmpty ? '' : education.first['degree'] ?? '';
+    _institution.text = education.isEmpty ? '' : education.first['institution'] ?? '';
+    _education.text = education.isEmpty ? '' : education.first['description'] ?? '';
+    _skills.text = resume.skills;
+    for (final entry in work.skip(1)) {
+      _extraExperiences.add([TextEditingController(text: entry['title'] ?? ''),
+        TextEditingController(text: entry['company'] ?? ''), TextEditingController(text: entry['description'] ?? '')]);
+    }
+    for (final entry in education.skip(1)) {
+      _extraEducations.add([TextEditingController(text: entry['degree'] ?? ''),
+        TextEditingController(text: entry['institution'] ?? ''), TextEditingController(text: entry['description'] ?? '')]);
+    }
+    for (final entry in resume.projects) {
+      _projects.add([TextEditingController(text: entry['name'] ?? ''),
+        TextEditingController(text: entry['description'] ?? ''), TextEditingController(text: entry['technologies'] ?? '')]);
+    }
+    for (final entry in resume.certifications) {
+      _certifications.add([TextEditingController(text: entry['name'] ?? ''),
+        TextEditingController(text: entry['issuer'] ?? ''), TextEditingController(text: entry['date'] ?? '')]);
+    }
+    setState(() {});
+  }
+
   Future<void> _improveSummary() async {
     final provider = context.read<ResumeProvider>();
     try {
@@ -269,6 +363,20 @@ class _ResumeEditorScreenState extends State<ResumeEditorScreen> {
                 ],
               ),
             ),
+          ),
+          _section(
+            title: 'Import an existing resume',
+            description: 'Upload a PDF, DOCX or TXT file to prefill your resume. Review and edit every extracted field.',
+            icon: Icons.file_upload_outlined,
+            children: [
+              SizedBox(width: double.infinity, child: OutlinedButton.icon(
+                onPressed: _importResume,
+                icon: const Icon(Icons.upload_file),
+                label: const Text('Import resume file'),
+              )),
+              const Text('The selected file is sent to the SoulSkill parsing API for extraction.',
+                style: TextStyle(fontSize: 11, color: Color(0xFF77728D))),
+            ],
           ),
           _section(
             title: 'Personal details',
