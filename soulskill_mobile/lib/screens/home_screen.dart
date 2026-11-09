@@ -68,6 +68,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     'Your career profile',
                     'Your profile will become the reusable source of truth for resumes, job applications and admissions documents.',
                   ),
+                  onOpenCareerExplorer: _openCareerExplorer,
+                  onOpenPreparationGuide: _openPreparationGuide,
                 ),
                 Expanded(
                   child: Column(
@@ -327,11 +329,15 @@ class _DesktopSidebar extends StatelessWidget {
     required this.selected,
     required this.onSelected,
     required this.onOpenProfile,
+    required this.onOpenCareerExplorer,
+    required this.onOpenPreparationGuide,
   });
 
   final _Destination selected;
   final ValueChanged<_Destination> onSelected;
   final VoidCallback onOpenProfile;
+  final VoidCallback onOpenCareerExplorer;
+  final VoidCallback onOpenPreparationGuide;
 
   @override
   Widget build(BuildContext context) {
@@ -376,12 +382,11 @@ class _DesktopSidebar extends StatelessWidget {
           ),
           const SizedBox(height: 25),
           const _SidebarLabel('EXPLORE'),
-          const _SidebarItem(
+          _SidebarItem(
             icon: Icons.track_changes_outlined,
-            label: 'Job matching',
+            label: 'Find roles & companies',
             selected: false,
-            onTap: null,
-            badge: 'NEXT',
+            onTap: onOpenCareerExplorer,
           ),
           const _SidebarItem(
             icon: Icons.school_outlined,
@@ -390,12 +395,11 @@ class _DesktopSidebar extends StatelessWidget {
             onTap: null,
             badge: 'NEXT',
           ),
-          const _SidebarItem(
+          _SidebarItem(
             icon: Icons.menu_book_outlined,
-            label: 'Learning hub',
+            label: 'Preparation guide',
             selected: false,
-            onTap: null,
-            badge: 'NEXT',
+            onTap: onOpenPreparationGuide,
           ),
           const _SidebarItem(
             icon: Icons.assignment_outlined,
