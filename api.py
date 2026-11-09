@@ -153,7 +153,17 @@ async def get_user_resumes(
 async def parse_resume_file(file: UploadFile = File(...)):
     """Parse uploaded resume file"""
     try:
-        parsed_data = parse_uploaded_resume(file.file, api_key=None)
+        filename = (file.filename or '').lower()
+        if not filename.endswith(('.pdf', '.docx', '.txt')):
+            raise HTTPException(status_code=415, detail="Unsupported file format. Upload PDF, DOCX, or TXT.")
+        contents = await file.read()
+        if not contents:
+            raise HTTPException(status_code=400, detail="The uploaded file is empty.")
+        if len(contents) > 10 * 1024 * 1024:
+            raise HTTPException(status_code=413, detail="Resume file must be 10 MB or smaller.")
+        stream = io.BytesIO(contents)
+        stream.name = file.filename
+        parsed_data = parse_uploaded_resume(stream, api_key=None)
         
         return {
             "success": True,
