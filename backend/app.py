@@ -33,7 +33,7 @@ def _cors_settings() -> dict[str, Any]:
         for value in os.getenv("SOULSKILL_CORS_ORIGINS", "").split(",")
         if value.strip()
     ]
-    local_regex = r"^https?://(localhost|127\\.0\\.0\\.1)(:\\d+)?$"
+    local_regex = r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
     return {
         "allow_origins": origins,
         "allow_origin_regex": local_regex if env not in {"production", "prod"} and not origins else None,
@@ -120,7 +120,7 @@ async def parse_resume_upload(file: UploadFile = File(...)):
                     status_code=422,
                     detail="This PDF is password protected. Upload an unlocked copy.",
                 )
-            extracted = "\\n".join(page.extract_text() or "" for page in reader.pages)
+            extracted = "\n".join(page.extract_text() or "" for page in reader.pages)
         elif extension == "docx":
             from docx import Document
             document = Document(BytesIO(content))
@@ -130,7 +130,7 @@ async def parse_resume_upload(file: UploadFile = File(...)):
                 for table in document.tables
                 for row in table.rows
             ]
-            extracted = "\\n".join(paragraphs + tables)
+            extracted = "\n".join(paragraphs + tables)
         else:
             extracted = content.decode("utf-8-sig")
     except HTTPException:
