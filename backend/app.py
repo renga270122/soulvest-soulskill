@@ -1,7 +1,7 @@
-"""Small, stateless FastAPI service for SoulSkill's first backend milestone.
+"""FastAPI service for SoulSkill's career workspace.
 
-This API parses user-supplied resumes in memory and performs deterministic
-job-fit analysis. It does not persist files, profiles, or job descriptions.
+Resume import/job-fit remain stateless. Authenticated account and profile
+endpoints use Supabase Auth and user-scoped PostgREST access.
 """
 from __future__ import annotations
 
@@ -17,8 +17,10 @@ from pydantic import BaseModel, Field
 
 try:
     from .resume_job_service import analyze_resume_for_job, parse_resume_text
+    from .profile_api import router as profile_router
 except ImportError:
     from resume_job_service import analyze_resume_for_job, parse_resume_text
+    from profile_api import router as profile_router
 
 MAX_UPLOAD_BYTES = 4 * 1024 * 1024
 MAX_RESUME_JSON_CHARS = 80_000
@@ -36,18 +38,19 @@ def _cors_settings() -> dict[str, Any]:
         "allow_origins": origins,
         "allow_origin_regex": local_regex if env not in {"production", "prod"} and not origins else None,
         "allow_credentials": False,
-        "allow_methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "X-Request-ID"],
+        "allow_methods": ["GET", "POST", "PATCH", "OPTIONS"],
+        "allow_headers": ["Authorization", "Content-Type", "X-Request-ID"],
         "expose_headers": ["X-Request-ID"],
     }
 
 
 app = FastAPI(
     title="SoulSkill API",
-    description="Stateless resume import and job-fit analysis for the SoulSkill career workspace.",
-    version="0.1.0",
+    description="Career workspace APIs, resume import and explainable job-fit analysis.",
+    version="0.2.0",
 )
 app.add_middleware(CORSMiddleware, **_cors_settings())
+app.include_router(profile_router)
 
 
 @app.middleware("http")
@@ -72,8 +75,14 @@ async def root():
         "version": app.version,
         "health": "/health",
         "docs": "/docs",
-        "capabilities": ["resume.parse", "resume.job_fit"],
-        "persistence": "none",
+        "capabilities": [
+            "resume.parse",
+            "resume.job_fit",
+            "account.me",
+            "profile.read",
+            "profile.update",
+        ],
+        "persistence": "candidate profile only; resume import remains stateless",
     }
 
 
