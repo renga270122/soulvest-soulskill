@@ -25,6 +25,8 @@ class _ResumeEditorScreenState extends State<ResumeEditorScreen> {
   late final TextEditingController _institution;
   late final TextEditingController _education;
   late final TextEditingController _skills;
+  final List<List<TextEditingController>> _extraExperiences = [];
+  final List<List<TextEditingController>> _extraEducations = [];
 
   @override
   void initState() {
@@ -43,6 +45,20 @@ class _ResumeEditorScreenState extends State<ResumeEditorScreen> {
     _institution = TextEditingController(text: resume.institution);
     _education = TextEditingController(text: resume.educationDetails);
     _skills = TextEditingController(text: resume.skills);
+    for (final entry in resume.effectiveWorkExperiences.skip(1)) {
+      _extraExperiences.add([
+        TextEditingController(text: entry['title'] ?? ''),
+        TextEditingController(text: entry['company'] ?? ''),
+        TextEditingController(text: entry['description'] ?? ''),
+      ]);
+    }
+    for (final entry in resume.effectiveEducationEntries.skip(1)) {
+      _extraEducations.add([
+        TextEditingController(text: entry['degree'] ?? ''),
+        TextEditingController(text: entry['institution'] ?? ''),
+        TextEditingController(text: entry['description'] ?? ''),
+      ]);
+    }
   }
 
   @override
@@ -51,8 +67,9 @@ class _ResumeEditorScreenState extends State<ResumeEditorScreen> {
       _name, _role, _email, _phone, _location, _summary,
       _experienceRole, _company, _experience, _degree,
       _institution, _education, _skills,
-    ]) {
-      controller.dispose();
+    ]) { controller.dispose(); }
+    for (final group in [..._extraExperiences, ..._extraEducations]) {
+      for (final controller in group) { controller.dispose(); }
     }
     super.dispose();
   }
@@ -74,7 +91,51 @@ class _ResumeEditorScreenState extends State<ResumeEditorScreen> {
         institution: _institution.text,
         educationDetails: _education.text,
         skills: _skills.text,
+        workExperiences: [
+          if (_experienceRole.text.isNotEmpty || _company.text.isNotEmpty || _experience.text.isNotEmpty)
+            {'title': _experienceRole.text, 'company': _company.text, 'description': _experience.text},
+          ..._extraExperiences.map((g) => {'title': g[0].text, 'company': g[1].text, 'description': g[2].text}),
+        ],
+        educationEntries: [
+          if (_degree.text.isNotEmpty || _institution.text.isNotEmpty || _education.text.isNotEmpty)
+            {'degree': _degree.text, 'institution': _institution.text, 'description': _education.text},
+          ..._extraEducations.map((g) => {'degree': g[0].text, 'institution': g[1].text, 'description': g[2].text}),
+        ],
       ),
+    );
+  }
+
+
+  void _addEntry(List<List<TextEditingController>> entries) {
+    setState(() => entries.add(List.generate(3, (_) => TextEditingController())));
+    _syncDraft();
+  }
+
+  void _removeEntry(List<List<TextEditingController>> entries, int index) {
+    final removed = entries.removeAt(index);
+    for (final controller in removed) { controller.dispose(); }
+    setState(() {});
+    _syncDraft();
+  }
+
+  Widget _additionalEntry(List<TextEditingController> fields, String title,
+      List<String> labels, List<String> hints, VoidCallback onRemove) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8F7FF),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE8E5FA)),
+      ),
+      child: Column(children: [
+        Row(children: [
+          Expanded(child: Text(title, style: const TextStyle(fontWeight: FontWeight.w700))),
+          IconButton(onPressed: onRemove, icon: const Icon(Icons.delete_outline, color: Colors.redAccent)),
+        ]),
+        for (var i = 0; i < 3; i++)
+          _field(label: labels[i], controller: fields[i], hint: hints[i], lines: i == 2 ? 4 : 1),
+      ]),
     );
   }
 
@@ -249,6 +310,14 @@ class _ResumeEditorScreenState extends State<ResumeEditorScreen> {
                 hint: 'Describe what you delivered. Add measurable outcomes where possible.',
                 lines: 5,
               ),
+              for (var i = 0; i < _extraExperiences.length; i++)
+                _additionalEntry(_extraExperiences[i], 'Additional experience ' + (i + 2).toString(),
+                  const ['Job title', 'Company', 'Responsibilities and achievements'],
+                  const ['e.g. Technical Lead', 'Company name', 'Describe your impact and measurable outcomes.'],
+                  () => _removeEntry(_extraExperiences, i)),
+              Align(alignment: Alignment.centerLeft,
+                child: TextButton.icon(onPressed: () => _addEntry(_extraExperiences),
+                  icon: const Icon(Icons.add), label: const Text('Add another experience'))),
             ],
           ),
           _section(
@@ -259,6 +328,14 @@ class _ResumeEditorScreenState extends State<ResumeEditorScreen> {
               _field(label: 'Degree / Qualification', controller: _degree, hint: 'e.g. B.E. Computer Science'),
               _field(label: 'Institution', controller: _institution, hint: 'College or university'),
               _field(label: 'Additional details', controller: _education, hint: 'Year, specialization, honors or relevant coursework.', lines: 3),
+              for (var i = 0; i < _extraEducations.length; i++)
+                _additionalEntry(_extraEducations[i], 'Additional education ' + (i + 2).toString(),
+                  const ['Degree / Qualification', 'Institution', 'Additional details'],
+                  const ['Qualification', 'College or university', 'Year, specialization or honors.'],
+                  () => _removeEntry(_extraEducations, i)),
+              Align(alignment: Alignment.centerLeft,
+                child: TextButton.icon(onPressed: () => _addEntry(_extraEducations),
+                  icon: const Icon(Icons.add), label: const Text('Add another education'))),
             ],
           ),
           _section(
