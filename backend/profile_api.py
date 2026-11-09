@@ -6,7 +6,10 @@ from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
-from .auth import AuthContext, get_auth_context
+try:
+    from .auth import AuthContext, get_auth_context
+except ImportError:
+    from auth import AuthContext, get_auth_context
 
 router = APIRouter(prefix="/api/v1", tags=["account", "profile"])
 
