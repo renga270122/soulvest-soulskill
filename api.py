@@ -13,6 +13,7 @@ import hmac
 import hashlib
 import json
 import os
+import io
 import uvicorn
 
 # Import our modules
@@ -169,6 +170,8 @@ async def parse_resume_file(file: UploadFile = File(...)):
             "success": True,
             "data": parsed_data
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
