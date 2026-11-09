@@ -5,6 +5,9 @@ import '../providers/resume_provider.dart';
 import '../theme/soulskill_theme.dart';
 import 'resume_editor_screen.dart';
 import 'resume_preview_screen.dart';
+import 'career_explorer_screen.dart';
+import 'preparation_guide_screen.dart';
+import 'build_together_screen.dart';
 
 enum _Destination { home, career, coach, soulMind }
 
@@ -28,6 +31,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _openPreview() => Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => const ResumePreviewScreen()),
+      );
+
+  void _openCareerExplorer() => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const CareerExplorerScreen()),
+      );
+
+  void _openPreparationGuide() => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const PreparationGuideScreen()),
+      );
+
+  void _openBuildTogether() => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const BuildTogetherScreen()),
       );
 
   void _openFeature(String title, String description) {
@@ -58,6 +73,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     'Your career profile',
                     'Your profile will become the reusable source of truth for resumes, job applications and admissions documents.',
                   ),
+                  onOpenCareerExplorer: _openCareerExplorer,
+                  onOpenPreparationGuide: _openPreparationGuide,
                 ),
                 Expanded(
                   child: Column(
@@ -133,6 +150,9 @@ class _HomeScreenState extends State<HomeScreen> {
           onOpenCoach: () => _select(_Destination.coach),
           onOpenSoulMind: () => _select(_Destination.soulMind),
           onOpenFeature: _openFeature,
+          onFindRoles: _openCareerExplorer,
+          onOpenPreparationGuide: _openPreparationGuide,
+          onBuildTogether: _openBuildTogether,
           onOpenPreview:
               provider.resume.completionPercent > 0 ? _openPreview : null,
           checkIn: _checkIn,
@@ -150,6 +170,8 @@ class _HomeScreenState extends State<HomeScreen> {
           onPreview:
               provider.resume.completionPercent > 0 ? _openPreview : null,
           onOpenFeature: _openFeature,
+          onFindRoles: _openCareerExplorer,
+          onOpenPreparationGuide: _openPreparationGuide,
         );
       case _Destination.coach:
         return _SoulCoachView(onOpenFeature: _openFeature);
@@ -274,8 +296,8 @@ class _BrandLockup extends StatelessWidget {
             color: const Color(0xFFECEAFF),
             borderRadius: BorderRadius.circular(13),
           ),
-          child: const Icon(Icons.auto_awesome_rounded,
-              color: SoulSkillTheme.violet, size: 22),
+          child: const Icon(Icons.spa_rounded,
+              color: SoulSkillTheme.violet, size: 24),
         ),
         const SizedBox(width: 10),
         Column(
@@ -313,11 +335,15 @@ class _DesktopSidebar extends StatelessWidget {
     required this.selected,
     required this.onSelected,
     required this.onOpenProfile,
+    required this.onOpenCareerExplorer,
+    required this.onOpenPreparationGuide,
   });
 
   final _Destination selected;
   final ValueChanged<_Destination> onSelected;
   final VoidCallback onOpenProfile;
+  final VoidCallback onOpenCareerExplorer;
+  final VoidCallback onOpenPreparationGuide;
 
   @override
   Widget build(BuildContext context) {
@@ -362,16 +388,28 @@ class _DesktopSidebar extends StatelessWidget {
           ),
           const SizedBox(height: 25),
           const _SidebarLabel('EXPLORE'),
-          const _SidebarItem(
+          _SidebarItem(
             icon: Icons.track_changes_outlined,
-            label: 'Job matching',
+            label: 'Find roles & companies',
             selected: false,
-            onTap: null,
-            badge: 'NEXT',
+            onTap: onOpenCareerExplorer,
           ),
           const _SidebarItem(
             icon: Icons.school_outlined,
             label: 'Admissions',
+            selected: false,
+            onTap: null,
+            badge: 'NEXT',
+          ),
+          _SidebarItem(
+            icon: Icons.menu_book_outlined,
+            label: 'Preparation guide',
+            selected: false,
+            onTap: onOpenPreparationGuide,
+          ),
+          const _SidebarItem(
+            icon: Icons.assignment_outlined,
+            label: 'Applications',
             selected: false,
             onTap: null,
             badge: 'NEXT',
@@ -535,6 +573,9 @@ class _DashboardView extends StatelessWidget {
     required this.onOpenCoach,
     required this.onOpenSoulMind,
     required this.onOpenFeature,
+    required this.onFindRoles,
+    required this.onOpenPreparationGuide,
+    required this.onBuildTogether,
     required this.onOpenPreview,
     required this.checkIn,
     required this.onCheckIn,
@@ -547,6 +588,9 @@ class _DashboardView extends StatelessWidget {
   final VoidCallback onOpenCoach;
   final VoidCallback onOpenSoulMind;
   final void Function(String, String) onOpenFeature;
+  final VoidCallback onFindRoles;
+  final VoidCallback onOpenPreparationGuide;
+  final VoidCallback onBuildTogether;
   final VoidCallback? onOpenPreview;
   final String? checkIn;
   final ValueChanged<String> onCheckIn;
@@ -573,11 +617,19 @@ class _DashboardView extends StatelessWidget {
               onOpenSoulMind: onOpenSoulMind,
               wide: wide,
             ),
+            const SizedBox(height: 14),
+            _DailyWisdomCard(onOpenSoulMind: onOpenSoulMind),
             const SizedBox(height: 18),
             _ProgressSummary(
               progress: progress,
               isLoaded: isLoaded,
               onTap: onOpenCareer,
+              wide: wide,
+            ),
+            const SizedBox(height: 14),
+            _DashboardMetricStrip(
+              progress: progress,
+              isLoaded: isLoaded,
               wide: wide,
             ),
             const SizedBox(height: 28),
@@ -593,6 +645,9 @@ class _DashboardView extends StatelessWidget {
               onCoach: onOpenCoach,
               onSoulMind: onOpenSoulMind,
               onFeature: onOpenFeature,
+              onFindRoles: onFindRoles,
+              onPreparationGuide: onOpenPreparationGuide,
+              onBuildTogether: onBuildTogether,
             ),
             const SizedBox(height: 28),
             if (sideBySide)
@@ -925,6 +980,152 @@ class _ProgressSummary extends StatelessWidget {
   }
 }
 
+
+class _DashboardMetricStrip extends StatelessWidget {
+  const _DashboardMetricStrip({
+    required this.progress,
+    required this.isLoaded,
+    required this.wide,
+  });
+
+  final int progress;
+  final bool isLoaded;
+  final bool wide;
+
+  @override
+  Widget build(BuildContext context) {
+    final metrics = <_DashboardMetricData>[
+      _DashboardMetricData(
+        icon: Icons.insights_rounded,
+        label: 'Resume strength',
+        value: isLoaded ? '$progress%' : '—',
+        detail: 'Your profile progress',
+        color: const Color(0xFF6558D3),
+      ),
+      const _DashboardMetricData(
+        icon: Icons.work_outline_rounded,
+        label: 'Career toolkit',
+        value: '06',
+        detail: 'Tools in your workspace',
+        color: Color(0xFF278B83),
+      ),
+      const _DashboardMetricData(
+        icon: Icons.auto_awesome_rounded,
+        label: 'AI companion',
+        value: 'Ready',
+        detail: 'Guidance when you need it',
+        color: Color(0xFF8A63D2),
+      ),
+      const _DashboardMetricData(
+        icon: Icons.spa_outlined,
+        label: 'Personal growth',
+        value: 'SoulMind',
+        detail: 'Make space for yourself',
+        color: Color(0xFFD16B91),
+      ),
+    ];
+
+    return GridView.builder(
+      itemCount: metrics.length,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: wide ? 4 : 2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        mainAxisExtent: wide ? 112 : 106,
+      ),
+      itemBuilder: (context, index) =>
+          _DashboardMetricCard(metric: metrics[index]),
+    );
+  }
+}
+
+class _DashboardMetricData {
+  const _DashboardMetricData({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.detail,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final String detail;
+  final Color color;
+}
+
+class _DashboardMetricCard extends StatelessWidget {
+  const _DashboardMetricCard({required this.metric});
+
+  final _DashboardMetricData metric;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(color: SoulSkillTheme.border),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x080F1230),
+            blurRadius: 14,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(metric.icon, color: metric.color, size: 17),
+              const SizedBox(width: 7),
+              Expanded(
+                child: Text(
+                  metric.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: SoulSkillTheme.muted,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Text(
+            metric.value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: SoulSkillTheme.ink,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.4,
+            ),
+          ),
+          Text(
+            metric.detail,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Color(0xFF9299A8),
+              fontSize: 9,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _SectionHeading extends StatelessWidget {
   const _SectionHeading({
     required this.title,
@@ -971,6 +1172,9 @@ class _QuickActionGrid extends StatelessWidget {
     required this.onCoach,
     required this.onSoulMind,
     required this.onFeature,
+    required this.onFindRoles,
+    required this.onPreparationGuide,
+    required this.onBuildTogether,
   });
 
   final bool wide;
@@ -978,6 +1182,9 @@ class _QuickActionGrid extends StatelessWidget {
   final VoidCallback onCoach;
   final VoidCallback onSoulMind;
   final void Function(String, String) onFeature;
+  final VoidCallback onFindRoles;
+  final VoidCallback onPreparationGuide;
+  final VoidCallback onBuildTogether;
 
   @override
   Widget build(BuildContext context) {
@@ -990,15 +1197,25 @@ class _QuickActionGrid extends StatelessWidget {
         onTap: onCareer,
       ),
       _ActionData(
-        icon: Icons.track_changes_outlined,
-        title: 'Job matching',
-        subtitle: 'Understand role requirements',
+        icon: Icons.travel_explore_rounded,
+        title: 'Find roles & companies',
+        subtitle: 'Explore opportunities for your skills',
         color: const Color(0xFF238A81),
-        status: 'NEXT',
-        onTap: () => onFeature(
-          'Job matching & ATS insights',
-          'Compare a resume with a job description, understand skill evidence and discover practical improvements. This capability is planned for the next product milestone.',
-        ),
+        onTap: onFindRoles,
+      ),
+      _ActionData(
+        icon: Icons.menu_book_rounded,
+        title: 'Preparation guide',
+        subtitle: 'Learning materials and interview links',
+        color: const Color(0xFF5275C8),
+        onTap: onPreparationGuide,
+      ),
+      _ActionData(
+        icon: Icons.groups_2_outlined,
+        title: 'BuildTogether',
+        subtitle: 'Find collaborators and consulting paths',
+        color: const Color(0xFF238A81),
+        onTap: onBuildTogether,
       ),
       _ActionData(
         icon: Icons.mic_none_rounded,
@@ -1389,12 +1606,16 @@ class _CareerStudioView extends StatelessWidget {
     required this.onCreateResume,
     required this.onPreview,
     required this.onOpenFeature,
+    required this.onFindRoles,
+    required this.onOpenPreparationGuide,
   });
 
   final int progress;
   final VoidCallback onCreateResume;
   final VoidCallback? onPreview;
   final void Function(String, String) onOpenFeature;
+  final VoidCallback onFindRoles;
+  final VoidCallback onOpenPreparationGuide;
 
   @override
   Widget build(BuildContext context) {
@@ -1447,15 +1668,21 @@ class _CareerStudioView extends StatelessWidget {
         ),
         const SizedBox(height: 15),
         _FeatureRowCard(
-          icon: Icons.track_changes_outlined,
-          title: 'ATS and job matching',
+          icon: Icons.travel_explore_rounded,
+          title: 'Find companies and roles',
           description:
-              'Compare your resume with a real job description and understand evidence gaps.',
-          badge: 'PLANNED',
-          onTap: () => onOpenFeature(
-            'ATS and job matching',
-            'This screen will compare a resume with a job description and explain skill alignment, missing evidence and document-readability checks.',
-          ),
+              'Explore role paths and employer career pages that align with your saved skills.',
+          badge: 'AVAILABLE',
+          onTap: onFindRoles,
+        ),
+        const SizedBox(height: 11),
+        _FeatureRowCard(
+          icon: Icons.menu_book_rounded,
+          title: 'Preparation guide and materials',
+          description:
+              'Open curated learning paths, technical references and interview practice resources.',
+          badge: 'AVAILABLE',
+          onTap: onOpenPreparationGuide,
         ),
         const SizedBox(height: 11),
         _FeatureRowCard(
@@ -1603,9 +1830,18 @@ class _SoulMindView extends StatelessWidget {
   final VoidCallback onClearCheckIn;
 
   static const _affirmations = <String>[
-    'My worth is not defined by a job title or an interview outcome.',
+    'My worth is not defined by a job title, salary or interview outcome.',
     'I can learn, adapt and communicate the value I bring.',
-    'I allow myself to take the next step at a steady pace.',
+    'I am allowed to pause, breathe and begin again.',
+    'A setback is part of my story, not the whole story.',
+    'I can ask for help without feeling that I have failed.',
+    'I bring experience, perspective and strengths that matter.',
+    'I do not need to compare my timeline with someone else’s.',
+    'I can take one useful step today, even if the whole path is unclear.',
+    'I deserve respect, including from myself.',
+    'I am more than my current employment status.',
+    'I can respond to uncertainty with curiosity instead of self-criticism.',
+    'Progress can be quiet, slow and still meaningful.',
   ];
 
   Future<void> _startPractice(BuildContext context) async {
@@ -1729,6 +1965,16 @@ class _SoulMindView extends StatelessWidget {
             ),
           ),
         ),
+        const SizedBox(height: 22),
+        Text('Emotional intelligence reminders',
+            style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 6),
+        Text(
+          'Small reminders for how we understand ourselves and connect with others.',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 11),
+        const _WisdomQuoteList(),
         const SizedBox(height: 16),
         _SurfaceCard(
           child: Column(
@@ -1770,6 +2016,132 @@ class _SoulMindView extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _DailyWisdomCard extends StatelessWidget {
+  const _DailyWisdomCard({required this.onOpenSoulMind});
+
+  final VoidCallback onOpenSoulMind;
+
+  static const _thoughts = <String>[
+    'Your employment status can change. Your worth does not.',
+    'You do not have to pretend to be okay to deserve support.',
+    'A kind conversation can be the first step toward a new direction.',
+    'You are allowed to be a work in progress and still be proud of yourself.',
+    'Asking for help is a skill, not a weakness.',
+    'You can hold uncertainty and hope at the same time.',
+    'Your next chapter does not need to look like anyone else’s.',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final day = DateTime.now().difference(DateTime(2025, 1, 1)).inDays;
+    final thought = _thoughts[day.abs() % _thoughts.length];
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF8EC),
+        borderRadius: BorderRadius.circular(19),
+        border: Border.all(color: const Color(0xFFF2E5CC)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.wb_sunny_outlined,
+              color: Color(0xFFB7791F), size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('A NOTE FOR TODAY',
+                    style: TextStyle(
+                      color: Color(0xFF9A681D),
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1,
+                    )),
+                const SizedBox(height: 7),
+                Text(thought,
+                    style: const TextStyle(
+                      color: SoulSkillTheme.ink,
+                      fontSize: 15,
+                      height: 1.4,
+                      fontWeight: FontWeight.w700,
+                    )),
+                const SizedBox(height: 5),
+                const Text('An original SoulSkill reflection',
+                    style: TextStyle(
+                      color: SoulSkillTheme.muted,
+                      fontSize: 10,
+                    )),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: onOpenSoulMind,
+                    child: const Text('A little more encouragement'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WisdomQuoteList extends StatelessWidget {
+  const _WisdomQuoteList();
+
+  static const _quotes = <(String, String)>[
+    ('Notice what you feel before deciding what to do with it.',
+        'Self-awareness'),
+    ('You can listen to understand without agreeing with everything.',
+        'Empathy'),
+    ('A pause between a feeling and a response can change a conversation.',
+        'Self-regulation'),
+    ('Boundaries can be kind, clear and respectful at the same time.',
+        'Healthy relationships'),
+    ('You can celebrate someone else’s progress without making your own smaller.',
+        'Social awareness'),
+    ('Curiosity often opens a door that judgment closes.',
+        'Empathy'),
+    ('Being strong does not mean carrying everything alone.',
+        'Self-awareness'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: _quotes.map((quote) => Padding(
+        padding: const EdgeInsets.only(bottom: 9),
+        child: _SurfaceCard(
+          color: const Color(0xFFF8F7FF),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('“${quote.$1}”',
+                  style: const TextStyle(
+                    color: SoulSkillTheme.ink,
+                    fontSize: 13,
+                    height: 1.45,
+                    fontWeight: FontWeight.w600,
+                  )),
+              const SizedBox(height: 8),
+              Text(quote.$2.toUpperCase(),
+                  style: const TextStyle(
+                    color: SoulSkillTheme.violet,
+                    fontSize: 9,
+                    letterSpacing: 0.8,
+                    fontWeight: FontWeight.w800,
+                  )),
+            ],
+          ),
+        ),
+      )).toList(),
     );
   }
 }

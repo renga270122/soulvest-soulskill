@@ -67,8 +67,14 @@ class ResumeProvider extends ChangeNotifier {
 
   Future<void> improveSummary() async {
     final summary = _resume.professionalSummary.trim();
-    if (summary.isEmpty) {
-      throw const ApiException('Add a short summary before asking AI to improve it.');
+    final experience = [
+      _resume.experienceRole.trim(),
+      _resume.company.trim(),
+      _resume.experienceDescription.trim(),
+    ].where((value) => value.isNotEmpty).join(' — ');
+    final skills = _resume.skillList;
+    if (summary.isEmpty && experience.isEmpty && skills.isEmpty) {
+      throw const ApiException('Add your work experience or skills first so we can create an accurate summary.');
     }
 
     _isImproving = true;
@@ -77,6 +83,8 @@ class ResumeProvider extends ChangeNotifier {
       final improved = await _apiClient.improveProfessionalSummary(
         summary: summary,
         role: _resume.targetRole,
+        experience: experience,
+        skills: skills,
       );
       update(_resume.copyWith(professionalSummary: improved));
       await saveNow();

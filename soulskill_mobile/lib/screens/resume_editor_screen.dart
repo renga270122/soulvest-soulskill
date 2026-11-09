@@ -86,7 +86,7 @@ class _ResumeEditorScreenState extends State<ResumeEditorScreen> {
       if (!mounted) return;
       _summary.text = provider.resume.professionalSummary;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('AI suggestion added to your draft. Please review it.')),
+        const SnackBar(content: Text('Summary draft updated. Please review it for accuracy.')),
       );
     } catch (error) {
       if (!mounted) return;
@@ -224,7 +224,7 @@ class _ResumeEditorScreenState extends State<ResumeEditorScreen> {
           ),
           _section(
             title: 'Professional summary',
-            description: 'A concise introduction to your experience and strengths.',
+            description: 'Create a concise introduction from your real experience and skills. You can start with a blank summary.',
             icon: Icons.auto_awesome_outlined,
             children: [
               _field(
@@ -241,7 +241,7 @@ class _ResumeEditorScreenState extends State<ResumeEditorScreen> {
                     icon: provider.isImproving
                         ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
                         : const Icon(Icons.auto_awesome, size: 17),
-                    label: Text(provider.isImproving ? 'Improving…' : 'Improve with AI'),
+                    label: Text(provider.isImproving ? 'Preparing…' : 'Create / improve summary'),
                   ),
                 ),
               ),
