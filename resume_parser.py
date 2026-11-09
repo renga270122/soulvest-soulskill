@@ -361,19 +361,19 @@ class ResumeParser:
         # Extract common experience and education sections heuristically when AI parsing is unavailable.
         def section_text(patterns):
             heading = r'(?:' + '|'.join(patterns) + r')'
-            match = re.search(heading + r'\\s*[:\\-]?\\s*(.*?)(?=\\n\\s*(?:EDUCATION|ACADEMIC|QUALIFICATION|SKILLS|TECHNICAL SKILLS|PROJECTS|CERTIFICATIONS|ACHIEVEMENTS|AWARDS|LANGUAGES|PERSONAL DETAILS)\\b|\\Z)', text, re.IGNORECASE | re.DOTALL)
+            match = re.search(heading + r'\s*[:\-]?\s*(.*?)(?=\n\s*(?:EDUCATION|ACADEMIC|QUALIFICATION|SKILLS|TECHNICAL SKILLS|PROJECTS|CERTIFICATIONS|ACHIEVEMENTS|AWARDS|LANGUAGES|PERSONAL DETAILS)\b|\Z)', text, re.IGNORECASE | re.DOTALL)
             return match.group(1).strip() if match else ''
 
         experience_text = section_text(['WORK EXPERIENCE', 'PROFESSIONAL EXPERIENCE', 'EMPLOYMENT HISTORY', 'EXPERIENCE'])
         if experience_text:
-            blocks = [block.strip() for block in re.split(r'\\n\\s*\\n', experience_text) if block.strip()]
+            blocks = [block.strip() for block in re.split(r'\n\s*\n', experience_text) if block.strip()]
             for block in blocks[:12]:
-                lines = [re.sub(r'^[•▪▫●*\\-]+\\s*', '', line).strip() for line in block.splitlines() if line.strip()]
+                lines = [re.sub(r'^[•▪▫●*\-]+\s*', '', line).strip() for line in block.splitlines() if line.strip()]
                 if not lines:
                     continue
                 title = lines[0][:120]
                 company = lines[1][:120] if len(lines) > 1 else ''
-                responsibilities = '\\n'.join(lines[2:] if len(lines) > 2 else lines[1:])
+                responsibilities = '\n'.join(lines[2:] if len(lines) > 2 else lines[1:])
                 if title or company or responsibilities:
                     data['work_entries'].append({
                         'title': title, 'company': company,
@@ -383,7 +383,7 @@ class ResumeParser:
 
         education_text = section_text(['EDUCATION', 'ACADEMIC QUALIFICATIONS', 'QUALIFICATIONS'])
         if education_text:
-            blocks = [block.strip() for block in re.split(r'\\n\\s*\\n', education_text) if block.strip()]
+            blocks = [block.strip() for block in re.split(r'\n\s*\n', education_text) if block.strip()]
             for block in blocks[:10]:
                 lines = [line.strip() for line in block.splitlines() if line.strip()]
                 if not lines:
@@ -396,12 +396,12 @@ class ResumeParser:
 
         projects_text = section_text(['PROJECTS', 'PERSONAL PROJECTS', 'KEY PROJECTS'])
         if projects_text:
-            for block in [b.strip() for b in re.split(r'\\n\\s*\\n', projects_text) if b.strip()][:10]:
+            for block in [b.strip() for b in re.split(r'\n\s*\n', projects_text) if b.strip()][:10]:
                 lines = [line.strip() for line in block.splitlines() if line.strip()]
                 if lines:
                     data.setdefault('projects', []).append({
                         'name': lines[0][:160],
-                        'description': '\\n'.join(lines[1:])[:1500],
+                        'description': '\n'.join(lines[1:])[:1500],
                         'technologies': ''
                     })
 
