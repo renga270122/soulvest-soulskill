@@ -117,6 +117,7 @@ class ResumeModel {
       'degree': entry['degree'] ?? '', 'institution': entry['institution'] ?? '',
       'description': entry['year'] ?? entry['description'] ?? '',
     }).toList();
+    final projects = _entries(json['projects']);
     final firstWork = work.isNotEmpty ? work.first : <String, String>{};
     final firstEducation = education.isNotEmpty ? education.first : <String, String>{};
     final rawCertifications = json['certifications'];
@@ -134,7 +135,8 @@ class ResumeModel {
       degree: firstEducation['degree'] ?? '', institution: firstEducation['institution'] ?? '',
       educationDetails: firstEducation['description'] ?? '',
       workExperiences: work, educationEntries: education,
-      certifications: certificationList, skills: _string(json, 'tech_skills'),
+      certifications: certificationList, projects: projects,
+      skills: _string(json, 'tech_skills'),
     );
   }
 
