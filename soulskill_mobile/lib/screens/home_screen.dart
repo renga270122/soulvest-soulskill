@@ -7,6 +7,7 @@ import 'resume_editor_screen.dart';
 import 'resume_preview_screen.dart';
 import 'career_explorer_screen.dart';
 import 'preparation_guide_screen.dart';
+import 'build_together_screen.dart';
 
 enum _Destination { home, career, coach, soulMind }
 
@@ -38,6 +39,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _openPreparationGuide() => Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => const PreparationGuideScreen()),
+      );
+
+  void _openBuildTogether() => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const BuildTogetherScreen()),
       );
 
   void _openFeature(String title, String description) {
@@ -147,6 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onOpenFeature: _openFeature,
           onFindRoles: _openCareerExplorer,
           onOpenPreparationGuide: _openPreparationGuide,
+          onBuildTogether: _openBuildTogether,
           onOpenPreview:
               provider.resume.completionPercent > 0 ? _openPreview : null,
           checkIn: _checkIn,
@@ -569,6 +575,7 @@ class _DashboardView extends StatelessWidget {
     required this.onOpenFeature,
     required this.onFindRoles,
     required this.onOpenPreparationGuide,
+    required this.onBuildTogether,
     required this.onOpenPreview,
     required this.checkIn,
     required this.onCheckIn,
@@ -583,6 +590,7 @@ class _DashboardView extends StatelessWidget {
   final void Function(String, String) onOpenFeature;
   final VoidCallback onFindRoles;
   final VoidCallback onOpenPreparationGuide;
+  final VoidCallback onBuildTogether;
   final VoidCallback? onOpenPreview;
   final String? checkIn;
   final ValueChanged<String> onCheckIn;
@@ -639,6 +647,7 @@ class _DashboardView extends StatelessWidget {
               onFeature: onOpenFeature,
               onFindRoles: onFindRoles,
               onPreparationGuide: onOpenPreparationGuide,
+              onBuildTogether: onBuildTogether,
             ),
             const SizedBox(height: 28),
             if (sideBySide)
@@ -1165,6 +1174,7 @@ class _QuickActionGrid extends StatelessWidget {
     required this.onFeature,
     required this.onFindRoles,
     required this.onPreparationGuide,
+    required this.onBuildTogether,
   });
 
   final bool wide;
@@ -1174,6 +1184,7 @@ class _QuickActionGrid extends StatelessWidget {
   final void Function(String, String) onFeature;
   final VoidCallback onFindRoles;
   final VoidCallback onPreparationGuide;
+  final VoidCallback onBuildTogether;
 
   @override
   Widget build(BuildContext context) {
@@ -1198,6 +1209,13 @@ class _QuickActionGrid extends StatelessWidget {
         subtitle: 'Learning materials and interview links',
         color: const Color(0xFF5275C8),
         onTap: onPreparationGuide,
+      ),
+      _ActionData(
+        icon: Icons.groups_2_outlined,
+        title: 'BuildTogether',
+        subtitle: 'Find collaborators and consulting paths',
+        color: const Color(0xFF238A81),
+        onTap: onBuildTogether,
       ),
       _ActionData(
         icon: Icons.mic_none_rounded,
