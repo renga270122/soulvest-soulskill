@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 class SoulSkillTheme {
-  static const Color ink = Color(0xFF182033);
-  static const Color muted = Color(0xFF697386);
-  static const Color canvas = Color(0xFFF6F7FB);
-  static const Color violet = Color(0xFF6558D3);
-  static const Color lavender = Color(0xFF8B7CF6);
-  static const Color border = Color(0xFFE8EAF1);
+  static const Color ink = Color(0xFF20183D);
+  static const Color muted = Color(0xFF706A83);
+  static const Color canvas = Color(0xFFF7F5FC);
+  static const Color violet = Color(0xFF6842D8);
+  static const Color lavender = Color(0xFF9B7AF5);
+  static const Color border = Color(0xFFEAE6F3);
 
   static ThemeData get light {
     final scheme = ColorScheme.fromSeed(
@@ -23,16 +23,16 @@ class SoulSkillTheme {
       colorScheme: scheme,
       scaffoldBackgroundColor: canvas,
       appBarTheme: const AppBarTheme(
-        backgroundColor: canvas,
+        backgroundColor: Colors.white,
         foregroundColor: ink,
         elevation: 0,
         centerTitle: false,
-        titleTextStyle: TextStyle(color: ink, fontSize: 19, fontWeight: FontWeight.w700),
+        titleTextStyle: TextStyle(color: ink, fontSize: 20, fontWeight: FontWeight.w700),
       ),
       textTheme: const TextTheme(
         headlineMedium: TextStyle(
           color: ink,
-          fontSize: 28,
+          fontSize: 30,
           height: 1.15,
           fontWeight: FontWeight.w800,
           letterSpacing: -0.7,
