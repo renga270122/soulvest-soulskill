@@ -27,6 +27,8 @@ class _ResumeEditorScreenState extends State<ResumeEditorScreen> {
   late final TextEditingController _skills;
   final List<List<TextEditingController>> _extraExperiences = [];
   final List<List<TextEditingController>> _extraEducations = [];
+  final List<List<TextEditingController>> _projects = [];
+  final List<List<TextEditingController>> _certifications = [];
 
   @override
   void initState() {
@@ -52,6 +54,12 @@ class _ResumeEditorScreenState extends State<ResumeEditorScreen> {
         TextEditingController(text: entry['description'] ?? ''),
       ]);
     }
+    for (final entry in resume.projects) {
+      _projects.add([TextEditingController(text: entry['name'] ?? ''), TextEditingController(text: entry['description'] ?? ''), TextEditingController(text: entry['technologies'] ?? '')]);
+    }
+    for (final entry in resume.certifications) {
+      _certifications.add([TextEditingController(text: entry['name'] ?? ''), TextEditingController(text: entry['issuer'] ?? ''), TextEditingController(text: entry['date'] ?? '')]);
+    }
     for (final entry in resume.effectiveEducationEntries.skip(1)) {
       _extraEducations.add([
         TextEditingController(text: entry['degree'] ?? ''),
@@ -68,7 +76,7 @@ class _ResumeEditorScreenState extends State<ResumeEditorScreen> {
       _experienceRole, _company, _experience, _degree,
       _institution, _education, _skills,
     ]) { controller.dispose(); }
-    for (final group in [..._extraExperiences, ..._extraEducations]) {
+    for (final group in [..._extraExperiences, ..._extraEducations, ..._projects, ..._certifications]) {
       for (final controller in group) { controller.dispose(); }
     }
     super.dispose();
@@ -96,6 +104,8 @@ class _ResumeEditorScreenState extends State<ResumeEditorScreen> {
             {'title': _experienceRole.text, 'company': _company.text, 'description': _experience.text},
           ..._extraExperiences.map((g) => {'title': g[0].text, 'company': g[1].text, 'description': g[2].text}),
         ],
+        projects: _projects.map((g) => {'name': g[0].text, 'description': g[1].text, 'technologies': g[2].text}).toList(),
+        certifications: _certifications.map((g) => {'name': g[0].text, 'issuer': g[1].text, 'date': g[2].text}).toList(),
         educationEntries: [
           if (_degree.text.isNotEmpty || _institution.text.isNotEmpty || _education.text.isNotEmpty)
             {'degree': _degree.text, 'institution': _institution.text, 'description': _education.text},
@@ -336,6 +346,36 @@ class _ResumeEditorScreenState extends State<ResumeEditorScreen> {
               Align(alignment: Alignment.centerLeft,
                 child: TextButton.icon(onPressed: () => _addEntry(_extraEducations),
                   icon: const Icon(Icons.add), label: const Text('Add another education'))),
+            ],
+          ),
+          _section(
+            title: 'Projects',
+            description: 'Showcase relevant work, side projects and measurable outcomes.',
+            icon: Icons.code_rounded,
+            children: [
+              for (var i = 0; i < _projects.length; i++)
+                _additionalEntry(_projects[i], 'Project ' + (i + 1).toString(),
+                  const ['Project name', 'What you built and achieved', 'Technologies / tools'],
+                  const ['e.g. Embedded diagnostics platform', 'Describe the problem, your contribution and impact.', 'C, C++, Python'],
+                  () { final removed = _projects.removeAt(i); for (final c in removed) { c.dispose(); } setState(() {}); _syncDraft(); }),
+              Align(alignment: Alignment.centerLeft,
+                child: TextButton.icon(onPressed: () => _addEntry(_projects),
+                  icon: const Icon(Icons.add), label: const Text('Add project'))),
+            ],
+          ),
+          _section(
+            title: 'Certifications',
+            description: 'Add relevant professional certifications and courses.',
+            icon: Icons.workspace_premium_outlined,
+            children: [
+              for (var i = 0; i < _certifications.length; i++)
+                _additionalEntry(_certifications[i], 'Certification ' + (i + 1).toString(),
+                  const ['Certification name', 'Issuing organisation', 'Date / year'],
+                  const ['e.g. AWS Certified Developer', 'e.g. Amazon Web Services', '2026'],
+                  () { final removed = _certifications.removeAt(i); for (final c in removed) { c.dispose(); } setState(() {}); _syncDraft(); }),
+              Align(alignment: Alignment.centerLeft,
+                child: TextButton.icon(onPressed: () => _addEntry(_certifications),
+                  icon: const Icon(Icons.add), label: const Text('Add certification'))),
             ],
           ),
           _section(
