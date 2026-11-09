@@ -1,0 +1,46 @@
+name: Flutter validation
+
+on:
+  push:
+    branches:
+      - feature/flutter-soulskill-full-migration
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  validate:
+    name: Analyze, test and build Flutter targets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: soulskill_mobile
+        run: flutter pub get
+
+      - name: Analyze
+        working-directory: soulskill_mobile
+        run: flutter analyze --no-pub
+
+      - name: Run tests
+        working-directory: soulskill_mobile
+        run: flutter test --no-pub
+
+      - name: Build PWA
+        working-directory: soulskill_mobile
+        run: flutter build web --release
+
+      - name: Generate Android host project
+        run: bash ./scripts/bootstrap_android.sh
+
+      - name: Build Android APK
+        working-directory: soulskill_mobile
+        run: flutter build apk --debug
