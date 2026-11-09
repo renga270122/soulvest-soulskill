@@ -154,8 +154,8 @@ async def improve_professional_summary(request: ImproveSummaryRequest):
             pass
 
     # Honest offline fallback: reorganize only the facts the candidate provided.
-    clean_summary = re.sub(r"\\s+", " ", summary).strip(" .")
-    clean_experience = re.sub(r"\\s+", " ", experience).strip(" .")
+    clean_summary = re.sub(r"\s+", " ", summary).strip(" .")
+    clean_experience = re.sub(r"\s+", " ", experience).strip(" .")
     clean_skills = ", ".join(skills[:8])
     parts = []
     if role:
