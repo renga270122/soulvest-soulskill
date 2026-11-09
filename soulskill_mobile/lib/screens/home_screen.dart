@@ -274,8 +274,8 @@ class _BrandLockup extends StatelessWidget {
             color: const Color(0xFFECEAFF),
             borderRadius: BorderRadius.circular(13),
           ),
-          child: const Icon(Icons.auto_awesome_rounded,
-              color: SoulSkillTheme.violet, size: 22),
+          child: const Icon(Icons.spa_rounded,
+              color: SoulSkillTheme.violet, size: 24),
         ),
         const SizedBox(width: 10),
         Column(
@@ -372,6 +372,20 @@ class _DesktopSidebar extends StatelessWidget {
           const _SidebarItem(
             icon: Icons.school_outlined,
             label: 'Admissions',
+            selected: false,
+            onTap: null,
+            badge: 'NEXT',
+          ),
+          const _SidebarItem(
+            icon: Icons.menu_book_outlined,
+            label: 'Learning hub',
+            selected: false,
+            onTap: null,
+            badge: 'NEXT',
+          ),
+          const _SidebarItem(
+            icon: Icons.assignment_outlined,
+            label: 'Applications',
             selected: false,
             onTap: null,
             badge: 'NEXT',
@@ -578,6 +592,12 @@ class _DashboardView extends StatelessWidget {
               progress: progress,
               isLoaded: isLoaded,
               onTap: onOpenCareer,
+              wide: wide,
+            ),
+            const SizedBox(height: 14),
+            _DashboardMetricStrip(
+              progress: progress,
+              isLoaded: isLoaded,
               wide: wide,
             ),
             const SizedBox(height: 28),
@@ -920,6 +940,152 @@ class _ProgressSummary extends StatelessWidget {
                   color: SoulSkillTheme.violet, size: 20),
           ],
         ),
+      ),
+    );
+  }
+}
+
+
+class _DashboardMetricStrip extends StatelessWidget {
+  const _DashboardMetricStrip({
+    required this.progress,
+    required this.isLoaded,
+    required this.wide,
+  });
+
+  final int progress;
+  final bool isLoaded;
+  final bool wide;
+
+  @override
+  Widget build(BuildContext context) {
+    final metrics = <_DashboardMetricData>[
+      _DashboardMetricData(
+        icon: Icons.insights_rounded,
+        label: 'Resume strength',
+        value: isLoaded ? '$progress%' : '—',
+        detail: 'Your profile progress',
+        color: const Color(0xFF6558D3),
+      ),
+      const _DashboardMetricData(
+        icon: Icons.work_outline_rounded,
+        label: 'Career toolkit',
+        value: '06',
+        detail: 'Tools in your workspace',
+        color: Color(0xFF278B83),
+      ),
+      const _DashboardMetricData(
+        icon: Icons.auto_awesome_rounded,
+        label: 'AI companion',
+        value: 'Ready',
+        detail: 'Guidance when you need it',
+        color: Color(0xFF8A63D2),
+      ),
+      const _DashboardMetricData(
+        icon: Icons.spa_outlined,
+        label: 'Personal growth',
+        value: 'SoulMind',
+        detail: 'Make space for yourself',
+        color: Color(0xFFD16B91),
+      ),
+    ];
+
+    return GridView.builder(
+      itemCount: metrics.length,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: wide ? 4 : 2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        mainAxisExtent: wide ? 112 : 106,
+      ),
+      itemBuilder: (context, index) =>
+          _DashboardMetricCard(metric: metrics[index]),
+    );
+  }
+}
+
+class _DashboardMetricData {
+  const _DashboardMetricData({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.detail,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final String detail;
+  final Color color;
+}
+
+class _DashboardMetricCard extends StatelessWidget {
+  const _DashboardMetricCard({required this.metric});
+
+  final _DashboardMetricData metric;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(color: SoulSkillTheme.border),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x080F1230),
+            blurRadius: 14,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(metric.icon, color: metric.color, size: 17),
+              const SizedBox(width: 7),
+              Expanded(
+                child: Text(
+                  metric.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: SoulSkillTheme.muted,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Text(
+            metric.value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: SoulSkillTheme.ink,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.4,
+            ),
+          ),
+          Text(
+            metric.detail,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Color(0xFF9299A8),
+              fontSize: 9,
+            ),
+          ),
+        ],
       ),
     );
   }
