@@ -7,6 +7,9 @@ from __future__ import annotations
 
 import json
 import os
+import re
+import urllib.error
+import urllib.request
 from datetime import datetime, timezone
 from io import BytesIO
 from typing import Any
@@ -65,6 +68,13 @@ class JobFitRequest(BaseModel):
     target_role: str | None = Field(default=None, max_length=160)
 
 
+class ImproveSummaryRequest(BaseModel):
+    summary: str = Field(default="", max_length=4_000)
+    role: str = Field(default="", max_length=160)
+    experience: str = Field(default="", max_length=8_000)
+    skills: list[str] = Field(default_factory=list, max_length=40)
+
+
 @app.get("/")
 async def root():
     return {
@@ -84,6 +94,88 @@ async def health_check():
         "service": "soulskill-api",
         "version": app.version,
         "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+
+@app.post("/api/ai/improve-summary")
+async def improve_professional_summary(request: ImproveSummaryRequest):
+    """Improve a candidate summary without adding unsupported claims."""
+    summary = request.summary.strip()
+    experience = request.experience.strip()
+    skills = [item.strip()[:80] for item in request.skills if item.strip()][:20]
+    role = request.role.strip()
+
+    if not summary and not experience and not skills:
+        raise HTTPException(
+            status_code=422,
+            detail="Add a summary, work experience or skills before generating a professional introduction.",
+        )
+
+    api_key = os.getenv("GOOGLE_API_KEY", "").strip()
+    if api_key:
+        model = os.getenv("GOOGLE_GEMINI_MODEL", "gemini-2.0-flash").strip()
+        facts = {
+            "target_role": role,
+            "existing_summary": summary,
+            "experience_evidence": experience,
+            "skills_supplied_by_candidate": skills,
+        }
+        prompt = (
+            "Rewrite the candidate's professional resume summary in 3 to 4 concise sentences. "
+            "Use only facts explicitly present in the supplied candidate data. Do not invent "
+            "years, employers, degrees, certifications, achievements, metrics, seniority or skills. "
+            "Do not claim proficiency beyond what the candidate supplied. If information is sparse, "
+            "keep the wording appropriately modest. Use a clear, ATS-readable professional tone. "
+            "Return only the revised summary. Candidate data: "
+            + json.dumps(facts, ensure_ascii=False)
+        )
+        body = json.dumps({
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {"temperature": 0.2, "maxOutputTokens": 220},
+        }).encode("utf-8")
+        url = (
+            "https://generativelanguage.googleapis.com/v1beta/models/"
+            + model + ":generateContent?key=" + api_key
+        )
+        try:
+            req = urllib.request.Request(
+                url, data=body, headers={"Content-Type": "application/json"}, method="POST"
+            )
+            with urllib.request.urlopen(req, timeout=22) as response:
+                result = json.loads(response.read().decode("utf-8"))
+            improved = (
+                result.get("candidates", [{}])[0]
+                .get("content", {}).get("parts", [{}])[0].get("text", "").strip()
+            )
+            if improved:
+                return {"status": "success", "improved": improved, "mode": "ai"}
+        except (urllib.error.URLError, TimeoutError, ValueError, KeyError, IndexError):
+            pass
+
+    # Honest offline fallback: reorganize only the facts the candidate provided.
+    clean_summary = re.sub(r"\s+", " ", summary).strip(" .")
+    clean_experience = re.sub(r"\s+", " ", experience).strip(" .")
+    clean_skills = ", ".join(skills[:8])
+    parts = []
+    if role:
+        parts.append("Career-focused " + role + " professional" if clean_experience else "Aspiring " + role)
+    elif clean_experience:
+        parts.append("Professional with hands-on experience")
+    else:
+        parts.append("Motivated candidate")
+    if clean_summary:
+        parts.append(clean_summary[0].lower() + clean_summary[1:])
+    elif clean_experience:
+        parts.append(clean_experience)
+    if clean_skills:
+        parts.append("Skills include " + clean_skills)
+    improved = ". ".join(part.strip().rstrip(".") for part in parts if part.strip()) + "."
+    return {
+        "status": "success",
+        "improved": improved,
+        "mode": "guided",
+        "message": "A structured draft was created from your supplied information. Review it before use.",
     }
 
 
