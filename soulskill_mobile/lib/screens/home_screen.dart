@@ -5,6 +5,8 @@ import '../providers/resume_provider.dart';
 import '../theme/soulskill_theme.dart';
 import 'resume_editor_screen.dart';
 import 'resume_preview_screen.dart';
+import 'career_explorer_screen.dart';
+import 'preparation_guide_screen.dart';
 
 enum _Destination { home, career, coach, soulMind }
 
@@ -28,6 +30,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _openPreview() => Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => const ResumePreviewScreen()),
+      );
+
+  void _openCareerExplorer() => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const CareerExplorerScreen()),
+      );
+
+  void _openPreparationGuide() => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const PreparationGuideScreen()),
       );
 
   void _openFeature(String title, String description) {
@@ -133,6 +143,8 @@ class _HomeScreenState extends State<HomeScreen> {
           onOpenCoach: () => _select(_Destination.coach),
           onOpenSoulMind: () => _select(_Destination.soulMind),
           onOpenFeature: _openFeature,
+          onFindRoles: _openCareerExplorer,
+          onOpenPreparationGuide: _openPreparationGuide,
           onOpenPreview:
               provider.resume.completionPercent > 0 ? _openPreview : null,
           checkIn: _checkIn,
@@ -150,6 +162,8 @@ class _HomeScreenState extends State<HomeScreen> {
           onPreview:
               provider.resume.completionPercent > 0 ? _openPreview : null,
           onOpenFeature: _openFeature,
+          onFindRoles: _openCareerExplorer,
+          onOpenPreparationGuide: _openPreparationGuide,
         );
       case _Destination.coach:
         return _SoulCoachView(onOpenFeature: _openFeature);
@@ -549,6 +563,8 @@ class _DashboardView extends StatelessWidget {
     required this.onOpenCoach,
     required this.onOpenSoulMind,
     required this.onOpenFeature,
+    required this.onFindRoles,
+    required this.onOpenPreparationGuide,
     required this.onOpenPreview,
     required this.checkIn,
     required this.onCheckIn,
@@ -561,6 +577,8 @@ class _DashboardView extends StatelessWidget {
   final VoidCallback onOpenCoach;
   final VoidCallback onOpenSoulMind;
   final void Function(String, String) onOpenFeature;
+  final VoidCallback onFindRoles;
+  final VoidCallback onOpenPreparationGuide;
   final VoidCallback? onOpenPreview;
   final String? checkIn;
   final ValueChanged<String> onCheckIn;
@@ -613,6 +631,8 @@ class _DashboardView extends StatelessWidget {
               onCoach: onOpenCoach,
               onSoulMind: onOpenSoulMind,
               onFeature: onOpenFeature,
+              onFindRoles: onFindRoles,
+              onPreparationGuide: onOpenPreparationGuide,
             ),
             const SizedBox(height: 28),
             if (sideBySide)
@@ -1137,6 +1157,8 @@ class _QuickActionGrid extends StatelessWidget {
     required this.onCoach,
     required this.onSoulMind,
     required this.onFeature,
+    required this.onFindRoles,
+    required this.onPreparationGuide,
   });
 
   final bool wide;
@@ -1144,6 +1166,8 @@ class _QuickActionGrid extends StatelessWidget {
   final VoidCallback onCoach;
   final VoidCallback onSoulMind;
   final void Function(String, String) onFeature;
+  final VoidCallback onFindRoles;
+  final VoidCallback onPreparationGuide;
 
   @override
   Widget build(BuildContext context) {
@@ -1156,15 +1180,18 @@ class _QuickActionGrid extends StatelessWidget {
         onTap: onCareer,
       ),
       _ActionData(
-        icon: Icons.track_changes_outlined,
-        title: 'Job matching',
-        subtitle: 'Understand role requirements',
+        icon: Icons.travel_explore_rounded,
+        title: 'Find roles & companies',
+        subtitle: 'Explore opportunities for your skills',
         color: const Color(0xFF238A81),
-        status: 'NEXT',
-        onTap: () => onFeature(
-          'Job matching & ATS insights',
-          'Compare a resume with a job description, understand skill evidence and discover practical improvements. This capability is planned for the next product milestone.',
-        ),
+        onTap: onFindRoles,
+      ),
+      _ActionData(
+        icon: Icons.menu_book_rounded,
+        title: 'Preparation guide',
+        subtitle: 'Learning materials and interview links',
+        color: const Color(0xFF5275C8),
+        onTap: onPreparationGuide,
       ),
       _ActionData(
         icon: Icons.mic_none_rounded,
@@ -1555,12 +1582,16 @@ class _CareerStudioView extends StatelessWidget {
     required this.onCreateResume,
     required this.onPreview,
     required this.onOpenFeature,
+    required this.onFindRoles,
+    required this.onOpenPreparationGuide,
   });
 
   final int progress;
   final VoidCallback onCreateResume;
   final VoidCallback? onPreview;
   final void Function(String, String) onOpenFeature;
+  final VoidCallback onFindRoles;
+  final VoidCallback onOpenPreparationGuide;
 
   @override
   Widget build(BuildContext context) {
@@ -1613,15 +1644,21 @@ class _CareerStudioView extends StatelessWidget {
         ),
         const SizedBox(height: 15),
         _FeatureRowCard(
-          icon: Icons.track_changes_outlined,
-          title: 'ATS and job matching',
+          icon: Icons.travel_explore_rounded,
+          title: 'Find companies and roles',
           description:
-              'Compare your resume with a real job description and understand evidence gaps.',
-          badge: 'PLANNED',
-          onTap: () => onOpenFeature(
-            'ATS and job matching',
-            'This screen will compare a resume with a job description and explain skill alignment, missing evidence and document-readability checks.',
-          ),
+              'Explore role paths and employer career pages that align with your saved skills.',
+          badge: 'AVAILABLE',
+          onTap: onFindRoles,
+        ),
+        const SizedBox(height: 11),
+        _FeatureRowCard(
+          icon: Icons.menu_book_rounded,
+          title: 'Preparation guide and materials',
+          description:
+              'Open curated learning paths, technical references and interview practice resources.',
+          badge: 'AVAILABLE',
+          onTap: onOpenPreparationGuide,
         ),
         const SizedBox(height: 11),
         _FeatureRowCard(
