@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/resume_provider.dart';
 import 'resume_editor_screen.dart';
 import 'resume_preview_screen.dart';
+import 'career_tools_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -155,6 +156,33 @@ class HomeScreen extends StatelessWidget {
                   title: 'Build your resume',
                   subtitle: 'Add experience, skills and education',
                   onTap: provider.isLoaded ? () => _openEditor(context) : null,
+                ),
+                const SizedBox(height: 10),
+                _ActionTile(
+                  icon: Icons.track_changes_outlined,
+                  title: 'Job matching & ATS insights',
+                  subtitle: 'Compare your resume with a target role',
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const CareerToolsScreen()),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                _ActionTile(
+                  icon: Icons.view_kanban_outlined,
+                  title: 'Application tracker',
+                  subtitle: 'Keep roles and application stages together',
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const CareerToolsScreen(initialTool: CareerTool.tracker)),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                _ActionTile(
+                  icon: Icons.record_voice_over_outlined,
+                  title: 'Interview practice',
+                  subtitle: 'Prepare structured answers with STAR',
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const CareerToolsScreen(initialTool: CareerTool.interview)),
+                  ),
                 ),
                 const SizedBox(height: 10),
                 _ActionTile(
