@@ -114,11 +114,14 @@ class _CareerToolsScreenState extends State<CareerToolsScreen> {
       return;
     }
     final resume = context.read<ResumeProvider>().resume;
-    final evidence = _tokens([
-      resume.targetRole, resume.professionalSummary, resume.experienceRole,
-      resume.company, resume.experienceDescription, resume.skills,
-      resume.degree, resume.institution, resume.educationDetails
-    ].join(' ')).toSet();
+    final evidenceText = <String>[
+      resume.targetRole, resume.professionalSummary, resume.skills,
+      ...resume.effectiveWorkExperiences.expand((entry) => entry.values),
+      ...resume.effectiveEducationEntries.expand((entry) => entry.values),
+      ...resume.projects.expand((entry) => entry.values),
+      ...resume.certifications.expand((entry) => entry.values),
+    ].join(' ');
+    final evidence = _tokens(evidenceText).toSet();
     final matched = jd.where(evidence.contains).toList()..sort();
     final missing = jd.where((word) => !evidence.contains(word)).toList()..sort();
     final priorityTerms = jd.where(_prioritySkills.contains).toSet().toList()..sort();
