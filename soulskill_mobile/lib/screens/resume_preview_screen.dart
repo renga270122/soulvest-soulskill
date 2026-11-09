@@ -86,6 +86,20 @@ class _ResumeDocument extends StatelessWidget {
                 .where((value) => value.isNotEmpty).join('  |  '),
             body: entry['description'] ?? '',
           )),
+        if (resume.projects.isNotEmpty)
+          ...resume.projects.map((entry) => _PreviewSection(
+            title: 'PROJECT',
+            heading: entry['name'] ?? '',
+            body: [entry['description'] ?? '', entry['technologies'] ?? '']
+                .where((value) => value.isNotEmpty).join('\\n'),
+          )),
+        if (resume.certifications.isNotEmpty)
+          ...resume.certifications.map((entry) => _PreviewSection(
+            title: 'CERTIFICATION',
+            heading: entry['name'] ?? '',
+            body: [entry['issuer'] ?? '', entry['date'] ?? '']
+                .where((value) => value.isNotEmpty).join('  |  '),
+          )),
         if (resume.skillList.isNotEmpty)
           _PreviewSection(title: 'SKILLS', body: resume.skillList.join('  •  ')),
         if (resume.completionPercent == 0)
